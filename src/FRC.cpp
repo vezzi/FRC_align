@@ -1,6 +1,6 @@
-/*  
-    qaTools - Just more qa tools.
-    Copyright (C) 2011  P. Costea(paul.igor.costea@scilifelab.se)
+/*
+    FRC: computes the FRC curve starting from alignments
+    Copyright (C) 2011  F. Vezzi(vezi84@gmail.com)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,8 @@
 #include <time.h>
 #include <string>
 #include "radix.h"
-#include "sam.h"
+#include "samtools/sam.h"
+
 
 typedef struct
 {
@@ -121,7 +122,7 @@ static void compute_print_cov(FILE* outputFile, Options userOpt, int* data, char
     fprintf(userOpt.detailed,"%s\t",name);
     for (int i=0; i<=userOpt.maxCoverage; ++i) {
         uint64_t coverage = 0;
-        //All that has been covered i, had been covered i+1, i+2 and so on times. Thus, do this addition                                              
+        //All that has been covered i, had been covered i+1, i+2 and so on times. Thus, do this addition
 	for (int x = i; x<=userOpt.maxCoverage; ++x) coverage += localCoverageHist[x];
         fprintf(userOpt.detailed,"%3.5f\t",(double)(coverage)/chrSize*100);
     }
@@ -149,20 +150,20 @@ static void compute_print_cov(FILE* outputFile, Options userOpt, int* data, char
 }
 
 /**
- * Open a .sam/.bam file. 
+ * Open a .sam/.bam file.
  * @returns NULL is open failed.
  */
 samfile_t * open_alignment_file(std::string path)
 {
   samfile_t * fp = NULL;
   std::string flag = "r";
-  if (path.substr(path.size()-3).compare("bam") == 0) {                                                                                                                                               
-    //BAM file!                                                                                                                                    
-    flag += "b";                                                                                                                                                                                                             
+  if (path.substr(path.size()-3).compare("bam") == 0) {
+    //BAM file!
+    flag += "b";
   }
   if ((fp = samopen(path.c_str(), flag.c_str() , 0)) == 0) {
     fprintf(stderr, "qaCompute: Failed to open file %s\n", path.c_str());
-  } 
+  }
   return fp;
 }
 
@@ -184,7 +185,8 @@ int main(int argc, char *argv[])
   userOpt.maxInsert = -1;
   bool doDetail = false;
   int arg;
-  //Get args                                                                                                                                               
+
+  //Get args
   while ((arg = getopt(argc, argv, "mdis:q:c:h:")) >= 0) {
     switch (arg) {
     case 'm': userOpt.doMedian = 1; break;
@@ -249,15 +251,15 @@ int main(int argc, char *argv[])
     uint32_t interChr = 0;
     uint32_t duplicates = 0;
     uint32_t usedReads = 0;
- 
+
     int *entireChr = NULL;
     //Keep header for further reference
     bam_header_t* head = fp->header;
-    
+
     int32_t currentTid = -1;
 
     //Create "map" vector for histogram
-    uint64_t* coverageHist= (uint64_t*)malloc((userOpt.maxCoverage+1)*sizeof(uint64_t)); 
+    uint64_t* coverageHist= (uint64_t*)malloc((userOpt.maxCoverage+1)*sizeof(uint64_t));
     memset( coverageHist, 0, (userOpt.maxCoverage+1)*sizeof(uint64_t));
 
     //Write file table header
@@ -267,7 +269,7 @@ int main(int argc, char *argv[])
       fprintf(outputFile, "Chromosome\tSeq_lem\tAvg_Cov\n");
 
     while (samread(fp, b) >= 0) {
-      
+
       //uint32_t* cigar = bam1_cigar(b);
       //Get bam core.
       const bam1_core_t *core = &b->core;
@@ -285,7 +287,7 @@ int main(int argc, char *argv[])
       else {
 
 	if (core->tid != currentTid) {
-	  
+
 	  //Count coverage!
 	  if (currentTid != -1) {
 	    if (!userOpt.silent)
@@ -294,7 +296,7 @@ int main(int argc, char *argv[])
 	    compute_print_cov(outputFile, userOpt, entireChr, head->target_name[currentTid], chrSize, coverageHist, currentTid);
 	  }
 
-	  //Get length of next section                                                                                       
+	  //Get length of next section
           chrSize = head->target_len[core->tid];
 	  if (chrSize < 1) {//We can't have such sizes! this can't be right
 	    fprintf(stderr,"%s has size %d, which can't be right!\nCheck bam header!",head->target_name[core->tid],chrSize);
@@ -306,17 +308,17 @@ int main(int argc, char *argv[])
 	  //Done with current section.
 	  //Allocate memory
 	  entireChr = (int*)realloc(entireChr, (chrSize+1)*sizeof(int));
-	  
+
 	  if (entireChr == NULL) {
 	    fprintf(stderr,"Allocation failed! \n");
 	    return -1;
 	  }
 	  memset(entireChr, 0, (chrSize+1)*sizeof(int));
-	  
+
 	  currentTid = core->tid;
-	
+
 	}
-	
+
 	//If read has quality == 0, we won't count it as mapped
 	if (core->qual >= userOpt.minQual) {
 	 if (core->flag&BAM_FPROPER_PAIR) {
@@ -329,7 +331,7 @@ int main(int argc, char *argv[])
 	   ++duplicates;
 	 } else {
 	   if (!userOpt.spanCov) {
-	     //All entries in SAM file are represented on the forward strand! (See specs of SAM format for details)    
+	     //All entries in SAM file are represented on the forward strand! (See specs of SAM format for details)
 	     ++entireChr[core->pos];
 	     ++usedReads;
 	     if ((uint32_t)(core->pos+core->l_qseq) >= chrSize)
@@ -337,7 +339,7 @@ int main(int argc, char *argv[])
 	     else
 	       --entireChr[core->pos+core->l_qseq];
 	   } else {
-	     //Computing span coverage. 
+	     //Computing span coverage.
 	     //Only consider first read in pair! and extend a bit to the end of the insert
 	     if ((core->flag&BAM_FREAD1) //First in pair
 		 && !(core->flag&BAM_FMUNMAP) /*Mate is also mapped!*/
@@ -368,7 +370,7 @@ int main(int argc, char *argv[])
       }
 
       ++totalNumberOfReads;
-      
+
     }
 
     //Compute coverage for the last "chromosome"
@@ -401,7 +403,7 @@ int main(int argc, char *argv[])
 
     fprintf(outputFile,"\nOther\n");
 
-    //Printout procentage of mapped/unmapped reads                                                                                                     
+    //Printout procentage of mapped/unmapped reads
     double procentageOfUnmapped = 100*((double)unmappedReads/totalNumberOfReads);
     double procentageOfZeroQuality = 100*((double)zeroQualityReads/totalNumberOfReads);
     fprintf(outputFile,"Total number of reads: %u\n", totalNumberOfReads);
@@ -417,11 +419,11 @@ int main(int argc, char *argv[])
     }
 
     printf("Out of %u reads, you have %3.5f unmapped reads\n and %3.5f sub-par quality mappings\n", totalNumberOfReads ,procentageOfUnmapped, procentageOfZeroQuality);
-    
+
 
     free(coverageHist);
 
-  
+
     fclose(outputFile);
     if (outsideHeader) {
       //Must force this back to NULL, otherwise we'll delete it twice.
@@ -429,9 +431,9 @@ int main(int argc, char *argv[])
       samclose(headerF);
     }
     samclose(fp);
-    
+
     if (userOpt.detailed)
       fclose(userOpt.detailed);
-  
+
   return 0;
 }
