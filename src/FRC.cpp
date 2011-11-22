@@ -19,8 +19,10 @@
 #include <stdio.h>
 #include <time.h>
 #include <string>
+#include <vector>
 #include "radix.h"
 #include "samtools/sam.h"
+#include "options/Options.h"
 
 
 typedef struct
@@ -170,7 +172,142 @@ samfile_t * open_alignment_file(std::string path)
 /**
  * Main of app
  */
-int main(int argc, char *argv[])
+
+
+int main(int argc, char *argv[]) {
+	//MAIN VARIABLE
+	  Options userOpt;
+	  string alignmentFile = "";
+	  string assemblyFile = "";
+	  vector<string> peFiles;
+
+	  samfile_t *fp;
+
+	// PROCESS PARAMETERS
+	stringstream ss;
+	ss << package_description() << endl << endl << "Allowed options";
+	po::options_description desc(ss.str().c_str());
+	desc.add_options() ("help", "produce help message")
+			("assembly", po::value<string>(), "assembly file name in fasta format")
+			("sam", po::value<string>(), "alignment file")
+			("pe", po::value< vector < string > >(), "paired reads, one pair after the other")
+			("pe-min-insert",  po::value<int>(), "minimum allowed insert size")
+			("pe-max-insert",  po::value<int>(), "maximum allowed insert size")
+			;
+
+	po::variables_map vm;
+	try {
+		po::store(po::parse_command_line(argc, argv, desc), vm);
+		po::notify(vm);
+	} catch (boost::program_options::error & error) {
+		ERROR_CHANNEL <<  error.what() << endl;
+		ERROR_CHANNEL << "Try \"--help\" for help" << endl;
+		exit(2);
+	}
+	if (vm.count("help")) {
+		DEFAULT_CHANNEL << desc << endl;
+		exit(0);
+	}
+	if (!vm.count("assembly") || !vm.count("sam") || !vm.count("pe")) {
+		DEFAULT_CHANNEL << "--assembly, --sam and,  --pe are mandatory" << endl;
+		exit(0);
+	}
+
+	if (vm.count("assembly")) {
+		assemblyFile = vm["assembly"].as<string>();
+	}
+	if (vm.count("sam")) {
+		alignmentFile = vm["sam"].as<string>();
+	}
+	if (vm.count("pe")) {
+		peFiles = vm["pe"].as<vector<string> >();
+	}
+
+	cout << "assembly file name is " << assemblyFile << endl;
+	cout << "sam file name is " << alignmentFile << endl;
+	for(int i=0; i< peFiles.size() ; i++ ) {
+		cout << peFiles.at(i) << endl;
+	}
+
+	fp = open_alignment_file(alignmentFile);
+	EXIT_IF_NULL(fp);
+
+	//Initialize bam entity
+	bam1_t *b = bam_init1();
+
+	//All var declarations
+	uint64_t totalGenomeLength = 0;
+	uint64_t totalReadLength = 0;
+	uint64_t contigReadLength = 0;
+	uint32_t unmappedReads = 0;
+	uint32_t zeroQualityReads = 0;
+	uint32_t totalNumberOfReads = 0;
+	uint32_t totalProperPaires = 0;
+	uint32_t contigSize = 0;
+	uint32_t interChr = 0;
+	uint32_t duplicates = 0;
+	uint32_t usedReads = 0;
+
+    int *entireChr = NULL;
+    //Keep header for further reference
+    bam_header_t* head = fp->header;
+
+    int32_t currentTid = -1;
+
+    while (samread(fp, b) >= 0) {
+	      //Get bam core.
+	      const bam1_core_t *core = &b->core;
+
+	      if (core == NULL) {
+	    	  //There is something wrong with the read/file
+	    	  printf("Input file is corrupt!");
+	    	  //Leak everything and exit!
+	    	  return -1;
+	      }
+
+	      if (!is_mapped(core))
+	    	  ++unmappedReads;
+	      else {
+
+	    	  if (core->tid != currentTid) {
+	    		  if (currentTid != -1) {
+	    //			  	 cout << "working on new contig: " << head->target_name[core->tid] << endl;
+	    		  }
+	    		  //Get length of next section
+	    		  contigSize = head->target_len[core->tid];
+	    		  if (contigSize < 1) {//We can't have such sizes! this can't be right
+	    			  fprintf(stderr,"%s has size %d, which can't be right!\nCheck bam header!",head->target_name[core->tid],contigSize);
+	    		  }
+	    		  totalGenomeLength += contigSize;
+	    		  currentTid = core->tid;
+	    		  totalReadLength += contigReadLength;
+	    		  contigReadLength = 0;
+	    	  }
+	      }
+	      //If read has quality == 0, we won't count it as mapped
+	      if (core->qual >= 0) {
+	    	  if (core->flag&BAM_FPROPER_PAIR) {
+	    		  //Is part of a proper pair
+	    		  ++totalProperPaires;
+	    	  }
+	    	  if (core->flag&BAM_FDUP) {   //This is a duplicate. Don't count it!.
+	    		  ++duplicates;
+	    	  } else {
+	    	      uint32_t* cigar = bam1_cigar(b);
+	    		  contigReadLength += bam_cigar2qlen(core,cigar);
+	    	  }
+	      }
+    }
+    totalReadLength += contigReadLength;
+    totalGenomeLength += contigSize;
+    float C_A = totalReadLength/(float)totalGenomeLength;
+    cout << "C_A = " << C_A <<endl;
+
+}
+
+
+
+int mainTST(int argc, char *argv[])
 {
   samfile_t *fp;
   FILE *outputFile;

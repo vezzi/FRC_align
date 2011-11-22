@@ -14,6 +14,11 @@
 #define INLINE inline
 #endif
 
+
+
+#define DEFAULT_CHANNEL std::cout
+#define ERROR_CHANNEL std::cerr
+
 #define VERBOSE_CHANNEL std::cerr
 #define DEBUG_CHANNEL std::cerr
 #define DEFAULT_CHANNEL std::cout
