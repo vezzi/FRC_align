@@ -79,6 +79,17 @@ public:
 		matedDifferentContigLength_win=0;
 	}
 
+	void print() {
+		cout << "from " << windowStart << " to " << windowEnd << "\n";
+		cout << "windowLength " << windowLength << "\n";
+		cout << "readsLength " << readsLength_win << "\n";
+		cout << "insersLength " << insertsLength_win << "\n";
+		cout << "correctlyMatedReadsLength " << correctlyMatedReadsLength_win << "\n";
+		cout << "wronglyOrientedReadsLength " << wronglyOrientedReadsLength_win << "\n";
+		cout << "singletonReadsLength " << singletonReadsLength_win << "\n";
+		cout << "matedDifferentContigLength " << matedDifferentContigLength_win  << "\n";
+		cout << "-----\n";
+	}
 
 	uint32_t windowStart;
 	uint32_t windowEnd;
@@ -584,7 +595,7 @@ int main(int argc, char *argv[]) {
     EXIT_IF_NULL(fp);
     //Keep header for further reference
     head = fp->header;
-    currentTid = -1;
+    currentTid = -2;
     reads = 0;
 
     ContigFeature *CONTIG = new ContigFeature[contigs];
@@ -619,9 +630,13 @@ int main(int argc, char *argv[]) {
     		++unmappedReads;
     	} else {
     		if (core->tid != currentTid) {
+    			if(currentTid == -2) {
+    				cout << "first contig read\n";
+    			}
     			if(currentTid > -1) {
     				//compute statistics and update contig feature for the last segment of the contig
-    				//cout << "new contig\n" << actualWindow->correctlyMatedReadsLength_win << "\n";
+    				actualWindow->print();
+    				cout << "new contig " << "\n";
     				actualWindow->reset();
     			}
     			//Get length of next section
@@ -630,28 +645,30 @@ int main(int argc, char *argv[]) {
     				fprintf(stderr,"%s has size %d, which can't be right!\nCheck bam header!",head->target_name[core->tid],contigSize);
     			}
     			currentTid = core->tid;
-    			windowStart = 0; // reset window start
-    			windowEnd   = windowStart + WINDOW; // reset window end
-    			if(windowEnd > contigSize) {
-    				windowEnd = contigSize;
+    			actualWindow->windowStart = 0; // reset window start
+    			actualWindow->windowEnd  = actualWindow->windowStart + WINDOW; // reset window end
+    			if(actualWindow->windowEnd > contigSize) {
+    				actualWindow->windowEnd = contigSize;
     			}
-    			actualWindow->windowLength = (windowEnd -windowStart + 1); // set window length
-    			actualWindow->windowStart = windowStart;
-    			actualWindow->windowEnd = windowEnd;
+    			actualWindow->windowLength = (actualWindow->windowEnd - actualWindow->windowStart + 1); // set window length
+
     		}
 
-    		if (core->pos > windowEnd) {
+    		if (core->pos > actualWindow->windowEnd) {
     			//compute statistics and update contig feature
     //TODO this point
+    			actualWindow->print();
+
     			actualWindow->reset();
-    			windowStart = windowEnd +1;
-    			windowEnd += WINDOW;
-    			if(windowEnd > contigSize) {
-    				windowEnd = contigSize;
+    			actualWindow->windowStart = actualWindow->windowEnd + 1;
+    			actualWindow->windowEnd += WINDOW;
+    			if(actualWindow->windowEnd > contigSize) {
+    				actualWindow->windowEnd = contigSize;
     			}
-    			actualWindow->windowLength = (windowEnd -windowStart + 1); // set window length
-    			actualWindow->windowStart = windowStart;
-    			actualWindow->windowEnd = windowEnd;
+    			actualWindow->windowLength = (actualWindow->windowEnd - actualWindow->windowStart + 1); // set window length
+    			//actualWindow->windowStart = windowStart;
+    			//actualWindow->windowEnd = windowEnd;
+    			updateWindow(b, actualWindow,  peMinInsert, peMaxInsert);
     		} else {
     			//this read contributes to the features of the current window
     			updateWindow(b, actualWindow,  peMinInsert, peMaxInsert);
