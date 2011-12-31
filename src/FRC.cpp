@@ -72,6 +72,7 @@ public:
 	void reset() {
 		windowLength = 0;
 		readsLength_win=0;
+		inserts=0;
 		insertsLength_win=0;
 		correctlyMatedReadsLength_win=0;
 		wronglyOrientedReadsLength_win=0;
@@ -83,6 +84,7 @@ public:
 		cout << "from " << windowStart << " to " << windowEnd << "\n";
 		cout << "windowLength " << windowLength << "\n";
 		cout << "readsLength " << readsLength_win << "\n";
+		cout << "inserts " << inserts << "\n";
 		cout << "insersLength " << insertsLength_win << "\n";
 		cout << "correctlyMatedReadsLength " << correctlyMatedReadsLength_win << "\n";
 		cout << "wronglyOrientedReadsLength " << wronglyOrientedReadsLength_win << "\n";
@@ -94,9 +96,11 @@ public:
 	uint32_t windowStart;
 	uint32_t windowEnd;
 	uint32_t windowLength;
+
 	// reads aligned
 	uint64_t readsLength_win; // length of reads placed in window
 	// insert length
+	uint32_t inserts; // number of inserts inside window
 	uint64_t insertsLength_win; // total length of inserts inside window
 	// correctly aligned mates
 	uint64_t correctlyMatedReadsLength_win; // length of correctly mated reads inside window
@@ -170,6 +174,7 @@ void updateWindow(bam1_t* b, windowStatistics* actualWindow, unsigned int peMinI
 
 			if (peMinInsert <= iSize && iSize <= peMaxInsert) {
 				actualWindow->insertsLength_win += iSize; // update number of inserts and total length
+				actualWindow->inserts++;
 			}
 
 			if (peMinInsert <= iSize && iSize <= peMaxInsert) {
@@ -205,6 +210,7 @@ void updateWindow(bam1_t* b, windowStatistics* actualWindow, unsigned int peMinI
 			if (peMinInsert <= iSize && iSize <= peMaxInsert) { // I have to check if the mate is outside window boundaries
 				if(start <= actualWindow->windowStart || end >= actualWindow->windowEnd) {
 					actualWindow->insertsLength_win += iSize; // update number of inserts and total length
+					actualWindow->inserts++;
 				}
 			}
 
@@ -657,7 +663,21 @@ int main(int argc, char *argv[]) {
     		if (core->pos > actualWindow->windowEnd) {
     			//compute statistics and update contig feature
     //TODO this point
-    			actualWindow->print();
+    			C_A_i = actualWindow->readsLength_win/(float)actualWindow->windowLength;  // read coverage of window
+    		   	S_A_i = actualWindow->insertsLength_win/(float)actualWindow->windowLength; // span coverage of window
+    		   	C_M_i = actualWindow->matedDifferentContigLength_win/(float)actualWindow->windowLength; // coverage of correctly aligned reads of window
+    		   	C_W_i = (actualWindow->wronglyDistanceReadsLength_win+actualWindow->wronglyOrientedReadsLength_win)/(float)actualWindow->windowLength; // coverage of wrongly aligned reads
+    		   	C_S_i = actualWindow->singletonReadsLength_win/(float)actualWindow->windowLength; // singleton coverage of window
+    		   	C_C_i = actualWindow->matedDifferentContigLength_win/(float)actualWindow->windowLength; // coverage of reads with mate on different contigs
+    		   	if(actualWindow->inserts > 0) {
+    		   		float localMean = actualWindow->insertsLength_win/(float)actualWindow->inserts;
+    		   		Z_i   = (localMean - insertMean)/(float)(insertStd/sqrt(actualWindow->inserts)); // CE statistics
+    		   	} else {
+    		   		Z_i = -100;
+    		   	}
+
+    			//actualWindow->print();
+    			cout << "CE statistics " << Z_i << "\n";
 
     			actualWindow->reset();
     			actualWindow->windowStart = actualWindow->windowEnd + 1;
