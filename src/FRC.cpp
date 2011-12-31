@@ -57,6 +57,49 @@ public:
 };
 
 
+class windowStatistics {
+public:
+	windowStatistics() {
+		windowLength = 0;
+		readsLength_win=0;
+		insertsLength_win=0;
+		correctlyMatedReadsLength_win=0;
+		wronglyOrientedReadsLength_win=0;
+		singletonReadsLength_win=0;
+		matedDifferentContigLength_win=0;
+	}
+
+	void reset() {
+		windowLength = 0;
+		readsLength_win=0;
+		insertsLength_win=0;
+		correctlyMatedReadsLength_win=0;
+		wronglyOrientedReadsLength_win=0;
+		singletonReadsLength_win=0;
+		matedDifferentContigLength_win=0;
+	}
+
+
+	uint32_t windowStart;
+	uint32_t windowEnd;
+	uint32_t windowLength;
+	// reads aligned
+	uint64_t readsLength_win; // length of reads placed in window
+	// insert length
+	uint64_t insertsLength_win; // total length of inserts inside window
+	// correctly aligned mates
+	uint64_t correctlyMatedReadsLength_win; // length of correctly mated reads inside window
+	// wrongly oriented reads
+	uint64_t wronglyOrientedReadsLength_win; // length of wrongly oriented reads inside window
+	// wrongly distance reads
+	uint64_t wronglyDistanceReadsLength_win; // total length of reads placed in different contigs  inside window
+	// singletons
+	uint64_t singletonReadsLength_win; // total length of singleton reads  inside window
+	// mates on different contigs
+	uint64_t matedDifferentContigLength_win;// total number of reads placed in different contigs  inside window
+};
+
+
 #define MIN(x,y) \
   ((x) < (y)) ? (x) : (y)
 
@@ -96,6 +139,103 @@ samfile_t * open_alignment_file(std::string path)
   }
   return fp;
 }
+
+
+void updateWindow(bam1_t* b, windowStatistics* actualWindow, unsigned int peMinInsert, unsigned int peMaxInsert ) {
+	const bam1_core_t* core =  &b->core;
+	if (core->qual >= 0) {
+		uint32_t* cigar = bam1_cigar(b);
+
+		if ((core->flag&BAM_FREAD1) //First in pair
+				&& !(core->flag&BAM_FMUNMAP) /*Mate is also mapped!*/
+				&& (core->tid == core->mtid) /*Mate on the same chromosome*/
+		) {
+			//pair is mapped on the same contig and I'm looking the first pair
+			int32_t start = MIN(core->pos,core->mpos);
+			int32_t end = start+abs(core->isize);
+			int32_t iSize = end-start; // compute insert size
+
+
+
+			if (peMinInsert <= iSize && iSize <= peMaxInsert) {
+				actualWindow->insertsLength_win += iSize; // update number of inserts and total length
+			}
+
+			if (peMinInsert <= iSize && iSize <= peMaxInsert) {
+				if(core->pos < core->mpos) { // read I'm processing is the first
+					if(!(core->flag&BAM_FREVERSE) && (core->flag&BAM_FMREVERSE) ) { // pairs are one in front of the other
+						actualWindow->correctlyMatedReadsLength_win +=  bam_cigar2qlen(core,cigar); // update number of correctly mapped and their length
+					} else {
+						// wrong orientation
+						actualWindow->wronglyOrientedReadsLength_win += bam_cigar2qlen(core,cigar);
+					}
+				} else {
+					if(!(core->flag&BAM_FMREVERSE) && (core->flag&BAM_FREVERSE)) { // pairs are one in front of the other
+						actualWindow->correctlyMatedReadsLength_win +=  bam_cigar2qlen(core,cigar); // update number of correctly mapped and their length
+					} else {
+						// wrong orientation
+						actualWindow->wronglyOrientedReadsLength_win += bam_cigar2qlen(core,cigar);
+					}
+				}
+			} else {
+				//wrong distance
+				actualWindow->wronglyDistanceReadsLength_win += bam_cigar2qlen(core,cigar);
+			}
+		} else  if ((core->flag&BAM_FREAD2) //Second in pair
+				&& !(core->flag&BAM_FMUNMAP) /*Mate is also mapped!*/
+				&& (core->tid == core->mtid) /*Mate on the same chromosome*/
+		)
+			// if I'm considering the second read in a pair I must check it is is a correctly mated read and if this is tha case update the right variables
+		{
+			int32_t start = MIN(core->pos,core->mpos);
+			int32_t end = start+abs(core->isize);
+			int32_t iSize = end-start; // compute insert size
+
+			if (peMinInsert <= iSize && iSize <= peMaxInsert) { // I have to check if the mate is outside window boundaries
+				if(start <= actualWindow->windowStart || end >= actualWindow->windowEnd) {
+					actualWindow->insertsLength_win += iSize; // update number of inserts and total length
+				}
+			}
+
+			if (peMinInsert <= iSize && iSize <= peMaxInsert) {
+				if(core->pos > core->mpos) { // read I'm processing is the first
+					if((core->flag&BAM_FREVERSE) && !(core->flag&BAM_FMREVERSE) ) { // pairs are one in front of the other
+						actualWindow->correctlyMatedReadsLength_win +=  bam_cigar2qlen(core,cigar); //  update number of correctly mapped and their length
+					} else {
+						// wrong orientation
+						actualWindow->wronglyOrientedReadsLength_win += bam_cigar2qlen(core,cigar);
+					}
+				} else {
+					if((core->flag&BAM_FMREVERSE) && !(core->flag&BAM_FREVERSE)) { // pairs are one in front of the other
+						actualWindow->correctlyMatedReadsLength_win +=  bam_cigar2qlen(core,cigar); // update number of correctly mapped and their length
+					} else {
+						// wrong orientation
+						actualWindow->wronglyOrientedReadsLength_win += bam_cigar2qlen(core,cigar);
+					}
+				}
+			} else {
+				//wrong distance
+				actualWindow->wronglyDistanceReadsLength_win += bam_cigar2qlen(core,cigar);
+
+			}
+		} else if (core->tid != core->mtid && !(core->flag&BAM_FMUNMAP)) {
+			//Count inter-chrom pairs
+			actualWindow->matedDifferentContigLength_win += bam_cigar2qlen(core,cigar);
+		} else if(core->flag&BAM_FMUNMAP) {
+			// if mate read is unmapped
+			actualWindow->singletonReadsLength_win =+ bam_cigar2qlen(core,cigar);
+		}
+
+
+		if (core->flag&BAM_FDUP) {   //This is a duplicate. Don't count it!.
+		} else {
+			actualWindow->readsLength_win += bam_cigar2qlen(core,cigar);
+		}
+	}
+}
+
+
+
 
 /**
  * Main of app
@@ -193,6 +333,8 @@ int main(int argc, char *argv[]) {
 
 	uint32_t inserts = 0;       // total number of inserts
 	uint64_t insertsLength = 0; // total inserts length
+	float insertMean;
+	float insertStd;
 
 // mated reads (not necessary correctly mated)
 	uint32_t matedReads = 0;        // length of reads that align on a contig with the mate
@@ -220,8 +362,7 @@ int main(int argc, char *argv[]) {
 	uint64_t matedDifferentContigLength = 0; // total number of reads placed in different contigs
 
 	float C_A = 0; // total read coverage
-	float S_A = 0; // total span coverage, or mean insert length
-	float S_std = 0; // span coverage standard deviation
+	float S_A = 0; // total span coverage
 
 	float C_M = 0; // coverage induced by correctly aligned pairs
 	float C_W = 0; // coverage induced by wrongly mated pairs
@@ -410,9 +551,10 @@ int main(int argc, char *argv[]) {
     cout << "\n-------\n";
 
     C_A = readsLength/(float)genomeLength;
-    S_A = insertsLength/(float)inserts;
+    S_A = insertsLength/(float)genomeLength;
     C_M = correctlyMatedReadsLength/(float)genomeLength;
     C_W = (wronglyDistanceReadsLength + wronglyOrientedReadsLength)/(float)genomeLength;
+    C_S = (singletonReadsLength)/(float)genomeLength;
     C_C = matedDifferentContigLength/(float)genomeLength;
 
 
@@ -420,14 +562,15 @@ int main(int argc, char *argv[]) {
     cout << "S_A = " << S_A << endl;
     cout << "C_M = " << C_M << endl;
     cout << "C_W = " << C_W << endl;
+    cout << "C_S = " << C_S << endl;
     cout << "C_C = " << C_C << endl;
 
     cout << "\n";
     cout << "Mean Insert length = " << Mk << endl;
-    float meanInsertLength = Mk;
+    insertMean = Mk;
     Qk = sqrt(Qk/counterK);
     cout << "Std Insert length = " << Qk << endl;
-    float stdInsertLength = Qk;
+    insertStd = Qk;
 
 
 
@@ -446,8 +589,21 @@ int main(int argc, char *argv[]) {
 
     ContigFeature *CONTIG = new ContigFeature[contigs];
 
-    uint32_t windowStart = 0;
-    uint32_t windowEnd   = windowStart + WINDOW;
+	uint32_t windowStart = 0;
+	uint32_t windowEnd   = windowStart + WINDOW;
+
+	windowStatistics* actualWindow = new windowStatistics();
+	actualWindow->windowLength = (windowEnd -windowStart + 1);
+	actualWindow->windowStart = windowStart;
+	actualWindow->windowEnd = windowEnd;
+
+   	float C_A_i = 0;  // read coverage of window
+   	float S_A_i = 0; // span coverage of window
+   	float C_M_i = 0; // coverage of correctly aligned reads of window
+   	float C_W_i = 0; // coverage of wrongly aligned reads
+   	float C_S_i = 0; // singleton coverage of window
+   	float C_C_i = 0; // coverage of reads with mate on different contigs
+   	float Z_i   = 0; // CE statistics
 
     while (samread(fp, b) >= 0) {
     	//Get bam core.
@@ -463,24 +619,42 @@ int main(int argc, char *argv[]) {
     		++unmappedReads;
     	} else {
     		if (core->tid != currentTid) {
+    			if(currentTid > -1) {
+    				//compute statistics and update contig feature for the last segment of the contig
+    				//cout << "new contig\n" << actualWindow->correctlyMatedReadsLength_win << "\n";
+    				actualWindow->reset();
+    			}
     			//Get length of next section
     			contigSize = head->target_len[core->tid];
     			if (contigSize < 1) {//We can't have such sizes! this can't be right
     				fprintf(stderr,"%s has size %d, which can't be right!\nCheck bam header!",head->target_name[core->tid],contigSize);
     			}
     			currentTid = core->tid;
+    			windowStart = 0; // reset window start
+    			windowEnd   = windowStart + WINDOW; // reset window end
+    			if(windowEnd > contigSize) {
+    				windowEnd = contigSize;
+    			}
+    			actualWindow->windowLength = (windowEnd -windowStart + 1); // set window length
+    			actualWindow->windowStart = windowStart;
+    			actualWindow->windowEnd = windowEnd;
     		}
 
     		if (core->pos > windowEnd) {
     			//compute statistics and update contig feature
-
+    //TODO this point
+    			actualWindow->reset();
     			windowStart = windowEnd +1;
     			windowEnd += WINDOW;
-    			if(windowEnd > contigLength) {
-    				windowEnd = contigLength;
+    			if(windowEnd > contigSize) {
+    				windowEnd = contigSize;
     			}
+    			actualWindow->windowLength = (windowEnd -windowStart + 1); // set window length
+    			actualWindow->windowStart = windowStart;
+    			actualWindow->windowEnd = windowEnd;
     		} else {
-    			//this read contributes to the features
+    			//this read contributes to the features of the current window
+    			updateWindow(b, actualWindow,  peMinInsert, peMaxInsert);
     		}
 
 
