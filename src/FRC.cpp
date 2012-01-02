@@ -25,36 +25,6 @@
 #include "options/Options.h"
 
 
-class ContigFeature {
-public:
-	ContigFeature() {
-		LOW_COVERAGE_AREA = 0;
-		HIGH_COVERAGE_AREA = 0;
-		LOW_NORMAL_AREA = 0;
-		HIGH_NORMAL_AREA = 0;
-		HIGH_SINGLE_AREA = 0;
-		HIGH_SPANING_AREA = 0;
-		HIGH_OUTIE = 0;
-		COMPRESSION_AREA = 0;
-		STRECH_AREA = 0;
-	}
-
-	void updateLOW_COVERAGE_AREA() {
-		LOW_COVERAGE_AREA++;
-		TOTAL++;
-	}
-
-	unsigned int LOW_COVERAGE_AREA;
-	unsigned int HIGH_COVERAGE_AREA;
-	unsigned int LOW_NORMAL_AREA;
-	unsigned int HIGH_NORMAL_AREA;
-	unsigned int HIGH_SINGLE_AREA;
-	unsigned int HIGH_SPANING_AREA;
-	unsigned int HIGH_OUTIE;
-	unsigned int COMPRESSION_AREA;
-	unsigned int STRECH_AREA;
-	unsigned int TOTAL;
-};
 
 
 class windowStatistics {
@@ -75,9 +45,11 @@ public:
 		inserts=0;
 		insertsLength_win=0;
 		correctlyMatedReadsLength_win=0;
+		wronglyDistanceReadsLength_win = 0;
 		wronglyOrientedReadsLength_win=0;
 		singletonReadsLength_win=0;
 		matedDifferentContigLength_win=0;
+
 	}
 
 	void print() {
@@ -112,8 +84,125 @@ public:
 	uint64_t singletonReadsLength_win; // total length of singleton reads  inside window
 	// mates on different contigs
 	uint64_t matedDifferentContigLength_win;// total number of reads placed in different contigs  inside window
+
+
+/*
+	float C_A; // total read coverage
+	float S_A; // total span coverage
+	float C_M; // coverage induced by correctly aligned pairs
+	float C_W; // coverage induced by wrongly mated pairs
+	float C_S; // coverage induced by singletons
+	float C_C; // coverage induced by reads with mate on a different contig
+	float CEstatistics;
+	*/
 };
 
+
+class ContigFeature {
+public:
+	ContigFeature() {
+		contigLength = 0;
+		LOW_COVERAGE_AREA = 0;
+		HIGH_COVERAGE_AREA = 0;
+		LOW_NORMAL_AREA = 0;
+		HIGH_NORMAL_AREA = 0;
+		HIGH_SINGLE_AREA = 0;
+		HIGH_SPANING_AREA = 0;
+		HIGH_OUTIE = 0;
+		COMPRESSION_AREA = 0;
+		STRECH_AREA = 0;
+	}
+
+	void updateLOW_COVERAGE_AREA() {
+		LOW_COVERAGE_AREA++;
+		TOTAL++;
+	}
+	void updateHIGH_COVERAGE_AREA() {
+		HIGH_COVERAGE_AREA++;
+		TOTAL++;
+	}
+	void updateLOW_NORMAL_AREA() {
+		LOW_NORMAL_AREA++;
+		TOTAL++;
+	}
+	void updateHIGH_NORMAL_AREA() {
+		HIGH_NORMAL_AREA++;
+		TOTAL++;
+	}
+	void updateHIGH_SINGLE_AREA() {
+		HIGH_SINGLE_AREA++;
+		TOTAL++;
+	}
+	void updateHIGH_SPANING_AREA() {
+		HIGH_SPANING_AREA++;
+		TOTAL++;
+	}
+	void updateHIGH_OUTIE() {
+		HIGH_OUTIE++;
+		TOTAL++;
+	}
+	void updateCOMPRESSION_AREA() {
+		COMPRESSION_AREA++;
+		TOTAL++;
+	}
+	void updateSTRECH_AREA() {
+		STRECH_AREA++;
+		TOTAL++;
+	}
+
+
+/*
+	void updateFeatures(windowStatistics* window) {
+		float C_A_i = window->readsLength_win/(float)window->insertsLength_win;
+		float S_A_i = window->insertsLength_win/(float)window->insertsLength_win;
+		float C_M_i = window->correctlyMatedReadsLength_win/(float)window->insertsLength_win;
+		float C_W_i = (window->wronglyDistanceReadsLength_win + window->wronglyOrientedReadsLength_win)/(float)window->insertsLength_win;
+		float C_S_i = window->singletonReadsLength_win/(float)window->insertsLength_win;
+		float C_C_i = window->matedDifferentContigLength_win/(float)window->insertsLength_win;
+
+
+	}
+*/
+
+	void print() {
+		cout << "contigLength " << contigLength << "\n";
+		cout << "LOW_COVERAGE_AREA " << LOW_COVERAGE_AREA << "\n";
+		cout << "HIGH_COVERAGE_AREA " << HIGH_COVERAGE_AREA << "\n";
+		cout << "LOW_NORMAL_AREA " << LOW_NORMAL_AREA << "\n";
+		cout << "HIGH_NORMAL_AREA " << HIGH_NORMAL_AREA << "\n";
+		cout << "HIGH_SINGLE_AREA " << HIGH_SINGLE_AREA << "\n";
+		cout << "HIGH_SPANING_AREA " << HIGH_SPANING_AREA << "\n";
+		cout << "HIGH_OUTIE " << HIGH_OUTIE << "\n";
+		cout << "COMPRESSION_AREA " << COMPRESSION_AREA << "\n";
+		cout << "STRECH_AREA " << STRECH_AREA << "\n-----\n";
+	}
+
+	uint64_t contigLength;
+	unsigned int LOW_COVERAGE_AREA;
+	unsigned int HIGH_COVERAGE_AREA;
+	unsigned int LOW_NORMAL_AREA;
+	unsigned int HIGH_NORMAL_AREA;
+	unsigned int HIGH_SINGLE_AREA;
+	unsigned int HIGH_SPANING_AREA;
+	unsigned int HIGH_OUTIE;
+	unsigned int COMPRESSION_AREA;
+	unsigned int STRECH_AREA;
+	unsigned int TOTAL;
+};
+
+
+float lowCoverageFeat = 1/(float)3;
+float highCoverageFeat = 3;
+float lowNormalFeat = 1/(float)3;
+float highNormalFeat = 3;
+float highSingleFeat = 0.6;
+float highSpanningFeat = 0.6;
+float highOutieFeat = 0.6;
+float CE_statistics = 3;
+
+bool sortContigs(ContigFeature i, ContigFeature j) {
+	return (i.contigLength > j.contigLength);
+}
 
 #define MIN(x,y) \
   ((x) < (y)) ? (x) : (y)
@@ -267,6 +356,7 @@ int main(int argc, char *argv[]) {
 	uint32_t peMinInsert = 100;
 	uint32_t peMaxInsert = 1000000;
 	unsigned int WINDOW = 1000;
+	unsigned long int estimatedGenomeSize;
 
 	samfile_t *fp;
 
@@ -281,6 +371,7 @@ int main(int argc, char *argv[]) {
 			("pe-min-insert",  po::value<int>(), "minimum allowed insert size")
 			("pe-max-insert",  po::value<int>(), "maximum allowed insert size")
 			("window",  po::value<unsigned int>(), "window size for features computation")
+			("genome-size", po::value<unsigned long int>(), "estimated genome size (if not supplied genome size is belived to be assembly length")
 			;
 
 	po::variables_map vm;
@@ -321,6 +412,12 @@ int main(int argc, char *argv[]) {
 
 	if (vm.count("window")) {
 		WINDOW = vm["window"].as<unsigned int>();
+	}
+
+	if (vm.count("genome-size")) {
+		estimatedGenomeSize = vm["genome-size"].as<unsigned long int>();
+	} else {
+		estimatedGenomeSize = 0;
 	}
 
 	cout << "assembly file name is " << assemblyFile << endl;
@@ -548,10 +645,12 @@ int main(int argc, char *argv[]) {
     }
 
     genomeLength += contigSize;
-
+    if (estimatedGenomeSize == 0) {
+    	estimatedGenomeSize = genomeLength;
+    }
     cout << "BAM file has been read and statistics have been computed\n";
 
-    cout << "total numebr of contigs " << contigs << endl;
+    cout << "total number of contigs " << contigs << endl;
     cout << "total reads number " << reads << "\n";
     cout << "total mapped reads " << mappedReads << "\n";
     cout << "total unmapped reads " << unmappedReads << "\n";
@@ -604,12 +703,23 @@ int main(int argc, char *argv[]) {
     currentTid = -2;
     reads = 0;
 
-    ContigFeature *CONTIG = new ContigFeature[contigs];
+    vector<ContigFeature> CONTIG (contigs);
+    uint32_t featuresTotal = 0;
+
+//    ContigFeature *CONTIG = new ContigFeature[contigs];
+    uint32_t contig=0;
 
 	uint32_t windowStart = 0;
 	uint32_t windowEnd   = windowStart + WINDOW;
-
 	windowStatistics* actualWindow = new windowStatistics();
+/*	actualWindow->C_A = C_A;
+	actualWindow->S_A = S_A;
+	actualWindow->C_M = C_M;
+	actualWindow->C_W = C_W;
+	actualWindow->C_S = C_S;
+	actualWindow->C_C = C_C;
+	actualWindow->CEstatistics = 3;
+*/
 	actualWindow->windowLength = (windowEnd -windowStart + 1);
 	actualWindow->windowStart = windowStart;
 	actualWindow->windowEnd = windowEnd;
@@ -635,18 +745,72 @@ int main(int argc, char *argv[]) {
     	if (!is_mapped(core)) {
     		++unmappedReads;
     	} else {
-    		if (core->tid != currentTid) {
+    		if (core->tid != currentTid) { // another contig or simply the first one
     			if(currentTid == -2) {
     				cout << "first contig read\n";
     			}
     			if(currentTid > -1) {
     				//compute statistics and update contig feature for the last segment of the contig
-    				actualWindow->print();
-    				cout << "new contig " << "\n";
-    				actualWindow->reset();
+    				//actualWindow->print();
+        			C_A_i = actualWindow->readsLength_win/(float)actualWindow->windowLength;  // read coverage of window
+        		   	S_A_i = actualWindow->insertsLength_win/(float)actualWindow->windowLength; // span coverage of window
+        		   	C_M_i = actualWindow->correctlyMatedReadsLength_win/(float)actualWindow->windowLength; // coverage of correctly aligned reads of window
+        		   	C_W_i = (actualWindow->wronglyDistanceReadsLength_win+actualWindow->wronglyOrientedReadsLength_win)/(float)actualWindow->windowLength; // coverage of wrongly aligned reads
+        		   	C_S_i = actualWindow->singletonReadsLength_win/(float)actualWindow->windowLength; // singleton coverage of window
+        		   	C_C_i = actualWindow->matedDifferentContigLength_win/(float)actualWindow->windowLength; // coverage of reads with mate on different contigs
+        		   	if(actualWindow->inserts > 0) {
+        		   		float localMean = actualWindow->insertsLength_win/(float)actualWindow->inserts;
+        		   		Z_i   = (localMean - insertMean)/(float)(insertStd/sqrt(actualWindow->inserts)); // CE statistics
+        		   	} else {
+        		   		Z_i = -100;
+        		   	}
+        			//actualWindow->print();
+        		   	// NOW UPDATE CONTIG'S FEATURES
+        		   	if(C_A_i < lowCoverageFeat*C_A) {
+        		   		CONTIG[contig].updateLOW_COVERAGE_AREA();
+        		   		featuresTotal++;
+        		   	}
+        		   	if(C_A_i > highCoverageFeat*C_A) {
+        		   		CONTIG[contig].updateHIGH_COVERAGE_AREA();
+        		   		featuresTotal++;
+        		   	}
+        		   	if(C_M_i <  lowNormalFeat*C_M) {
+        		   		CONTIG[contig].updateLOW_NORMAL_AREA();
+        		   		featuresTotal++;
+        		   	}
+        		   	if(C_M_i > highNormalFeat*C_M) {
+        		   		CONTIG[contig].updateHIGH_NORMAL_AREA();
+        		   		featuresTotal++;
+        		   	}
+        		   	if(C_S_i > highSingleFeat*C_A_i) {
+        		   		CONTIG[contig].updateHIGH_SINGLE_AREA();
+        		   		featuresTotal++;
+        		   	}
+        		   	if(C_C_i > highSpanningFeat*C_A_i) {
+        		   		CONTIG[contig].updateHIGH_SPANING_AREA();
+        		   		featuresTotal++;
+        		   	}
+        		   	if(C_W_i > highOutieFeat*C_A_i) {
+        		   		CONTIG[contig].updateHIGH_OUTIE();
+        		   		featuresTotal++;
+        		   	}
+        		   	if(Z_i < -CE_statistics) {
+        		   		CONTIG[contig].updateCOMPRESSION_AREA();
+        		   		featuresTotal++;
+        		   	}
+        		   	if(Z_i > CE_statistics) {
+        		   		CONTIG[contig].updateSTRECH_AREA();
+        		   		featuresTotal++;
+        		   	}
+        		   	//        		   	CONTIG[contig].print();
+
+        		   	actualWindow->reset();
+        		   	contig++; // if I'm not reading the first contig update the contig counter
     			}
     			//Get length of next section
     			contigSize = head->target_len[core->tid];
+    			CONTIG[contig].contigLength = contigSize; // new contig (0 at first iteration)
+
     			if (contigSize < 1) {//We can't have such sizes! this can't be right
     				fprintf(stderr,"%s has size %d, which can't be right!\nCheck bam header!",head->target_name[core->tid],contigSize);
     			}
@@ -662,10 +826,9 @@ int main(int argc, char *argv[]) {
 
     		if (core->pos > actualWindow->windowEnd) {
     			//compute statistics and update contig feature
-    //TODO this point
     			C_A_i = actualWindow->readsLength_win/(float)actualWindow->windowLength;  // read coverage of window
     		   	S_A_i = actualWindow->insertsLength_win/(float)actualWindow->windowLength; // span coverage of window
-    		   	C_M_i = actualWindow->matedDifferentContigLength_win/(float)actualWindow->windowLength; // coverage of correctly aligned reads of window
+    		   	C_M_i = actualWindow->correctlyMatedReadsLength_win/(float)actualWindow->windowLength; // coverage of correctly aligned reads of window
     		   	C_W_i = (actualWindow->wronglyDistanceReadsLength_win+actualWindow->wronglyOrientedReadsLength_win)/(float)actualWindow->windowLength; // coverage of wrongly aligned reads
     		   	C_S_i = actualWindow->singletonReadsLength_win/(float)actualWindow->windowLength; // singleton coverage of window
     		   	C_C_i = actualWindow->matedDifferentContigLength_win/(float)actualWindow->windowLength; // coverage of reads with mate on different contigs
@@ -675,9 +838,44 @@ int main(int argc, char *argv[]) {
     		   	} else {
     		   		Z_i = -100;
     		   	}
-
     			//actualWindow->print();
-    			cout << "CE statistics " << Z_i << "\n";
+    		   	// NOW UPDATE CONTIG'S FEATURES
+    		   	if(C_A_i < lowCoverageFeat*C_A) {
+    		   		CONTIG[contig].updateLOW_COVERAGE_AREA();
+    		   		featuresTotal++;
+    		   	}
+    		   	if(C_A_i > highCoverageFeat*C_A) {
+    		   		CONTIG[contig].updateHIGH_COVERAGE_AREA();
+    		   		featuresTotal++;
+    		   	}
+    		   	if(C_M_i <  lowNormalFeat*C_M) {
+    		   		CONTIG[contig].updateLOW_NORMAL_AREA();
+    		   		featuresTotal++;
+    		   	}
+    		   	if(C_M_i > highNormalFeat*C_M) {
+    		   		CONTIG[contig].updateHIGH_NORMAL_AREA();
+    		   		featuresTotal++;
+    		   	}
+    		   	if(C_S_i > highSingleFeat*C_A_i) {
+    		   		CONTIG[contig].updateHIGH_SINGLE_AREA();
+    		   		featuresTotal++;
+    		   	}
+    		   	if(C_C_i > highSpanningFeat*C_A_i) {
+    		   		CONTIG[contig].updateHIGH_SPANING_AREA();
+    		   		featuresTotal++;
+    		   	}
+    		   	if(C_W_i > highOutieFeat*C_A_i) {
+    		   		CONTIG[contig].updateHIGH_OUTIE();
+    		   		featuresTotal++;
+    		   	}
+    		   	if(Z_i < -CE_statistics) {
+    		   		CONTIG[contig].updateCOMPRESSION_AREA();
+    		   		featuresTotal++;
+    		   	}
+    		   	if(Z_i > CE_statistics) {
+    		   		CONTIG[contig].updateSTRECH_AREA();
+    		   		featuresTotal++;
+    		   	}
 
     			actualWindow->reset();
     			actualWindow->windowStart = actualWindow->windowEnd + 1;
@@ -699,7 +897,35 @@ int main(int argc, char *argv[]) {
 
 
     }
+ // TODO: UPDATE LAST CONTIG
+
     cout << "number of reads " << reads << "\n";
+    //SORT CONTIGS ACCORDING TO THEIR LENGTH
+    sort(CONTIG.begin(),CONTIG.end(),sortContigs);
+//    for(uint32_t i=0; i< contigs; i++) {
+//   	CONTIG[i].print();
+//    }
+
+    cout << "Now computing FRC \n";
+    ofstream myfile;
+    myfile.open ("FRC.txt");
+    myfile << "features coverage\n";
+    float step = featuresTotal/(float)100;
+    float partial=0;
+    while(partial <= featuresTotal) {
+    	uint32_t contigStep = 0;
+    	uint64_t contigLengthStep = 0;
+    	uint32_t featuresStep = 0;
+    	while(featuresStep <= partial) {
+    		contigLengthStep += CONTIG[contigStep].contigLength;
+    		featuresStep += CONTIG[contigStep].TOTAL;
+    		contigStep++;
+    	}
+    	float coveragePartial =  contigLengthStep/(float)estimatedGenomeSize;
+    	myfile << partial << " " << coveragePartial << "\n";
+    	partial += step;
+    }
+    myfile.close();
 
 
 }
