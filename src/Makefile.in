@@ -51,7 +51,8 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
-am_FRC_OBJECTS = FRC-FRC.$(OBJEXT) data_structures/FRC-Mask.$(OBJEXT) \
+am_FRC_OBJECTS = FRC-FRC_align.$(OBJEXT) \
+	data_structures/FRC-Mask.$(OBJEXT) \
 	errors/FRC-Data_Exception.$(OBJEXT) \
 	errors/FRC-File_Not_Found.$(OBJEXT) \
 	errors/FRC-Incorrect_Format.$(OBJEXT) \
@@ -63,7 +64,7 @@ FRC_LDADD = $(LDADD)
 FRC_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(FRC_CXXFLAGS) $(CXXFLAGS) \
 	$(FRC_LDFLAGS) $(LDFLAGS) -o $@
-am__objects_1 = FRC_debug-FRC.$(OBJEXT) \
+am__objects_1 = FRC_debug-FRC_align.$(OBJEXT) \
 	data_structures/FRC_debug-Mask.$(OBJEXT) \
 	errors/FRC_debug-Data_Exception.$(OBJEXT) \
 	errors/FRC_debug-File_Not_Found.$(OBJEXT) \
@@ -117,6 +118,7 @@ BOOST_THREAD_LIBS = @BOOST_THREAD_LIBS@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
@@ -231,7 +233,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = subdir-objects
-FRC_SOURCES = FRC.cpp \
+FRC_SOURCES = FRC_align.cpp \
 	data_structures/Mask.cpp \
 	errors/Data_Exception.cpp \
 	errors/File_Not_Found.cpp \
@@ -410,8 +412,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FRC-FRC.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FRC_debug-FRC.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FRC-FRC_align.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FRC_debug-FRC_align.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@data_structures/$(DEPDIR)/FRC-Mask.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@data_structures/$(DEPDIR)/FRC-Reads.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@data_structures/$(DEPDIR)/FRC_debug-Mask.Po@am__quote@
@@ -453,19 +455,19 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
-FRC-FRC.o: FRC.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -MT FRC-FRC.o -MD -MP -MF $(DEPDIR)/FRC-FRC.Tpo -c -o FRC-FRC.o `test -f 'FRC.cpp' || echo '$(srcdir)/'`FRC.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/FRC-FRC.Tpo $(DEPDIR)/FRC-FRC.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='FRC.cpp' object='FRC-FRC.o' libtool=no @AMDEPBACKSLASH@
+FRC-FRC_align.o: FRC_align.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -MT FRC-FRC_align.o -MD -MP -MF $(DEPDIR)/FRC-FRC_align.Tpo -c -o FRC-FRC_align.o `test -f 'FRC_align.cpp' || echo '$(srcdir)/'`FRC_align.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/FRC-FRC_align.Tpo $(DEPDIR)/FRC-FRC_align.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='FRC_align.cpp' object='FRC-FRC_align.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -c -o FRC-FRC.o `test -f 'FRC.cpp' || echo '$(srcdir)/'`FRC.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -c -o FRC-FRC_align.o `test -f 'FRC_align.cpp' || echo '$(srcdir)/'`FRC_align.cpp
 
-FRC-FRC.obj: FRC.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -MT FRC-FRC.obj -MD -MP -MF $(DEPDIR)/FRC-FRC.Tpo -c -o FRC-FRC.obj `if test -f 'FRC.cpp'; then $(CYGPATH_W) 'FRC.cpp'; else $(CYGPATH_W) '$(srcdir)/FRC.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/FRC-FRC.Tpo $(DEPDIR)/FRC-FRC.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='FRC.cpp' object='FRC-FRC.obj' libtool=no @AMDEPBACKSLASH@
+FRC-FRC_align.obj: FRC_align.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -MT FRC-FRC_align.obj -MD -MP -MF $(DEPDIR)/FRC-FRC_align.Tpo -c -o FRC-FRC_align.obj `if test -f 'FRC_align.cpp'; then $(CYGPATH_W) 'FRC_align.cpp'; else $(CYGPATH_W) '$(srcdir)/FRC_align.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/FRC-FRC_align.Tpo $(DEPDIR)/FRC-FRC_align.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='FRC_align.cpp' object='FRC-FRC_align.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -c -o FRC-FRC.obj `if test -f 'FRC.cpp'; then $(CYGPATH_W) 'FRC.cpp'; else $(CYGPATH_W) '$(srcdir)/FRC.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -c -o FRC-FRC_align.obj `if test -f 'FRC_align.cpp'; then $(CYGPATH_W) 'FRC_align.cpp'; else $(CYGPATH_W) '$(srcdir)/FRC_align.cpp'; fi`
 
 data_structures/FRC-Mask.o: data_structures/Mask.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -MT data_structures/FRC-Mask.o -MD -MP -MF data_structures/$(DEPDIR)/FRC-Mask.Tpo -c -o data_structures/FRC-Mask.o `test -f 'data_structures/Mask.cpp' || echo '$(srcdir)/'`data_structures/Mask.cpp
@@ -579,19 +581,19 @@ data_structures/FRC-Reads.obj: data_structures/Reads.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -c -o data_structures/FRC-Reads.obj `if test -f 'data_structures/Reads.cpp'; then $(CYGPATH_W) 'data_structures/Reads.cpp'; else $(CYGPATH_W) '$(srcdir)/data_structures/Reads.cpp'; fi`
 
-FRC_debug-FRC.o: FRC.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -MT FRC_debug-FRC.o -MD -MP -MF $(DEPDIR)/FRC_debug-FRC.Tpo -c -o FRC_debug-FRC.o `test -f 'FRC.cpp' || echo '$(srcdir)/'`FRC.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/FRC_debug-FRC.Tpo $(DEPDIR)/FRC_debug-FRC.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='FRC.cpp' object='FRC_debug-FRC.o' libtool=no @AMDEPBACKSLASH@
+FRC_debug-FRC_align.o: FRC_align.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -MT FRC_debug-FRC_align.o -MD -MP -MF $(DEPDIR)/FRC_debug-FRC_align.Tpo -c -o FRC_debug-FRC_align.o `test -f 'FRC_align.cpp' || echo '$(srcdir)/'`FRC_align.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/FRC_debug-FRC_align.Tpo $(DEPDIR)/FRC_debug-FRC_align.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='FRC_align.cpp' object='FRC_debug-FRC_align.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -c -o FRC_debug-FRC.o `test -f 'FRC.cpp' || echo '$(srcdir)/'`FRC.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -c -o FRC_debug-FRC_align.o `test -f 'FRC_align.cpp' || echo '$(srcdir)/'`FRC_align.cpp
 
-FRC_debug-FRC.obj: FRC.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -MT FRC_debug-FRC.obj -MD -MP -MF $(DEPDIR)/FRC_debug-FRC.Tpo -c -o FRC_debug-FRC.obj `if test -f 'FRC.cpp'; then $(CYGPATH_W) 'FRC.cpp'; else $(CYGPATH_W) '$(srcdir)/FRC.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/FRC_debug-FRC.Tpo $(DEPDIR)/FRC_debug-FRC.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='FRC.cpp' object='FRC_debug-FRC.obj' libtool=no @AMDEPBACKSLASH@
+FRC_debug-FRC_align.obj: FRC_align.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -MT FRC_debug-FRC_align.obj -MD -MP -MF $(DEPDIR)/FRC_debug-FRC_align.Tpo -c -o FRC_debug-FRC_align.obj `if test -f 'FRC_align.cpp'; then $(CYGPATH_W) 'FRC_align.cpp'; else $(CYGPATH_W) '$(srcdir)/FRC_align.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/FRC_debug-FRC_align.Tpo $(DEPDIR)/FRC_debug-FRC_align.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='FRC_align.cpp' object='FRC_debug-FRC_align.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -c -o FRC_debug-FRC.obj `if test -f 'FRC.cpp'; then $(CYGPATH_W) 'FRC.cpp'; else $(CYGPATH_W) '$(srcdir)/FRC.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -c -o FRC_debug-FRC_align.obj `if test -f 'FRC_align.cpp'; then $(CYGPATH_W) 'FRC_align.cpp'; else $(CYGPATH_W) '$(srcdir)/FRC_align.cpp'; fi`
 
 data_structures/FRC_debug-Mask.o: data_structures/Mask.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -MT data_structures/FRC_debug-Mask.o -MD -MP -MF data_structures/$(DEPDIR)/FRC_debug-Mask.Tpo -c -o data_structures/FRC_debug-Mask.o `test -f 'data_structures/Mask.cpp' || echo '$(srcdir)/'`data_structures/Mask.cpp

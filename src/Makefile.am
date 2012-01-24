@@ -4,7 +4,7 @@ AUTOMAKE_OPTIONS = subdir-objects
 bin_PROGRAMS=FRC FRC_debug
 
 
-FRC_SOURCES=FRC.cpp \
+FRC_SOURCES=FRC_align.cpp \
 	data_structures/Mask.cpp \
 	errors/Data_Exception.cpp \
 	errors/File_Not_Found.cpp \

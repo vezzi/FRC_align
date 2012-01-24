@@ -16,10 +16,10 @@
 
 
 
-pkgdatadir = $(datadir)/frc
-pkgincludedir = $(includedir)/frc
-pkglibdir = $(libdir)/frc
-pkglibexecdir = $(libexecdir)/frc
+pkgdatadir = $(datadir)/frc_align
+pkgincludedir = $(includedir)/frc_align
+pkglibdir = $(libdir)/frc_align
+pkglibexecdir = $(libexecdir)/frc_align
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
 install_sh_PROGRAM = $(install_sh) -c
@@ -32,9 +32,9 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-build_triplet = x86_64-apple-darwin10.8.0
-host_triplet = x86_64-apple-darwin10.8.0
-target_triplet = x86_64-apple-darwin10.8.0
+build_triplet = x86_64-apple-darwin11.2.0
+host_triplet = x86_64-apple-darwin11.2.0
+target_triplet = x86_64-apple-darwin11.2.0
 bin_PROGRAMS = FRC$(EXEEXT) FRC_debug$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -51,7 +51,8 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
-am_FRC_OBJECTS = FRC-FRC.$(OBJEXT) data_structures/FRC-Mask.$(OBJEXT) \
+am_FRC_OBJECTS = FRC-FRC_align.$(OBJEXT) \
+	data_structures/FRC-Mask.$(OBJEXT) \
 	errors/FRC-Data_Exception.$(OBJEXT) \
 	errors/FRC-File_Not_Found.$(OBJEXT) \
 	errors/FRC-Incorrect_Format.$(OBJEXT) \
@@ -63,7 +64,7 @@ FRC_LDADD = $(LDADD)
 FRC_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(FRC_CXXFLAGS) $(CXXFLAGS) \
 	$(FRC_LDFLAGS) $(LDFLAGS) -o $@
-am__objects_1 = FRC_debug-FRC.$(OBJEXT) \
+am__objects_1 = FRC_debug-FRC_align.$(OBJEXT) \
 	data_structures/FRC_debug-Mask.$(OBJEXT) \
 	errors/FRC_debug-Data_Exception.$(OBJEXT) \
 	errors/FRC_debug-File_Not_Found.$(OBJEXT) \
@@ -95,12 +96,12 @@ DIST_SOURCES = $(FRC_SOURCES) $(FRC_debug_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /Users/vezzi/Documents/workspace/FRC/missing --run aclocal-1.11
-AMTAR = ${SHELL} /Users/vezzi/Documents/workspace/FRC/missing --run tar
+ACLOCAL = ${SHELL} /Users/vezzi/Documents/workspace/FRC_align/missing --run aclocal-1.11
+AMTAR = ${SHELL} /Users/vezzi/Documents/workspace/FRC_align/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /Users/vezzi/Documents/workspace/FRC/missing --run autoconf
-AUTOHEADER = ${SHELL} /Users/vezzi/Documents/workspace/FRC/missing --run autoheader
-AUTOMAKE = ${SHELL} /Users/vezzi/Documents/workspace/FRC/missing --run automake-1.11
+AUTOCONF = ${SHELL} /Users/vezzi/Documents/workspace/FRC_align/missing --run autoconf
+AUTOHEADER = ${SHELL} /Users/vezzi/Documents/workspace/FRC_align/missing --run autoheader
+AUTOMAKE = ${SHELL} /Users/vezzi/Documents/workspace/FRC_align/missing --run automake-1.11
 AWK = awk
 BOOST_CPPFLAGS = -I/opt/local/include 
 BOOST_IOSTREAMS_LDFLAGS = -L/opt/local/lib -R/opt/local/lib
@@ -116,14 +117,15 @@ BOOST_THREAD_LDPATH = /opt/local/lib
 BOOST_THREAD_LIBS = /opt/local/lib/libboost_thread-mt.a 
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS =  -Wall -D_USE_KNETFILE -D_FILE_OFFSET_BITS=64
+CFLAGS = -g -O2 -Wall -D_USE_KNETFILE -D_FILE_OFFSET_BITS=64 -m64 -DCPU_64
+CPP = gcc -E
 CPPFLAGS = 
 CXX = g++
 CXXCPP = g++ -E
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS =  -Wall -D_USE_KNETFILE -D_FILE_OFFSET_BITS=64 -m64 -DCPU_64
+CXXFLAGS = -g -O2 -Wall -m64 -DCPU_64
 CYGPATH_W = echo
-DEFS = -DPACKAGE_NAME=\"FRC\" -DPACKAGE_TARNAME=\"frc\" -DPACKAGE_VERSION=\"0.3\" -DPACKAGE_STRING=\"FRC\ 0.3\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DPACKAGE=\"frc\" -DVERSION=\"0.3\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_STDBOOL_H=1 -DHAVE_PTHREAD_H=1 -DHAVE_STDIO_H=1 -DHAVE_MATH_H=1 -DHAVE_LIMITS_H=1 -DHAVE_IOSTREAM=1 -DHAVE_FSTREAM=1 -DHAVE_STRING=1 -DHAVE_VECTOR=1 -DHAVE_EXCEPTION=1 -DHAVE_SSTREAM=1 -DHAVE_BZLIB_H=1 -DHAVE_DLFCN_H=1 -DLT_OBJDIR=\".libs/\" -DHAVE_BOOST=1 -DHAVE_BOOST_IOSTREAMS_DEVICE_FILE_DESCRIPTOR_HPP=1 -DHAVE_BOOST_PROGRAM_OPTIONS_HPP=1 -DHAVE_BOOST_THREAD_HPP=1
+DEFS = -DPACKAGE_NAME=\"FRC_align\" -DPACKAGE_TARNAME=\"frc_align\" -DPACKAGE_VERSION=\"1.0\" -DPACKAGE_STRING=\"FRC_align\ 1.0\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DPACKAGE=\"frc_align\" -DVERSION=\"1.0\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_DLFCN_H=1 -DLT_OBJDIR=\".libs/\" -DHAVE_STDBOOL_H=1 -DHAVE_PTHREAD_H=1 -DHAVE_STDIO_H=1 -DHAVE_MATH_H=1 -DHAVE_LIMITS_H=1 -DHAVE_BZLIB_H=1 -DHAVE_ZLIB_H=1 -DHAVE_IOSTREAM=1 -DHAVE_FSTREAM=1 -DHAVE_STRING=1 -DHAVE_VECTOR=1 -DHAVE_EXCEPTION=1 -DHAVE_SSTREAM=1 -DHAVE_BOOST=1 -DHAVE_BOOST_IOSTREAMS_DEVICE_FILE_DESCRIPTOR_HPP=1 -DHAVE_BOOST_PROGRAM_OPTIONS_HPP=1 -DHAVE_BOOST_THREAD_HPP=1
 DEPDIR = .deps
 DISTCHECK_CONFIGURE_FLAGS =  '--with-boost='
 DLLTOOL = false
@@ -141,7 +143,7 @@ INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-LD = /usr/libexec/gcc/i686-apple-darwin10/4.2.1/ld
+LD = /usr/llvm-gcc-4.2/libexec/gcc/i686-apple-darwin11/4.2.1/ld
 LDFLAGS = 
 LIBOBJS = 
 LIBS = 
@@ -149,7 +151,7 @@ LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = lipo
 LN_S = ln -s
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /Users/vezzi/Documents/workspace/FRC/missing --run makeinfo
+MAKEINFO = ${SHELL} /Users/vezzi/Documents/workspace/FRC_align/missing --run makeinfo
 MANIFEST_TOOL = :
 MKDIR_P = .././install-sh -c -d
 NM = /usr/bin/nm
@@ -158,24 +160,24 @@ OBJDUMP = false
 OBJEXT = o
 OTOOL = otool
 OTOOL64 = :
-PACKAGE = frc
+PACKAGE = frc_align
 PACKAGE_BUGREPORT = 
-PACKAGE_NAME = FRC
-PACKAGE_STRING = FRC 0.3
-PACKAGE_TARNAME = frc
+PACKAGE_NAME = FRC_align
+PACKAGE_STRING = FRC_align 1.0
+PACKAGE_TARNAME = frc_align
 PACKAGE_URL = 
-PACKAGE_VERSION = 0.3
+PACKAGE_VERSION = 1.0
 PATH_SEPARATOR = :
 RANLIB = ranlib
 SED = /usr/bin/sed
 SET_MAKE = 
 SHELL = /bin/sh
 STRIP = strip
-VERSION = 0.3
-abs_builddir = /Users/vezzi/Documents/workspace/FRC/src
-abs_srcdir = /Users/vezzi/Documents/workspace/FRC/src
-abs_top_builddir = /Users/vezzi/Documents/workspace/FRC
-abs_top_srcdir = /Users/vezzi/Documents/workspace/FRC
+VERSION = 1.0
+abs_builddir = /Users/vezzi/Documents/workspace/FRC_align/src
+abs_srcdir = /Users/vezzi/Documents/workspace/FRC_align/src
+abs_top_builddir = /Users/vezzi/Documents/workspace/FRC_align
+abs_top_srcdir = /Users/vezzi/Documents/workspace/FRC_align
 ac_ct_AR = ar
 ac_ct_CC = gcc
 ac_ct_CXX = g++
@@ -186,10 +188,10 @@ am__quote =
 am__tar = ${AMTAR} chof - "$$tardir"
 am__untar = ${AMTAR} xf -
 bindir = ${exec_prefix}/bin
-build = x86_64-apple-darwin10.8.0
+build = x86_64-apple-darwin11.2.0
 build_alias = 
 build_cpu = x86_64
-build_os = darwin10.8.0
+build_os = darwin11.2.0
 build_vendor = apple
 builddir = .
 datadir = ${datarootdir}
@@ -197,15 +199,15 @@ datarootdir = ${prefix}/share
 docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
 dvidir = ${docdir}
 exec_prefix = ${prefix}
-host = x86_64-apple-darwin10.8.0
+host = x86_64-apple-darwin11.2.0
 host_alias = 
 host_cpu = x86_64
-host_os = darwin10.8.0
+host_os = darwin11.2.0
 host_vendor = apple
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /Users/vezzi/Documents/workspace/FRC/install-sh
+install_sh = ${SHELL} /Users/vezzi/Documents/workspace/FRC_align/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -215,23 +217,23 @@ mkdir_p = $(top_builddir)/./install-sh -c -d
 oldincludedir = /usr/include
 pdfdir = ${docdir}
 prefix = /usr/local
-program_transform_name = s,x,x,
+program_transform_name = s&^&FRC&
 psdir = ${docdir}
 sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com
 srcdir = .
 sysconfdir = ${prefix}/etc
-target = x86_64-apple-darwin10.8.0
+target = x86_64-apple-darwin11.2.0
 target_alias = 
 target_cpu = x86_64
-target_os = darwin10.8.0
+target_os = darwin11.2.0
 target_vendor = apple
 top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = subdir-objects
-FRC_SOURCES = FRC.cpp \
+FRC_SOURCES = FRC_align.cpp \
 	data_structures/Mask.cpp \
 	errors/Data_Exception.cpp \
 	errors/File_Not_Found.cpp \
@@ -410,8 +412,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/FRC-FRC.Po
-include ./$(DEPDIR)/FRC_debug-FRC.Po
+include ./$(DEPDIR)/FRC-FRC_align.Po
+include ./$(DEPDIR)/FRC_debug-FRC_align.Po
 include data_structures/$(DEPDIR)/FRC-Mask.Po
 include data_structures/$(DEPDIR)/FRC-Reads.Po
 include data_structures/$(DEPDIR)/FRC_debug-Mask.Po
@@ -453,19 +455,19 @@ include io/$(DEPDIR)/FRC_debug-read_functions.Po
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(LTCXXCOMPILE) -c -o $@ $<
 
-FRC-FRC.o: FRC.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -MT FRC-FRC.o -MD -MP -MF $(DEPDIR)/FRC-FRC.Tpo -c -o FRC-FRC.o `test -f 'FRC.cpp' || echo '$(srcdir)/'`FRC.cpp
-	$(am__mv) $(DEPDIR)/FRC-FRC.Tpo $(DEPDIR)/FRC-FRC.Po
-#	source='FRC.cpp' object='FRC-FRC.o' libtool=no \
+FRC-FRC_align.o: FRC_align.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -MT FRC-FRC_align.o -MD -MP -MF $(DEPDIR)/FRC-FRC_align.Tpo -c -o FRC-FRC_align.o `test -f 'FRC_align.cpp' || echo '$(srcdir)/'`FRC_align.cpp
+	$(am__mv) $(DEPDIR)/FRC-FRC_align.Tpo $(DEPDIR)/FRC-FRC_align.Po
+#	source='FRC_align.cpp' object='FRC-FRC_align.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -c -o FRC-FRC.o `test -f 'FRC.cpp' || echo '$(srcdir)/'`FRC.cpp
+#	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -c -o FRC-FRC_align.o `test -f 'FRC_align.cpp' || echo '$(srcdir)/'`FRC_align.cpp
 
-FRC-FRC.obj: FRC.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -MT FRC-FRC.obj -MD -MP -MF $(DEPDIR)/FRC-FRC.Tpo -c -o FRC-FRC.obj `if test -f 'FRC.cpp'; then $(CYGPATH_W) 'FRC.cpp'; else $(CYGPATH_W) '$(srcdir)/FRC.cpp'; fi`
-	$(am__mv) $(DEPDIR)/FRC-FRC.Tpo $(DEPDIR)/FRC-FRC.Po
-#	source='FRC.cpp' object='FRC-FRC.obj' libtool=no \
+FRC-FRC_align.obj: FRC_align.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -MT FRC-FRC_align.obj -MD -MP -MF $(DEPDIR)/FRC-FRC_align.Tpo -c -o FRC-FRC_align.obj `if test -f 'FRC_align.cpp'; then $(CYGPATH_W) 'FRC_align.cpp'; else $(CYGPATH_W) '$(srcdir)/FRC_align.cpp'; fi`
+	$(am__mv) $(DEPDIR)/FRC-FRC_align.Tpo $(DEPDIR)/FRC-FRC_align.Po
+#	source='FRC_align.cpp' object='FRC-FRC_align.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -c -o FRC-FRC.obj `if test -f 'FRC.cpp'; then $(CYGPATH_W) 'FRC.cpp'; else $(CYGPATH_W) '$(srcdir)/FRC.cpp'; fi`
+#	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -c -o FRC-FRC_align.obj `if test -f 'FRC_align.cpp'; then $(CYGPATH_W) 'FRC_align.cpp'; else $(CYGPATH_W) '$(srcdir)/FRC_align.cpp'; fi`
 
 data_structures/FRC-Mask.o: data_structures/Mask.cpp
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -MT data_structures/FRC-Mask.o -MD -MP -MF data_structures/$(DEPDIR)/FRC-Mask.Tpo -c -o data_structures/FRC-Mask.o `test -f 'data_structures/Mask.cpp' || echo '$(srcdir)/'`data_structures/Mask.cpp
@@ -579,19 +581,19 @@ data_structures/FRC-Reads.obj: data_structures/Reads.cpp
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -c -o data_structures/FRC-Reads.obj `if test -f 'data_structures/Reads.cpp'; then $(CYGPATH_W) 'data_structures/Reads.cpp'; else $(CYGPATH_W) '$(srcdir)/data_structures/Reads.cpp'; fi`
 
-FRC_debug-FRC.o: FRC.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -MT FRC_debug-FRC.o -MD -MP -MF $(DEPDIR)/FRC_debug-FRC.Tpo -c -o FRC_debug-FRC.o `test -f 'FRC.cpp' || echo '$(srcdir)/'`FRC.cpp
-	$(am__mv) $(DEPDIR)/FRC_debug-FRC.Tpo $(DEPDIR)/FRC_debug-FRC.Po
-#	source='FRC.cpp' object='FRC_debug-FRC.o' libtool=no \
+FRC_debug-FRC_align.o: FRC_align.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -MT FRC_debug-FRC_align.o -MD -MP -MF $(DEPDIR)/FRC_debug-FRC_align.Tpo -c -o FRC_debug-FRC_align.o `test -f 'FRC_align.cpp' || echo '$(srcdir)/'`FRC_align.cpp
+	$(am__mv) $(DEPDIR)/FRC_debug-FRC_align.Tpo $(DEPDIR)/FRC_debug-FRC_align.Po
+#	source='FRC_align.cpp' object='FRC_debug-FRC_align.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -c -o FRC_debug-FRC.o `test -f 'FRC.cpp' || echo '$(srcdir)/'`FRC.cpp
+#	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -c -o FRC_debug-FRC_align.o `test -f 'FRC_align.cpp' || echo '$(srcdir)/'`FRC_align.cpp
 
-FRC_debug-FRC.obj: FRC.cpp
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -MT FRC_debug-FRC.obj -MD -MP -MF $(DEPDIR)/FRC_debug-FRC.Tpo -c -o FRC_debug-FRC.obj `if test -f 'FRC.cpp'; then $(CYGPATH_W) 'FRC.cpp'; else $(CYGPATH_W) '$(srcdir)/FRC.cpp'; fi`
-	$(am__mv) $(DEPDIR)/FRC_debug-FRC.Tpo $(DEPDIR)/FRC_debug-FRC.Po
-#	source='FRC.cpp' object='FRC_debug-FRC.obj' libtool=no \
+FRC_debug-FRC_align.obj: FRC_align.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -MT FRC_debug-FRC_align.obj -MD -MP -MF $(DEPDIR)/FRC_debug-FRC_align.Tpo -c -o FRC_debug-FRC_align.obj `if test -f 'FRC_align.cpp'; then $(CYGPATH_W) 'FRC_align.cpp'; else $(CYGPATH_W) '$(srcdir)/FRC_align.cpp'; fi`
+	$(am__mv) $(DEPDIR)/FRC_debug-FRC_align.Tpo $(DEPDIR)/FRC_debug-FRC_align.Po
+#	source='FRC_align.cpp' object='FRC_debug-FRC_align.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -c -o FRC_debug-FRC.obj `if test -f 'FRC.cpp'; then $(CYGPATH_W) 'FRC.cpp'; else $(CYGPATH_W) '$(srcdir)/FRC.cpp'; fi`
+#	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -c -o FRC_debug-FRC_align.obj `if test -f 'FRC_align.cpp'; then $(CYGPATH_W) 'FRC_align.cpp'; else $(CYGPATH_W) '$(srcdir)/FRC_align.cpp'; fi`
 
 data_structures/FRC_debug-Mask.o: data_structures/Mask.cpp
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -MT data_structures/FRC_debug-Mask.o -MD -MP -MF data_structures/$(DEPDIR)/FRC_debug-Mask.Tpo -c -o data_structures/FRC_debug-Mask.o `test -f 'data_structures/Mask.cpp' || echo '$(srcdir)/'`data_structures/Mask.cpp

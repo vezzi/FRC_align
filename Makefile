@@ -15,10 +15,11 @@
 
 
 
-pkgdatadir = $(datadir)/frc
-pkgincludedir = $(includedir)/frc
-pkglibdir = $(libdir)/frc
-pkglibexecdir = $(libexecdir)/frc
+
+pkgdatadir = $(datadir)/frc_align
+pkgincludedir = $(includedir)/frc_align
+pkglibdir = $(libdir)/frc_align
+pkglibexecdir = $(libexecdir)/frc_align
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 install_sh_DATA = $(install_sh) -c -m 644
 install_sh_PROGRAM = $(install_sh) -c
@@ -31,9 +32,9 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-build_triplet = x86_64-apple-darwin10.8.0
-host_triplet = x86_64-apple-darwin10.8.0
-target_triplet = x86_64-apple-darwin10.8.0
+build_triplet = x86_64-apple-darwin11.2.0
+host_triplet = x86_64-apple-darwin11.2.0
+target_triplet = x86_64-apple-darwin11.2.0
 subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(top_srcdir)/configure AUTHORS COPYING \
@@ -60,6 +61,29 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	install-pdf-recursive install-ps-recursive install-recursive \
 	installcheck-recursive installdirs-recursive pdf-recursive \
 	ps-recursive uninstall-recursive
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__installdirs = "$(DESTDIR)$(docdir)"
+DATA = $(doc_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
@@ -104,12 +128,12 @@ DIST_ARCHIVES = $(distdir).tar.gz
 GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
-ACLOCAL = ${SHELL} /Users/vezzi/Documents/workspace/FRC/missing --run aclocal-1.11
-AMTAR = ${SHELL} /Users/vezzi/Documents/workspace/FRC/missing --run tar
+ACLOCAL = ${SHELL} /Users/vezzi/Documents/workspace/FRC_align/missing --run aclocal-1.11
+AMTAR = ${SHELL} /Users/vezzi/Documents/workspace/FRC_align/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /Users/vezzi/Documents/workspace/FRC/missing --run autoconf
-AUTOHEADER = ${SHELL} /Users/vezzi/Documents/workspace/FRC/missing --run autoheader
-AUTOMAKE = ${SHELL} /Users/vezzi/Documents/workspace/FRC/missing --run automake-1.11
+AUTOCONF = ${SHELL} /Users/vezzi/Documents/workspace/FRC_align/missing --run autoconf
+AUTOHEADER = ${SHELL} /Users/vezzi/Documents/workspace/FRC_align/missing --run autoheader
+AUTOMAKE = ${SHELL} /Users/vezzi/Documents/workspace/FRC_align/missing --run automake-1.11
 AWK = awk
 BOOST_CPPFLAGS = -I/opt/local/include 
 BOOST_IOSTREAMS_LDFLAGS = -L/opt/local/lib -R/opt/local/lib
@@ -125,14 +149,15 @@ BOOST_THREAD_LDPATH = /opt/local/lib
 BOOST_THREAD_LIBS = /opt/local/lib/libboost_thread-mt.a 
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS =  -Wall -D_USE_KNETFILE -D_FILE_OFFSET_BITS=64
+CFLAGS = -g -O2 -Wall -D_USE_KNETFILE -D_FILE_OFFSET_BITS=64 -m64 -DCPU_64
+CPP = gcc -E
 CPPFLAGS = 
 CXX = g++
 CXXCPP = g++ -E
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS =  -Wall -D_USE_KNETFILE -D_FILE_OFFSET_BITS=64 -m64 -DCPU_64
+CXXFLAGS = -g -O2 -Wall -m64 -DCPU_64
 CYGPATH_W = echo
-DEFS = -DPACKAGE_NAME=\"FRC\" -DPACKAGE_TARNAME=\"frc\" -DPACKAGE_VERSION=\"0.3\" -DPACKAGE_STRING=\"FRC\ 0.3\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DPACKAGE=\"frc\" -DVERSION=\"0.3\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_STDBOOL_H=1 -DHAVE_PTHREAD_H=1 -DHAVE_STDIO_H=1 -DHAVE_MATH_H=1 -DHAVE_LIMITS_H=1 -DHAVE_IOSTREAM=1 -DHAVE_FSTREAM=1 -DHAVE_STRING=1 -DHAVE_VECTOR=1 -DHAVE_EXCEPTION=1 -DHAVE_SSTREAM=1 -DHAVE_BZLIB_H=1 -DHAVE_DLFCN_H=1 -DLT_OBJDIR=\".libs/\" -DHAVE_BOOST=1 -DHAVE_BOOST_IOSTREAMS_DEVICE_FILE_DESCRIPTOR_HPP=1 -DHAVE_BOOST_PROGRAM_OPTIONS_HPP=1 -DHAVE_BOOST_THREAD_HPP=1
+DEFS = -DPACKAGE_NAME=\"FRC_align\" -DPACKAGE_TARNAME=\"frc_align\" -DPACKAGE_VERSION=\"1.0\" -DPACKAGE_STRING=\"FRC_align\ 1.0\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DPACKAGE=\"frc_align\" -DVERSION=\"1.0\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_DLFCN_H=1 -DLT_OBJDIR=\".libs/\" -DHAVE_STDBOOL_H=1 -DHAVE_PTHREAD_H=1 -DHAVE_STDIO_H=1 -DHAVE_MATH_H=1 -DHAVE_LIMITS_H=1 -DHAVE_BZLIB_H=1 -DHAVE_ZLIB_H=1 -DHAVE_IOSTREAM=1 -DHAVE_FSTREAM=1 -DHAVE_STRING=1 -DHAVE_VECTOR=1 -DHAVE_EXCEPTION=1 -DHAVE_SSTREAM=1 -DHAVE_BOOST=1 -DHAVE_BOOST_IOSTREAMS_DEVICE_FILE_DESCRIPTOR_HPP=1 -DHAVE_BOOST_PROGRAM_OPTIONS_HPP=1 -DHAVE_BOOST_THREAD_HPP=1
 DEPDIR = .deps
 DISTCHECK_CONFIGURE_FLAGS =  '--with-boost='
 DLLTOOL = false
@@ -150,7 +175,7 @@ INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-LD = /usr/libexec/gcc/i686-apple-darwin10/4.2.1/ld
+LD = /usr/llvm-gcc-4.2/libexec/gcc/i686-apple-darwin11/4.2.1/ld
 LDFLAGS = 
 LIBOBJS = 
 LIBS = 
@@ -158,7 +183,7 @@ LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = lipo
 LN_S = ln -s
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /Users/vezzi/Documents/workspace/FRC/missing --run makeinfo
+MAKEINFO = ${SHELL} /Users/vezzi/Documents/workspace/FRC_align/missing --run makeinfo
 MANIFEST_TOOL = :
 MKDIR_P = ./install-sh -c -d
 NM = /usr/bin/nm
@@ -167,24 +192,24 @@ OBJDUMP = false
 OBJEXT = o
 OTOOL = otool
 OTOOL64 = :
-PACKAGE = frc
+PACKAGE = frc_align
 PACKAGE_BUGREPORT = 
-PACKAGE_NAME = FRC
-PACKAGE_STRING = FRC 0.3
-PACKAGE_TARNAME = frc
+PACKAGE_NAME = FRC_align
+PACKAGE_STRING = FRC_align 1.0
+PACKAGE_TARNAME = frc_align
 PACKAGE_URL = 
-PACKAGE_VERSION = 0.3
+PACKAGE_VERSION = 1.0
 PATH_SEPARATOR = :
 RANLIB = ranlib
 SED = /usr/bin/sed
 SET_MAKE = 
 SHELL = /bin/sh
 STRIP = strip
-VERSION = 0.3
-abs_builddir = /Users/vezzi/Documents/workspace/FRC
-abs_srcdir = /Users/vezzi/Documents/workspace/FRC
-abs_top_builddir = /Users/vezzi/Documents/workspace/FRC
-abs_top_srcdir = /Users/vezzi/Documents/workspace/FRC
+VERSION = 1.0
+abs_builddir = /Users/vezzi/Documents/workspace/FRC_align
+abs_srcdir = /Users/vezzi/Documents/workspace/FRC_align
+abs_top_builddir = /Users/vezzi/Documents/workspace/FRC_align
+abs_top_srcdir = /Users/vezzi/Documents/workspace/FRC_align
 ac_ct_AR = ar
 ac_ct_CC = gcc
 ac_ct_CXX = g++
@@ -195,10 +220,10 @@ am__quote =
 am__tar = ${AMTAR} chof - "$$tardir"
 am__untar = ${AMTAR} xf -
 bindir = ${exec_prefix}/bin
-build = x86_64-apple-darwin10.8.0
+build = x86_64-apple-darwin11.2.0
 build_alias = 
 build_cpu = x86_64
-build_os = darwin10.8.0
+build_os = darwin11.2.0
 build_vendor = apple
 builddir = .
 datadir = ${datarootdir}
@@ -206,15 +231,15 @@ datarootdir = ${prefix}/share
 docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
 dvidir = ${docdir}
 exec_prefix = ${prefix}
-host = x86_64-apple-darwin10.8.0
+host = x86_64-apple-darwin11.2.0
 host_alias = 
 host_cpu = x86_64
-host_os = darwin10.8.0
+host_os = darwin11.2.0
 host_vendor = apple
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /Users/vezzi/Documents/workspace/FRC/install-sh
+install_sh = ${SHELL} /Users/vezzi/Documents/workspace/FRC_align/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -224,22 +249,23 @@ mkdir_p = $(top_builddir)/./install-sh -c -d
 oldincludedir = /usr/include
 pdfdir = ${docdir}
 prefix = /usr/local
-program_transform_name = s,x,x,
+program_transform_name = s&^&FRC&
 psdir = ${docdir}
 sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com
 srcdir = .
 sysconfdir = ${prefix}/etc
-target = x86_64-apple-darwin10.8.0
+target = x86_64-apple-darwin11.2.0
 target_alias = 
 target_cpu = x86_64
-target_os = darwin10.8.0
+target_os = darwin11.2.0
 target_vendor = apple
 top_build_prefix = 
 top_builddir = .
 top_srcdir = .
 ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = src
+doc_DATA = AUTHORS README COPYING ChangeLog
 all: all-recursive
 
 .SUFFIXES:
@@ -286,6 +312,26 @@ clean-libtool:
 
 distclean-libtool:
 	-rm -f libtool config.lt
+install-docDATA: $(doc_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(docdir)" || $(MKDIR_P) "$(DESTDIR)$(docdir)"
+	@list='$(doc_DATA)'; test -n "$(docdir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(docdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(docdir)" || exit $$?; \
+	done
+
+uninstall-docDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(doc_DATA)'; test -n "$(docdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(docdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(docdir)" && rm -f $$files
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run `make' without going through this Makefile.
@@ -599,9 +645,12 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 check: check-recursive
-all-am: Makefile
+all-am: Makefile $(DATA)
 installdirs: installdirs-recursive
 installdirs-am:
+	for dir in "$(DESTDIR)$(docdir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
 install: install-recursive
 install-exec: install-exec-recursive
 install-data: install-data-recursive
@@ -649,7 +698,7 @@ info: info-recursive
 
 info-am:
 
-install-data-am:
+install-data-am: install-docDATA
 
 install-dvi: install-dvi-recursive
 
@@ -695,7 +744,7 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-docDATA
 
 .MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) ctags-recursive \
 	install-am install-strip tags-recursive
@@ -707,14 +756,15 @@ uninstall-am:
 	distcheck distclean distclean-generic distclean-libtool \
 	distclean-tags distcleancheck distdir distuninstallcheck dvi \
 	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs installdirs-am \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-recursive uninstall uninstall-am
+	install-data install-data-am install-docDATA install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
+	ps ps-am tags tags-recursive uninstall uninstall-am \
+	uninstall-docDATA
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
