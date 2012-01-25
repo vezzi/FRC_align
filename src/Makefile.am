@@ -8,6 +8,7 @@ FRC_SOURCES=FRC_align.cpp \
 	data_structures/Mask.cpp \
 	data_structures/Features.cpp \
 	data_structures/Contig.cpp \
+	data_structures/FRC.cpp \
 	errors/Data_Exception.cpp \
 	errors/File_Not_Found.cpp \
 	errors/Incorrect_Format.cpp \

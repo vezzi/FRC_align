@@ -55,6 +55,7 @@ am_FRC_OBJECTS = FRC-FRC_align.$(OBJEXT) \
 	data_structures/FRC-Mask.$(OBJEXT) \
 	data_structures/FRC-Features.$(OBJEXT) \
 	data_structures/FRC-Contig.$(OBJEXT) \
+	data_structures/FRC-FRC.$(OBJEXT) \
 	errors/FRC-Data_Exception.$(OBJEXT) \
 	errors/FRC-File_Not_Found.$(OBJEXT) \
 	errors/FRC-Incorrect_Format.$(OBJEXT) \
@@ -70,6 +71,7 @@ am__objects_1 = FRC_debug-FRC_align.$(OBJEXT) \
 	data_structures/FRC_debug-Mask.$(OBJEXT) \
 	data_structures/FRC_debug-Features.$(OBJEXT) \
 	data_structures/FRC_debug-Contig.$(OBJEXT) \
+	data_structures/FRC_debug-FRC.$(OBJEXT) \
 	errors/FRC_debug-Data_Exception.$(OBJEXT) \
 	errors/FRC_debug-File_Not_Found.$(OBJEXT) \
 	errors/FRC_debug-Incorrect_Format.$(OBJEXT) \
@@ -241,6 +243,7 @@ FRC_SOURCES = FRC_align.cpp \
 	data_structures/Mask.cpp \
 	data_structures/Features.cpp \
 	data_structures/Contig.cpp \
+	data_structures/FRC.cpp \
 	errors/Data_Exception.cpp \
 	errors/File_Not_Found.cpp \
 	errors/Incorrect_Format.cpp \
@@ -350,6 +353,8 @@ data_structures/FRC-Features.$(OBJEXT):  \
 	data_structures/$(DEPDIR)/$(am__dirstamp)
 data_structures/FRC-Contig.$(OBJEXT): data_structures/$(am__dirstamp) \
 	data_structures/$(DEPDIR)/$(am__dirstamp)
+data_structures/FRC-FRC.$(OBJEXT): data_structures/$(am__dirstamp) \
+	data_structures/$(DEPDIR)/$(am__dirstamp)
 errors/$(am__dirstamp):
 	@$(MKDIR_P) errors
 	@: > errors/$(am__dirstamp)
@@ -388,6 +393,9 @@ data_structures/FRC_debug-Features.$(OBJEXT):  \
 data_structures/FRC_debug-Contig.$(OBJEXT):  \
 	data_structures/$(am__dirstamp) \
 	data_structures/$(DEPDIR)/$(am__dirstamp)
+data_structures/FRC_debug-FRC.$(OBJEXT):  \
+	data_structures/$(am__dirstamp) \
+	data_structures/$(DEPDIR)/$(am__dirstamp)
 errors/FRC_debug-Data_Exception.$(OBJEXT): errors/$(am__dirstamp) \
 	errors/$(DEPDIR)/$(am__dirstamp)
 errors/FRC_debug-File_Not_Found.$(OBJEXT): errors/$(am__dirstamp) \
@@ -410,10 +418,12 @@ FRC_debug$(EXEEXT): $(FRC_debug_OBJECTS) $(FRC_debug_DEPENDENCIES)
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 	-rm -f data_structures/FRC-Contig.$(OBJEXT)
+	-rm -f data_structures/FRC-FRC.$(OBJEXT)
 	-rm -f data_structures/FRC-Features.$(OBJEXT)
 	-rm -f data_structures/FRC-Mask.$(OBJEXT)
 	-rm -f data_structures/FRC-Reads.$(OBJEXT)
 	-rm -f data_structures/FRC_debug-Contig.$(OBJEXT)
+	-rm -f data_structures/FRC_debug-FRC.$(OBJEXT)
 	-rm -f data_structures/FRC_debug-Features.$(OBJEXT)
 	-rm -f data_structures/FRC_debug-Mask.$(OBJEXT)
 	-rm -f data_structures/FRC_debug-Reads.$(OBJEXT)
@@ -436,10 +446,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FRC-FRC_align.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FRC_debug-FRC_align.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@data_structures/$(DEPDIR)/FRC-Contig.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@data_structures/$(DEPDIR)/FRC-FRC.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@data_structures/$(DEPDIR)/FRC-Features.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@data_structures/$(DEPDIR)/FRC-Mask.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@data_structures/$(DEPDIR)/FRC-Reads.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@data_structures/$(DEPDIR)/FRC_debug-Contig.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@data_structures/$(DEPDIR)/FRC_debug-FRC.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@data_structures/$(DEPDIR)/FRC_debug-Features.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@data_structures/$(DEPDIR)/FRC_debug-Mask.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@data_structures/$(DEPDIR)/FRC_debug-Reads.Po@am__quote@
@@ -535,6 +547,20 @@ data_structures/FRC-Contig.obj: data_structures/Contig.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='data_structures/Contig.cpp' object='data_structures/FRC-Contig.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -c -o data_structures/FRC-Contig.obj `if test -f 'data_structures/Contig.cpp'; then $(CYGPATH_W) 'data_structures/Contig.cpp'; else $(CYGPATH_W) '$(srcdir)/data_structures/Contig.cpp'; fi`
+
+data_structures/FRC-FRC.o: data_structures/FRC.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -MT data_structures/FRC-FRC.o -MD -MP -MF data_structures/$(DEPDIR)/FRC-FRC.Tpo -c -o data_structures/FRC-FRC.o `test -f 'data_structures/FRC.cpp' || echo '$(srcdir)/'`data_structures/FRC.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) data_structures/$(DEPDIR)/FRC-FRC.Tpo data_structures/$(DEPDIR)/FRC-FRC.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='data_structures/FRC.cpp' object='data_structures/FRC-FRC.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -c -o data_structures/FRC-FRC.o `test -f 'data_structures/FRC.cpp' || echo '$(srcdir)/'`data_structures/FRC.cpp
+
+data_structures/FRC-FRC.obj: data_structures/FRC.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -MT data_structures/FRC-FRC.obj -MD -MP -MF data_structures/$(DEPDIR)/FRC-FRC.Tpo -c -o data_structures/FRC-FRC.obj `if test -f 'data_structures/FRC.cpp'; then $(CYGPATH_W) 'data_structures/FRC.cpp'; else $(CYGPATH_W) '$(srcdir)/data_structures/FRC.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) data_structures/$(DEPDIR)/FRC-FRC.Tpo data_structures/$(DEPDIR)/FRC-FRC.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='data_structures/FRC.cpp' object='data_structures/FRC-FRC.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -c -o data_structures/FRC-FRC.obj `if test -f 'data_structures/FRC.cpp'; then $(CYGPATH_W) 'data_structures/FRC.cpp'; else $(CYGPATH_W) '$(srcdir)/data_structures/FRC.cpp'; fi`
 
 errors/FRC-Data_Exception.o: errors/Data_Exception.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_CXXFLAGS) $(CXXFLAGS) -MT errors/FRC-Data_Exception.o -MD -MP -MF errors/$(DEPDIR)/FRC-Data_Exception.Tpo -c -o errors/FRC-Data_Exception.o `test -f 'errors/Data_Exception.cpp' || echo '$(srcdir)/'`errors/Data_Exception.cpp
@@ -689,6 +715,20 @@ data_structures/FRC_debug-Contig.obj: data_structures/Contig.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='data_structures/Contig.cpp' object='data_structures/FRC_debug-Contig.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -c -o data_structures/FRC_debug-Contig.obj `if test -f 'data_structures/Contig.cpp'; then $(CYGPATH_W) 'data_structures/Contig.cpp'; else $(CYGPATH_W) '$(srcdir)/data_structures/Contig.cpp'; fi`
+
+data_structures/FRC_debug-FRC.o: data_structures/FRC.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -MT data_structures/FRC_debug-FRC.o -MD -MP -MF data_structures/$(DEPDIR)/FRC_debug-FRC.Tpo -c -o data_structures/FRC_debug-FRC.o `test -f 'data_structures/FRC.cpp' || echo '$(srcdir)/'`data_structures/FRC.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) data_structures/$(DEPDIR)/FRC_debug-FRC.Tpo data_structures/$(DEPDIR)/FRC_debug-FRC.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='data_structures/FRC.cpp' object='data_structures/FRC_debug-FRC.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -c -o data_structures/FRC_debug-FRC.o `test -f 'data_structures/FRC.cpp' || echo '$(srcdir)/'`data_structures/FRC.cpp
+
+data_structures/FRC_debug-FRC.obj: data_structures/FRC.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -MT data_structures/FRC_debug-FRC.obj -MD -MP -MF data_structures/$(DEPDIR)/FRC_debug-FRC.Tpo -c -o data_structures/FRC_debug-FRC.obj `if test -f 'data_structures/FRC.cpp'; then $(CYGPATH_W) 'data_structures/FRC.cpp'; else $(CYGPATH_W) '$(srcdir)/data_structures/FRC.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) data_structures/$(DEPDIR)/FRC_debug-FRC.Tpo data_structures/$(DEPDIR)/FRC_debug-FRC.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='data_structures/FRC.cpp' object='data_structures/FRC_debug-FRC.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -c -o data_structures/FRC_debug-FRC.obj `if test -f 'data_structures/FRC.cpp'; then $(CYGPATH_W) 'data_structures/FRC.cpp'; else $(CYGPATH_W) '$(srcdir)/data_structures/FRC.cpp'; fi`
 
 errors/FRC_debug-Data_Exception.o: errors/Data_Exception.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(FRC_debug_CXXFLAGS) $(CXXFLAGS) -MT errors/FRC_debug-Data_Exception.o -MD -MP -MF errors/$(DEPDIR)/FRC_debug-Data_Exception.Tpo -c -o errors/FRC_debug-Data_Exception.o `test -f 'errors/Data_Exception.cpp' || echo '$(srcdir)/'`errors/Data_Exception.cpp
