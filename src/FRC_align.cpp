@@ -617,23 +617,14 @@ int main(int argc, char *argv[]) {
     reads = 0;
 
     FRC *frc = new FRC(contigs);
-//    vector<ContigFeature> CONTIG (contigs);
     uint32_t featuresTotal = 0;
 
-//    ContigFeature *CONTIG = new ContigFeature[contigs];
     uint32_t contig=0;
 
 	uint32_t windowStart = 0;
 	uint32_t windowEnd   = windowStart + WINDOW;
 	windowStatistics* actualWindow = new windowStatistics();
-/*	actualWindow->C_A = C_A;
-	actualWindow->S_A = S_A;
-	actualWindow->C_M = C_M;
-	actualWindow->C_W = C_W;
-	actualWindow->C_S = C_S;
-	actualWindow->C_C = C_C;
-	actualWindow->CEstatistics = 3;
-*/
+
 	actualWindow->windowLength = (windowEnd - windowStart + 1);
 	actualWindow->windowStart = windowStart;
 	actualWindow->windowEnd = windowEnd;
@@ -664,6 +655,7 @@ int main(int argc, char *argv[]) {
     				cout << "first contig read\n";
     			}
     			if(currentTid > -1) {
+//count contig features
     				//compute statistics and update contig feature for the last segment of the contig
     				//actualWindow->print();
         			C_A_i = actualWindow->readsLength_win/(float)actualWindow->windowLength;  // read coverage of window
@@ -682,7 +674,6 @@ int main(int argc, char *argv[]) {
         		   	// NOW UPDATE CONTIG'S FEATURES
         		   	if(C_A_i < lowCoverageFeat*C_A) {
         		   		frc->update(contig,LOW_COVERAGE_AREA);
-//        		   		CONTIG[contig].updateLOW_COVERAGE_AREA();
         		   		featuresTotal++;
         		   	}
         		   	if(C_A_i > highCoverageFeat*C_A) {
@@ -725,7 +716,6 @@ int main(int argc, char *argv[]) {
     			//Get length of next section
     			contigSize = head->target_len[core->tid];
     			frc->setContigLength(contig, contigSize);
-//    			CONTIG[contig].contigLength = contigSize; // new contig (0 at first iteration)
 
 
     			if (contigSize < 1) {//We can't have such sizes! this can't be right
