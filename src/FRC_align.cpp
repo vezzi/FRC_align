@@ -15,8 +15,8 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-#include <stdio.h>
+ 
+#include <stdio.h> 
 #include <time.h>
 #include <string>
 #include <vector>
@@ -357,7 +357,7 @@ int main(int argc, char *argv[]) {
 	unsigned long int contigSize = 0;
 	uint32_t duplicates = 0;
 
-	uint32_t inserts = 0;       // total number of inserts
+
 	uint64_t insertsLength = 0; // total inserts length
 	float insertMean;
 	float insertStd;
@@ -405,27 +405,21 @@ int main(int argc, char *argv[]) {
     //Keep header for further reference
     bam_header_t* head = fp->header;
     int32_t currentTid = -1;
-
+    int32_t iSize;
 
     while (samread(fp, b) >= 0) {
 	      //Get bam core.
 	      const bam1_core_t *core = &b->core;
-
-	      if (core == NULL) {
-	    	  //There is something wrong with the read/file
+	      if (core == NULL) {  //There is something wrong with the read/file
 	    	  printf("Input file is corrupt!");
-	    	  //Leak everything and exit!
 	    	  return -1;
 	      }
-	      ++reads;
+	      ++reads; // otherwise one more read is readed
 
 	      if (!is_mapped(core)) {
 	    	  ++unmappedReads;
 	      } else {
 	    	  if (core->tid != currentTid) {
-	    		  if (currentTid != -1) {
-	    			  //			  	 cout << "working on new contig: " << head->target_name[core->tid] << endl;
-	    		  }
 	    		  //Get length of next section
 	    		  contigSize = head->target_len[core->tid];
 	    		  contigs++;
@@ -436,96 +430,117 @@ int main(int argc, char *argv[]) {
 	    		  currentTid = core->tid;
 	    	  }
 
-	    	  //If read has quality == 0, we won't count it as mapped
-	    	  if (core->qual > 0) {
+	    	  if(!(core->flag&BAM_FUNMAP) && !(core->flag&BAM_FDUP) && !(core->flag&BAM_FSECONDARY) && !(core->flag&BAM_FQCFAIL)) { // if read has been mapped and it is not a DUPLICATE or a SECONDARY alignment
 	    		  uint32_t* cigar = bam1_cigar(b);
 	    		  ++mappedReads;
+	    		  uint32_t alignmentLength = bam_cigar2qlen(core,cigar);
+	    		  readsLength += alignmentLength;
+	    		  uint32_t startRead = core->pos; // start position on the contig
+	    		  uint32_t startPaired;
 	    		  //Now check if reads belong to a proper pair: both reads aligned on the same contig at the expected distance and orientation
-
 	    		  if ((core->flag&BAM_FREAD1) //First in pair
 	    				  && !(core->flag&BAM_FMUNMAP) /*Mate is also mapped!*/
 	    				  && (core->tid == core->mtid) /*Mate on the same chromosome*/
 	    		  ) {
 	    			  //pair is mapped on the same contig and I'm looking the first pair
-	    			  int32_t start = MIN(core->pos,core->mpos);
-	    			  int32_t end = start+abs(core->isize);
-	    			  int32_t iSize = end-start; // compute insert size
-	    			  inserts ++;
-	    			  insertsLength += iSize; // update number of inserts and total length
-
-	    			  if (peMinInsert <= iSize && iSize <= peMaxInsert) {
-	    				  if(counterK == 1) {
-	    					  Mk = iSize;
-	    					  Qk = 0;
-	    					  counterK++;
-	    				  } else {
-	    					  float oldMk = Mk;
-	    					  float oldQk = Qk;
-	    					  Mk = oldMk + (iSize - oldMk)/counterK;
-	    					  Qk = oldQk + (counterK-1)*(iSize - oldMk)*(iSize - oldMk)/(float)counterK;
-	    					  counterK++;
-	    				  }
-	    			  }
-
-	    			  if (peMinInsert <=  iSize && iSize <= peMaxInsert) {
-	    				  if(core->pos < core->mpos) { // read I'm processing is the first
-	    					  if(!(core->flag&BAM_FREVERSE) && (core->flag&BAM_FMREVERSE) ) { // pairs are one in front of the other
+	    			  startPaired = core->mpos;
+	    			  if(startRead < startPaired) {
+	    				  iSize = (startPaired + core->l_qseq -1) - startRead; // insert size, I consider both reads of the same length
+	    				  if(!(core->flag&BAM_FREVERSE) && (core->flag&BAM_FMREVERSE) ) { //
+	    					  //here reads are correctly oriented
+	    					  if (peMinInsert <= iSize && iSize <= peMaxInsert) { //this is a right insert
+	    						  if(counterK == 1) {
+	    							  Mk = iSize;
+	    							  Qk = 0;
+	    							  counterK++;
+	    						  } else {
+	    							  float oldMk = Mk;
+	    							  float oldQk = Qk;
+	    							  Mk = oldMk + (iSize - oldMk)/counterK;
+	    							  Qk = oldQk + (counterK-1)*(iSize - oldMk)*(iSize - oldMk)/(float)counterK;
+	    							  counterK++;
+	    						  }
+	    						  insertsLength += iSize;
 	    						  correctlyMatedReads++;
 	    						  correctlyMatedReadsLength +=  bam_cigar2qlen(core,cigar); // update number of correctly mapped and their length
 	    					  } else {
-	    						  // wrong orientation
-	    						  wronglyOrientedReads++;
-	    						  wronglyOrientedReadsLength += bam_cigar2qlen(core,cigar);
+	    						  wronglyDistanceReads++;
+	    						  wronglyDistanceReadsLength += bam_cigar2qlen(core,cigar);
 	    					  }
 	    				  } else {
-	    					  if(!(core->flag&BAM_FMREVERSE) && (core->flag&BAM_FREVERSE)) { // pairs are one in front of the other
-	    						  correctlyMatedReads++;
-	    						  correctlyMatedReadsLength +=  bam_cigar2qlen(core,cigar); // update number of correctly mapped and their length
-	    					  } else {
-	    						  // wrong orientation
-	    						  wronglyOrientedReads++;
-	    						  wronglyOrientedReadsLength += bam_cigar2qlen(core,cigar);
-	    					  }
+	    					  //pair is wrongly oriented
+	    					  wronglyOrientedReads++;
+	    					  wronglyOrientedReadsLength += bam_cigar2qlen(core,cigar);
 	    				  }
 	    			  } else {
-	    				  //wrong distance
-	    				  wronglyDistanceReads++;
-	    				  wronglyDistanceReadsLength += bam_cigar2qlen(core,cigar);
+	    				  iSize = (startRead + alignmentLength - 1) - startPaired;
+	    				  if((core->flag&BAM_FREVERSE) && !(core->flag&BAM_FMREVERSE) ) { //
+	    					  //here reads are correctly oriented
+	    					  //here reads are correctly oriented
+	    					  if (peMinInsert <= iSize && iSize <= peMaxInsert) { //this is a right insert
+	    						  if(counterK == 1) {
+	    							  Mk = iSize;
+	    							  Qk = 0;
+	    							  counterK++;
+	    						  } else {
+	    							  float oldMk = Mk;
+	    							  float oldQk = Qk;
+	    							  Mk = oldMk + (iSize - oldMk)/counterK;
+	    							  Qk = oldQk + (counterK-1)*(iSize - oldMk)*(iSize - oldMk)/(float)counterK;
+	    							  counterK++;
+	    						  }
+	    						  insertsLength += iSize;
+	    						  correctlyMatedReads++;
+	    						  correctlyMatedReadsLength +=  bam_cigar2qlen(core,cigar); // update number of correctly mapped and their length
+	    					  } else {
+	    						  wronglyDistanceReads++;
+	    						  wronglyDistanceReadsLength += bam_cigar2qlen(core,cigar);
+	    					  }
+	    				  } else {
+	    					  //pair is wrongly oriented
+	    					  wronglyOrientedReads++;
+	    					  wronglyOrientedReadsLength += bam_cigar2qlen(core,cigar);
+	    				  }
 	    			  }
 	    		  } else  if ((core->flag&BAM_FREAD2) //Second in pair
 	    				  && !(core->flag&BAM_FMUNMAP) /*Mate is also mapped!*/
 	    				  && (core->tid == core->mtid) /*Mate on the same chromosome*/
 	    		  )
-	    	// if I'm considering the second read in a pair I must check it is is a correctly mated read and if this is tha case update the right variables
-	    			  {
-	    			  int32_t start = MIN(core->pos,core->mpos);
-	    			  int32_t end = start+abs(core->isize);
-	    			  int32_t iSize = end-start; // compute insert size
-	    			  if (peMinInsert <= iSize && iSize <= peMaxInsert) {
-	    				  if(core->pos > core->mpos) { // read I'm processing is the first
-	    					  if((core->flag&BAM_FREVERSE) && !(core->flag&BAM_FMREVERSE) ) { // pairs are one in front of the other
+	    	// if I'm considering the second read in a pair I must check it is is a correctly mated read and if this is the case update the right variables
+	    		  {
+	    			  startPaired = core->mpos;
+	    			  if(startRead > startPaired) {
+	    				  iSize = (startRead + alignmentLength -1) - startPaired;
+	    				  if((core->flag&BAM_FREVERSE) && !(core->flag&BAM_FMREVERSE) ) { //
+	    					  //here reads are correctly oriented
+	    					  if (peMinInsert <= iSize && iSize <= peMaxInsert) { //this is a right insert, no need to update insert coverage
 	    						  correctlyMatedReads++;
-	    						  correctlyMatedReadsLength +=  bam_cigar2qlen(core,cigar); //  update number of correctly mapped and their length
+	    						  correctlyMatedReadsLength +=  bam_cigar2qlen(core,cigar); // update number of correctly mapped and their length
 	    					  } else {
-	    						  // wrong orientation
-	    						  wronglyOrientedReads++;
-	    						  wronglyOrientedReadsLength += bam_cigar2qlen(core,cigar);
+	    						  wronglyDistanceReads++;
+	    						  wronglyDistanceReadsLength += bam_cigar2qlen(core,cigar);
 	    					  }
 	    				  } else {
-	    					  if((core->flag&BAM_FMREVERSE) && !(core->flag&BAM_FREVERSE)) { // pairs are one in front of the other
-	    						  correctlyMatedReads ++;
-  	    						  correctlyMatedReadsLength +=  bam_cigar2qlen(core,cigar); // update number of correctly mapped and their length
-	    					  } else {
-	    						  // wrong orientation
-	    						  wronglyOrientedReads++;
-	    						  wronglyOrientedReadsLength += bam_cigar2qlen(core,cigar);
-	    					  }
+	    					  //pair is wrongly oriented
+	    					  wronglyOrientedReads++;
+	    					  wronglyOrientedReadsLength += bam_cigar2qlen(core,cigar);
 	    				  }
 	    			  } else {
-	    				  //wrong distance
-	    				  wronglyDistanceReads++;
-	    				  wronglyDistanceReadsLength += bam_cigar2qlen(core,cigar);
-
+	    				  iSize = (startPaired + core->l_qseq -1) - startRead;
+	    				  if(!(core->flag&BAM_FREVERSE) && (core->flag&BAM_FMREVERSE) ) { //
+	    					  //here reads are correctly oriented
+	    					  if (peMinInsert <= iSize && iSize <= peMaxInsert) { //this is a right insert, no need to update insert coverage
+	    						  correctlyMatedReads++;
+	    						  correctlyMatedReadsLength +=  bam_cigar2qlen(core,cigar); // update number of correctly mapped and their length
+	    					  }else {
+	    						  wronglyDistanceReads++;
+	    						  wronglyDistanceReadsLength += bam_cigar2qlen(core,cigar);
+	    					  }
+	    				  } else {
+	    					  //pair is wrongly oriented
+	    					  wronglyOrientedReads++;
+	    					  wronglyOrientedReadsLength += bam_cigar2qlen(core,cigar);
+	    				  }
 	    			  }
 	    		  } else if (core->tid != core->mtid && !(core->flag&BAM_FMUNMAP)) {
 	    			  //Count inter-chrom pairs
@@ -546,8 +561,6 @@ int main(int argc, char *argv[]) {
 
 	    		  if (core->flag&BAM_FDUP) {   //This is a duplicate. Don't count it!.
 	    			  ++duplicates;
-	    		  } else {
-	    			  readsLength += bam_cigar2qlen(core,cigar);
 	    		  }
 	    	  } else {
 	    		  ++zeroQualityReads;
@@ -613,13 +626,24 @@ int main(int argc, char *argv[]) {
     EXIT_IF_NULL(fp);
     //Keep header for further reference
     head = fp->header;
-    currentTid = -2;
+    currentTid = -1;
     reads = 0;
 
-    FRC *frc = new FRC(contigs);
+    FRC frc = FRC(contigs); // FRC object, will memorize all information on features and contigs
     uint32_t featuresTotal = 0;
+    frc.setC_A(C_A);
+    frc.setS_A(S_A);
+    frc.setC_C(C_C);
+    frc.setC_M(C_M);
+    frc.setC_S(C_S);
+    frc.setC_W(C_W);
+    frc.setInsertMean(insertMean);
+    frc.setInsertStd(insertStd);
+
+    Contig *currentContig; // = new Contig(contigSize, peMinInsert, peMaxInsert); // Contig object, memorizes all information to compute contig`s features
 
     uint32_t contig=0;
+    contigSize = 0;
 
 	uint32_t windowStart = 0;
 	uint32_t windowEnd   = windowStart + WINDOW;
@@ -651,14 +675,17 @@ int main(int argc, char *argv[]) {
     		++unmappedReads;
     	} else {
     		if (core->tid != currentTid) { // another contig or simply the first one
-    			if(currentTid == -2) {
-    				cout << "first contig read\n";
-    			}
-    			if(currentTid > -1) {
-//count contig features
+
+    			if(currentTid == -1) { // first read that I`m processing
+    			//	cout << "now porcessing contig " << contig << "\n";
+    				contigSize = head->target_len[core->tid];
+    				currentTid = core->tid;
+    				frc.setContigLength(contig, contigSize);
+    				currentContig =  new Contig(contigSize, peMinInsert, peMaxInsert);
+    			} else {
+    				//count contig features
     				//compute statistics and update contig feature for the last segment of the contig
-    				//actualWindow->print();
-        			C_A_i = actualWindow->readsLength_win/(float)actualWindow->windowLength;  // read coverage of window
+         			C_A_i = actualWindow->readsLength_win/(float)actualWindow->windowLength;  // read coverage of window
         		   	S_A_i = actualWindow->insertsLength_win/(float)actualWindow->windowLength; // span coverage of window
         		   	C_M_i = actualWindow->correctlyMatedReadsLength_win/(float)actualWindow->windowLength; // coverage of correctly aligned reads of window
         		   	C_W_i = (actualWindow->wronglyDistanceReadsLength_win+actualWindow->wronglyOrientedReadsLength_win)/(float)actualWindow->windowLength; // coverage of wrongly aligned reads
@@ -672,56 +699,57 @@ int main(int argc, char *argv[]) {
         		   	}
         			//actualWindow->print();
         		   	// NOW UPDATE CONTIG'S FEATURES
-        		   	if(C_A_i < lowCoverageFeat*C_A) {
-        		   		frc->update(contig,LOW_COVERAGE_AREA);
-        		   		featuresTotal++;
-        		   	}
-        		   	if(C_A_i > highCoverageFeat*C_A) {
-        		   		frc->update(contig,HIGH_COVERAGE_AREA);
-        		   		featuresTotal++;
-        		   	}
-        		   	if(C_M_i <  lowNormalFeat*C_M) {
-        		   		frc->update(contig,LOW_NORMAL_AREA);
-        		   		featuresTotal++;
-        		   	}
-        		   	if(C_M_i > highNormalFeat*C_M) {
-        		   		frc->update(contig,HIGH_NORMAL_AREA);
-        		   		featuresTotal++;
-        		   	}
-        		   	if(C_S_i > highSingleFeat*C_A_i) {
-        		   		frc->update(contig,HIGH_SINGLE_AREA);
-        		   		featuresTotal++;
-        		   	}
+
         		   	if(C_C_i > highSpanningFeat*C_A_i) {
-        		   		frc->update(contig,HIGH_SPANING_AREA);
+        		   		frc.update(contig,HIGH_SPANING_AREA);
         		   		featuresTotal++;
         		   	}
         		   	if(C_W_i > highOutieFeat*C_A_i) {
-        		   		frc->update(contig,HIGH_OUTIE);
+        		   		frc.update(contig,HIGH_OUTIE);
         		   		featuresTotal++;
         		   	}
         		   	if(Z_i < -CE_statistics) {
-        		   		frc->update(contig,COMPRESSION_AREA);
+        		   		frc.update(contig,COMPRESSION_AREA);
         		   		featuresTotal++;
         		   	}
         		   	if(Z_i > CE_statistics) {
-        		   		frc->update(contig,STRECH_AREA);
+        		   		frc.update(contig,STRECH_AREA);
         		   		featuresTotal++;
         		   	}
         		   	//        		   	CONTIG[contig].print();
 
-        		   	actualWindow->reset();
-        		   	contig++; // if I'm not reading the first contig update the contig counter
-    			}
-    			//Get length of next section
-    			contigSize = head->target_len[core->tid];
-    			frc->setContigLength(contig, contigSize);
 
+
+        		   	frc.setFeature(contig, LOW_COVERAGE_AREA, 0 );
+                   	frc.computeLowCoverageArea(contig, currentContig);
+                   	frc.computeHighCoverageArea(contig, currentContig);
+                   	frc.computeLowNormalArea(contig, currentContig);
+                   	frc.computeHighNormalArea(contig, currentContig);
+                   	frc.computeHighSingleArea(contig, currentContig);
+                   	frc.computeHighSpanningArea(contig, currentContig);
+                   	frc.computeHighOutieArea(contig, currentContig);
+                   	frc.computeCompressionArea(contig, currentContig);
+                   	frc.computeStrechArea(contig, currentContig);
+
+
+        			//currentContig->print();
+
+        			contigSize = head->target_len[core->tid];
+        			contig++;
+    			//	cout << "now porcessing contig " << contig << "\n";
+        			delete currentContig; // delete hold contig
+        			currentTid = core->tid; // update current identifier
+        			currentContig =  new Contig(contigSize, peMinInsert, peMaxInsert);
+        			frc.setContigLength(contig, contigSize);
+                   	actualWindow->reset();
+    			}
 
     			if (contigSize < 1) {//We can't have such sizes! this can't be right
     				fprintf(stderr,"%s has size %d, which can't be right!\nCheck bam header!",head->target_name[core->tid],contigSize);
     			}
-    			currentTid = core->tid;
+    			currentContig->updateContig(b); // update contig with alignment
+
+
     			actualWindow->windowStart = 0; // reset window start
     			actualWindow->windowEnd  = actualWindow->windowStart + WINDOW; // reset window end
     			if(actualWindow->windowEnd > contigSize) {
@@ -729,9 +757,7 @@ int main(int argc, char *argv[]) {
     			}
     			actualWindow->windowLength = (actualWindow->windowEnd - actualWindow->windowStart + 1); // set window length
 
-    		}
-
-    		if (core->pos > actualWindow->windowEnd) {
+    		} else if (core->pos > actualWindow->windowEnd) {
     			//compute statistics and update contig feature
     			C_A_i = actualWindow->readsLength_win/(float)actualWindow->windowLength;  // read coverage of window
     		   	S_A_i = actualWindow->insertsLength_win/(float)actualWindow->windowLength; // span coverage of window
@@ -748,39 +774,39 @@ int main(int argc, char *argv[]) {
     			//actualWindow->print();
     		   	// NOW UPDATE CONTIG'S FEATURES
     		   	if(C_A_i < lowCoverageFeat*C_A) {
-    		   		frc->update(contig,LOW_COVERAGE_AREA);
+    		   		frc.update(contig,LOW_COVERAGE_AREA);
     		   		featuresTotal++;
     		   	}
     		   	if(C_A_i > highCoverageFeat*C_A) {
-    		   		frc->update(contig,HIGH_COVERAGE_AREA);
+    		   		frc.update(contig,HIGH_COVERAGE_AREA);
     		   		featuresTotal++;
     		   	}
     		   	if(C_M_i <  lowNormalFeat*C_M) {
-    		   		frc->update(contig,LOW_NORMAL_AREA);
+    		   		frc.update(contig,LOW_NORMAL_AREA);
     		   		featuresTotal++;
     		   	}
     		   	if(C_M_i > highNormalFeat*C_M) {
-    		   		frc->update(contig,HIGH_NORMAL_AREA);
+    		   		frc.update(contig,HIGH_NORMAL_AREA);
     		   		featuresTotal++;
     		   	}
     		   	if(C_S_i > highSingleFeat*C_A_i) {
-    		   		frc->update(contig,HIGH_SINGLE_AREA);
+    		   		frc.update(contig,HIGH_SINGLE_AREA);
     		   		featuresTotal++;
     		   	}
     		   	if(C_C_i > highSpanningFeat*C_A_i) {
-    		   		frc->update(contig,HIGH_SPANING_AREA);
+    		   		frc.update(contig,HIGH_SPANING_AREA);
     		   		featuresTotal++;
     		   	}
     		   	if(C_W_i > highOutieFeat*C_A_i) {
-    		   		frc->update(contig,HIGH_OUTIE);
+    		   		frc.update(contig,HIGH_OUTIE);
     		   		featuresTotal++;
     		   	}
     		   	if(Z_i < -CE_statistics) {
-    		   		frc->update(contig,COMPRESSION_AREA);
+    		   		frc.update(contig,COMPRESSION_AREA);
     		   		featuresTotal++;
     		   	}
     		   	if(Z_i > CE_statistics) {
-    		   		frc->update(contig,STRECH_AREA);
+    		   		frc.update(contig,STRECH_AREA);
     		   		featuresTotal++;
     		   	}
 
@@ -797,6 +823,7 @@ int main(int argc, char *argv[]) {
     		} else {
     			//this read contributes to the features of the current window
     			updateWindow(b, actualWindow,  peMinInsert, peMaxInsert);
+    			currentContig->updateContig(b);
     		}
 
 
@@ -804,11 +831,13 @@ int main(int argc, char *argv[]) {
 
 
     }
+  //  currentContig->print();
+
  // TODO: UPDATE LAST CONTIG
 
     cout << "number of reads " << reads << "\n";
     //SORT CONTIGS ACCORDING TO THEIR LENGTH
-    frc->sortFRC();
+    frc.sortFRC();
 //    sort(CONTIG.begin(),CONTIG.end(),sortContigs);
 //    for(uint32_t i=0; i< contigs; i++) {
 //  	CONTIG[i].print();
@@ -827,8 +856,8 @@ int main(int argc, char *argv[]) {
     	uint32_t featuresStep = 0;
    // 	cout << "now computing coverage for featuresStep " << featuresStep << " and contigLengthStep " << contigLengthStep << " and partial " << partial << "\n";
     	while(featuresStep <= partial) {
-    		contigLengthStep += frc->getContigLength(contigStep); // CONTIG[contigStep].contigLength;
-    		featuresStep += frc->getFeature(contigStep, TOTAL); // CONTIG[contigStep].TOTAL;
+    		contigLengthStep += frc.getContigLength(contigStep); // CONTIG[contigStep].contigLength;
+    		featuresStep += frc.getFeature(contigStep, TOTAL); // CONTIG[contigStep].TOTAL;
     //		cout << "(" << CONTIG[contigStep].contigLength << "," << CONTIG[contigStep].TOTAL << ") ";
     		contigStep++;
     	}
@@ -839,6 +868,7 @@ int main(int argc, char *argv[]) {
     	partial += step;
     }
     myfile.close();
+    cout << "test\n";
 
 
 }

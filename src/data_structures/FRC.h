@@ -12,6 +12,7 @@ using namespace std;
 
 #include "options/Options.h"
 #include "common.h"
+#include "data_structures/Contig.h"
 #include <iostream>
 #include <algorithm>
 #include <vector>
@@ -40,6 +41,16 @@ public:
 
 	unsigned long int getContigLength();
 	void setContigLength(unsigned int contigLength);
+	void setLOW_COVERAGE_AREA(unsigned int numFeat);
+	void setHIGH_COVERAGE_AREA(unsigned int numFeat);
+	void setLOW_NORMAL_AREA(unsigned int numFeat);
+	void setHIGH_NORMAL_AREA(unsigned int numFeat);
+	void setHIGH_SINGLE_AREA(unsigned int numFeat);
+	void setHIGH_SPANING_AREA(unsigned int numFeat);
+	void setHIGH_OUTIE(unsigned int numFeat);
+	void setCOMPRESSION_AREA(unsigned int numFeat);
+	void setSTRECH_AREA(unsigned int numFeat);
+
 
 	void updateLOW_COVERAGE_AREA();
 	void updateHIGH_COVERAGE_AREA();
@@ -52,6 +63,7 @@ public:
 	void updateSTRECH_AREA();
 	//void updateFeatures(windowStatistics* window)
 
+
 	unsigned int getLOW_COVERAGE_AREA();
 	unsigned int getHIGH_COVERAGE_AREA();
 	unsigned int getLOW_NORMAL_AREA();
@@ -63,6 +75,8 @@ public:
 	unsigned int getSTRECH_AREA();
 	unsigned int getTOTAL();
 
+
+
 	void print();
 
 };
@@ -70,8 +84,20 @@ public:
 
 
 class FRC {
+
     vector<contigFeatures> CONTIG;
     unsigned int contigs;
+
+    float C_A; // total read coverage
+    float S_A; // total span coverage
+
+    float C_M; // coverage induced by correctly aligned pairs
+    float C_W; // coverage induced by wrongly mated pairs
+    float C_S; // coverage induced by singletons
+    float C_C; // coverage induced by reads with mate on a diferent contif
+
+    float insertMean;
+    float insertStd;
 
 public:
 
@@ -81,11 +107,29 @@ public:
 
 	void update(unsigned int ctg, Feature f);
 	unsigned int getFeature(unsigned int ctg, Feature f);
+	void setFeature(unsigned int ctg, Feature f, unsigned int value);
 	void setContigLength(unsigned int ctg, unsigned int contigLength);
 	unsigned int getContigLength(unsigned int ctg);
 
+	void setC_A(float C_A);
+	void setS_A(float S_A);
+	void setC_M(float C_M);
+	void setC_W(float C_W);
+	void setC_S(float C_S);
+	void setC_C(float C_C);
+	void setInsertMean(float insertMean);
+	void setInsertStd(float insertStd);
 
 	void sortFRC();
+	void computeLowCoverageArea(unsigned int ctg, Contig *contig);
+	void computeHighCoverageArea(unsigned int ctg, Contig *contig);
+	void computeLowNormalArea(unsigned int ctg, Contig *contig);
+	void computeHighNormalArea(unsigned int ctg, Contig *contig);
+	void computeHighSingleArea(unsigned int ctg, Contig *contig);
+	void computeHighSpanningArea(unsigned int ctg, Contig *contig);
+	void computeHighOutieArea(unsigned int ctg, Contig *contig);
+	void computeCompressionArea(unsigned int ctg, Contig *contig);
+	void computeStrechArea(unsigned int ctg, Contig *contig);
 
 };
 

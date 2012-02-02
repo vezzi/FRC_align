@@ -17,7 +17,9 @@ FRC::FRC() {
 }
 
 FRC::~FRC() {
-	CONTIG.~vector();
+	if (CONTIG.empty() != 0) {
+		CONTIG.~vector();
+	}
 }
 
 FRC::FRC(unsigned int contigs) {
@@ -73,6 +75,91 @@ unsigned int FRC::getFeature(unsigned int ctg, Feature f) {
 
 
 
+void FRC::setFeature(unsigned int ctg, Feature f, unsigned int value) {
+	switch(f) {
+	case LOW_COVERAGE_AREA:   this->CONTIG[ctg].setLOW_COVERAGE_AREA(value); break;
+	case HIGH_COVERAGE_AREA: this->CONTIG[ctg].setHIGH_COVERAGE_AREA(value) ; break;
+	case LOW_NORMAL_AREA: this->CONTIG[ctg].setLOW_NORMAL_AREA(value); break;
+	case HIGH_NORMAL_AREA:  this->CONTIG[ctg].setHIGH_NORMAL_AREA(value); break;
+	case HIGH_SINGLE_AREA: this->CONTIG[ctg].setHIGH_SINGLE_AREA(value) ; break;
+	case HIGH_SPANING_AREA: this->CONTIG[ctg].setHIGH_SPANING_AREA(value) ; break;
+	case HIGH_OUTIE:  this->CONTIG[ctg].setHIGH_OUTIE(value) ; break;
+	case COMPRESSION_AREA: this->CONTIG[ctg].setCOMPRESSION_AREA(value) ; break;
+	case STRECH_AREA:  this->CONTIG[ctg].setSTRECH_AREA(value) ; break;
+	default: cout << f << "undefined feature, exit with error\n";;
+	}
+}
+
+void FRC::computeLowCoverageArea(unsigned int ctg, Contig *contig) {
+	unsigned int lowCoverageFeatures = contig->getLowCoverageAreas(this->C_A);
+	this->CONTIG[ctg].setLOW_COVERAGE_AREA(lowCoverageFeatures);
+}
+
+void FRC::computeHighCoverageArea(unsigned int ctg, Contig *contig) {
+	unsigned int highCoverageFeatures = contig->getHighCoverageAreas(this->C_A);
+	this->CONTIG[ctg].setHIGH_COVERAGE_AREA(highCoverageFeatures);
+}
+
+void FRC::computeLowNormalArea(unsigned int ctg, Contig *contig) {
+	unsigned int lowNormalFeatures = contig->getLowNormalAreas(this->C_M);
+	this->CONTIG[ctg].setLOW_NORMAL_AREA(lowNormalFeatures);
+}
+
+void FRC::computeHighNormalArea(unsigned int ctg, Contig *contig) {
+	unsigned int highNormalFeatures = contig->getHighNormalAreas(this->C_M);
+	this->CONTIG[ctg].setHIGH_NORMAL_AREA(highNormalFeatures);
+
+}
+
+void FRC::computeHighSingleArea(unsigned int ctg, Contig *contig) {
+	unsigned int highSingleFeatures = contig->getHighSingleAreas();
+	this->CONTIG[ctg].setHIGH_SINGLE_AREA(highSingleFeatures);
+}
+
+void FRC::computeHighSpanningArea(unsigned int ctg, Contig *contig) {
+
+}
+
+void FRC::computeHighOutieArea(unsigned int ctg, Contig *contig) {
+
+}
+
+void FRC::computeCompressionArea(unsigned int ctg, Contig *contig) {
+
+}
+
+void FRC::computeStrechArea(unsigned int ctg, Contig *contig) {
+
+}
+
+
+
+void FRC::setC_A(float C_A) {
+	this->C_A = C_A;
+}
+void FRC::setS_A(float S_A) {
+	this->S_A = S_A;
+}
+void FRC::setC_M(float C_M) {
+	this->C_M = C_M;
+}
+void FRC::setC_W(float C_W) {
+	this->C_W = C_W;
+}
+void FRC::setC_S(float C_S) {
+	this->C_S = C_S;
+}
+void FRC::setC_C(float C_C) {
+	this->C_C = C_C;
+}
+void FRC::setInsertMean(float insertMean) {
+	this->insertMean = insertMean;
+}
+void FRC::setInsertStd(float insertStd) {
+	this->insertStd = insertStd;
+}
+
+
 contigFeatures::contigFeatures() {
 	contigLength = 0;
 	LOW_COVERAGE_AREA = 0;
@@ -99,6 +186,36 @@ unsigned long int contigFeatures::getContigLength() {
 void contigFeatures::setContigLength(unsigned int contigLength) {
 	this->contigLength = contigLength;
 }
+
+
+void contigFeatures::setLOW_COVERAGE_AREA(unsigned int numFeat) {
+	this->LOW_COVERAGE_AREA = numFeat;
+}
+void contigFeatures::setHIGH_COVERAGE_AREA(unsigned int numFeat) {
+	this->HIGH_COVERAGE_AREA = numFeat;
+}
+void contigFeatures::setLOW_NORMAL_AREA(unsigned int numFeat) {
+	this->LOW_NORMAL_AREA = numFeat;
+}
+void contigFeatures::setHIGH_NORMAL_AREA(unsigned int numFeat) {
+	this->HIGH_NORMAL_AREA = numFeat;
+}
+void contigFeatures::setHIGH_SINGLE_AREA(unsigned int numFeat) {
+	this->HIGH_SINGLE_AREA = numFeat;
+}
+void contigFeatures::setHIGH_SPANING_AREA(unsigned int numFeat) {
+	this->HIGH_SPANING_AREA = numFeat;
+}
+void contigFeatures::setHIGH_OUTIE(unsigned int numFeat) {
+	this->HIGH_OUTIE = numFeat;
+}
+void contigFeatures::setCOMPRESSION_AREA(unsigned int numFeat) {
+	this->COMPRESSION_AREA = numFeat;
+}
+void contigFeatures::setSTRECH_AREA(unsigned int numFeat) {
+	this->STRECH_AREA = numFeat;
+}
+
 
 void contigFeatures::updateLOW_COVERAGE_AREA() {
 	LOW_COVERAGE_AREA++;
@@ -166,6 +283,9 @@ unsigned int contigFeatures::getHIGH_OUTIE() {return HIGH_OUTIE;}
 unsigned int contigFeatures::getCOMPRESSION_AREA() {return COMPRESSION_AREA;}
 unsigned int contigFeatures::getSTRECH_AREA() {return STRECH_AREA;}
 unsigned int contigFeatures::getTOTAL() {return TOTAL;}
+
+
+
 
 void contigFeatures::print() {
 	cout << "contigLength " << contigLength << "\n";

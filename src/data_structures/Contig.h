@@ -14,6 +14,7 @@ using namespace std;
 #include "data_structures/Features.h"
 #include "samtools/sam.h"
 #include "options/Options.h"
+#include "common.h"
 
 
 enum data {readCov, insertCov, cmCov, woCov, wdCov, singCov, mdcCov};
@@ -31,6 +32,8 @@ public:
 
 	Position();
 
+	~Position();
+
 };
 
 
@@ -41,6 +44,18 @@ class Contig{
 	unsigned int contigLength;
 	unsigned int peMinInsert;
 	unsigned int peMaxInsert;
+	unsigned int windowSize;
+	unsigned int windowStep;
+
+	float lowCoverageFeat;
+	float highCoverageFeat;
+	float lowNormalFeat;
+	float highNormalFeat;
+	float highSingleFeat;
+	float highSpanningFeat;
+	float highOutieFeat;
+	float CE_statistics;
+
 	Position *CONTIG;
 
 	void updateCov(unsigned int strat, unsigned int end, data type);
@@ -51,6 +66,16 @@ public:
 
 	void updateContig(bam1_t* b); // given an alignment it updates the contig situation
 
+
+	unsigned int getLowCoverageAreas(float C_A);
+	unsigned int getHighCoverageAreas(float C_A);
+	unsigned int getLowNormalAreas(float C_M);
+	unsigned int getHighNormalAreas(float C_M);
+	unsigned int getHighSingleAreas();
+
+
+
+	void print();
 
 };
 
