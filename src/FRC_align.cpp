@@ -684,43 +684,17 @@ int main(int argc, char *argv[]) {
     				currentContig =  new Contig(contigSize, peMinInsert, peMaxInsert);
     			} else {
     				//count contig features
-    				//compute statistics and update contig feature for the last segment of the contig
-         			C_A_i = actualWindow->readsLength_win/(float)actualWindow->windowLength;  // read coverage of window
-        		   	S_A_i = actualWindow->insertsLength_win/(float)actualWindow->windowLength; // span coverage of window
-        		   	C_M_i = actualWindow->correctlyMatedReadsLength_win/(float)actualWindow->windowLength; // coverage of correctly aligned reads of window
-        		   	C_W_i = (actualWindow->wronglyDistanceReadsLength_win+actualWindow->wronglyOrientedReadsLength_win)/(float)actualWindow->windowLength; // coverage of wrongly aligned reads
-        		   	C_S_i = actualWindow->singletonReadsLength_win/(float)actualWindow->windowLength; // singleton coverage of window
-        		   	C_C_i = actualWindow->matedDifferentContigLength_win/(float)actualWindow->windowLength; // coverage of reads with mate on different contigs
-        		   	if(actualWindow->inserts > 0) {
-        		   		float localMean = actualWindow->insertsLength_win/(float)actualWindow->inserts;
-        		   		Z_i   = (localMean - insertMean)/(float)(insertStd/sqrt(actualWindow->inserts)); // CE statistics
-        		   	} else {
-        		   		Z_i = -100;
-        		   	}
-        			//actualWindow->print();
-        		   	// NOW UPDATE CONTIG'S FEATURES
-
-        		   	if(C_C_i > highSpanningFeat*C_A_i) {
-        		   		frc.update(contig,HIGH_SPANING_AREA);
-        		   		featuresTotal++;
-        		   	}
-        		   	if(C_W_i > highOutieFeat*C_A_i) {
-        		   		frc.update(contig,HIGH_OUTIE);
-        		   		featuresTotal++;
-        		   	}
-        		   	if(Z_i < -CE_statistics) {
-        		   		frc.update(contig,COMPRESSION_AREA);
-        		   		featuresTotal++;
-        		   	}
-        		   	if(Z_i > CE_statistics) {
-        		   		frc.update(contig,STRECH_AREA);
-        		   		featuresTotal++;
-        		   	}
-        		   	//        		   	CONTIG[contig].print();
-
-
-
         		   	frc.setFeature(contig, LOW_COVERAGE_AREA, 0 );
+        		   	frc.setFeature(contig, HIGH_COVERAGE_AREA, 0 );
+        		   	frc.setFeature(contig, LOW_NORMAL_AREA, 0 );
+        		   	frc.setFeature(contig, HIGH_NORMAL_AREA, 0 );
+        		   	frc.setFeature(contig, HIGH_SINGLE_AREA, 0 );
+        		   	frc.setFeature(contig, HIGH_SPANNING_AREA, 0 );
+        		   	frc.setFeature(contig, HIGH_OUTIE_AREA, 0 );
+        		   	frc.setFeature(contig, COMPRESSION_AREA, 0 );
+        		   	frc.setFeature(contig, STRECH_AREA, 0 );
+        		   	frc.setFeature(contig, TOTAL, 0 );
+
                    	frc.computeLowCoverageArea(contig, currentContig);
                    	frc.computeHighCoverageArea(contig, currentContig);
                    	frc.computeLowNormalArea(contig, currentContig);
@@ -731,97 +705,27 @@ int main(int argc, char *argv[]) {
                    	frc.computeCompressionArea(contig, currentContig);
                    	frc.computeStrechArea(contig, currentContig);
 
+                   	frc.computeTOTAL(contig); // compute total amount of features in each contig
+                   	featuresTotal += frc.getFeature(contig, TOTAL); // update total number of feature seen so far
 
-        			//currentContig->print();
+               //    	frc.printContig(contig);
 
-        			contigSize = head->target_len[core->tid];
-        			contig++;
-    			//	cout << "now porcessing contig " << contig << "\n";
+// now create new contig
         			delete currentContig; // delete hold contig
+        			contig++;
+        			contigSize = head->target_len[core->tid];
+        			if (contigSize < 1) {//We can't have such sizes! this can't be right
+        				fprintf(stderr,"%s has size %d, which can't be right!\nCheck bam header!",head->target_name[core->tid],contigSize);
+        			}
         			currentTid = core->tid; // update current identifier
         			currentContig =  new Contig(contigSize, peMinInsert, peMaxInsert);
         			frc.setContigLength(contig, contigSize);
-                   	actualWindow->reset();
     			}
 
-    			if (contigSize < 1) {//We can't have such sizes! this can't be right
-    				fprintf(stderr,"%s has size %d, which can't be right!\nCheck bam header!",head->target_name[core->tid],contigSize);
-    			}
     			currentContig->updateContig(b); // update contig with alignment
 
-
-    			actualWindow->windowStart = 0; // reset window start
-    			actualWindow->windowEnd  = actualWindow->windowStart + WINDOW; // reset window end
-    			if(actualWindow->windowEnd > contigSize) {
-    				actualWindow->windowEnd = contigSize;
-    			}
-    			actualWindow->windowLength = (actualWindow->windowEnd - actualWindow->windowStart + 1); // set window length
-
-    		} else if (core->pos > actualWindow->windowEnd) {
-    			//compute statistics and update contig feature
-    			C_A_i = actualWindow->readsLength_win/(float)actualWindow->windowLength;  // read coverage of window
-    		   	S_A_i = actualWindow->insertsLength_win/(float)actualWindow->windowLength; // span coverage of window
-    		   	C_M_i = actualWindow->correctlyMatedReadsLength_win/(float)actualWindow->windowLength; // coverage of correctly aligned reads of window
-    		   	C_W_i = (actualWindow->wronglyDistanceReadsLength_win+actualWindow->wronglyOrientedReadsLength_win)/(float)actualWindow->windowLength; // coverage of wrongly aligned reads
-    		   	C_S_i = actualWindow->singletonReadsLength_win/(float)actualWindow->windowLength; // singleton coverage of window
-    		   	C_C_i = actualWindow->matedDifferentContigLength_win/(float)actualWindow->windowLength; // coverage of reads with mate on different contigs
-    		   	if(actualWindow->inserts > 0) {
-    		   		float localMean = actualWindow->insertsLength_win/(float)actualWindow->inserts;
-    		   		Z_i   = (localMean - insertMean)/(float)(insertStd/sqrt(actualWindow->inserts)); // CE statistics
-    		   	} else {
-    		   		Z_i = -100;
-    		   	}
-    			//actualWindow->print();
-    		   	// NOW UPDATE CONTIG'S FEATURES
-    		   	if(C_A_i < lowCoverageFeat*C_A) {
-    		   		frc.update(contig,LOW_COVERAGE_AREA);
-    		   		featuresTotal++;
-    		   	}
-    		   	if(C_A_i > highCoverageFeat*C_A) {
-    		   		frc.update(contig,HIGH_COVERAGE_AREA);
-    		   		featuresTotal++;
-    		   	}
-    		   	if(C_M_i <  lowNormalFeat*C_M) {
-    		   		frc.update(contig,LOW_NORMAL_AREA);
-    		   		featuresTotal++;
-    		   	}
-    		   	if(C_M_i > highNormalFeat*C_M) {
-    		   		frc.update(contig,HIGH_NORMAL_AREA);
-    		   		featuresTotal++;
-    		   	}
-    		   	if(C_S_i > highSingleFeat*C_A_i) {
-    		   		frc.update(contig,HIGH_SINGLE_AREA);
-    		   		featuresTotal++;
-    		   	}
-    		   	if(C_C_i > highSpanningFeat*C_A_i) {
-    		   		frc.update(contig,HIGH_SPANING_AREA);
-    		   		featuresTotal++;
-    		   	}
-    		   	if(C_W_i > highOutieFeat*C_A_i) {
-    		   		frc.update(contig,HIGH_OUTIE);
-    		   		featuresTotal++;
-    		   	}
-    		   	if(Z_i < -CE_statistics) {
-    		   		frc.update(contig,COMPRESSION_AREA);
-    		   		featuresTotal++;
-    		   	}
-    		   	if(Z_i > CE_statistics) {
-    		   		frc.update(contig,STRECH_AREA);
-    		   		featuresTotal++;
-    		   	}
-
-    			actualWindow->reset();
-    			actualWindow->windowStart = actualWindow->windowEnd + 1;
-    			actualWindow->windowEnd += WINDOW;
-    			if(actualWindow->windowEnd > contigSize) {
-    				actualWindow->windowEnd = contigSize;
-    			}
-    			actualWindow->windowLength = (actualWindow->windowEnd - actualWindow->windowStart + 1); // set window length
-    			//actualWindow->windowStart = windowStart;
-    			//actualWindow->windowEnd = windowEnd;
-    			updateWindow(b, actualWindow,  peMinInsert, peMaxInsert);
     		} else {
-    			//this read contributes to the features of the current window
+    			//add information to current contig
     			updateWindow(b, actualWindow,  peMinInsert, peMaxInsert);
     			currentContig->updateContig(b);
     		}
@@ -834,17 +738,11 @@ int main(int argc, char *argv[]) {
   //  currentContig->print();
 
  // TODO: UPDATE LAST CONTIG
-
-    cout << "number of reads " << reads << "\n";
-    //SORT CONTIGS ACCORDING TO THEIR LENGTH
-    frc.sortFRC();
-//    sort(CONTIG.begin(),CONTIG.end(),sortContigs);
-//    for(uint32_t i=0; i< contigs; i++) {
-//  	CONTIG[i].print();
-//    }
-
     cout << "estimated genome size " << estimatedGenomeSize << endl;
+    //SORT CONTIGS ACCORDING TO THEIR LENGTH
     cout << "Now computing FRC \n";
+    frc.sortFRC();
+
     ofstream myfile;
     myfile.open ("FRC.txt");
     myfile << "features coverage\n";
@@ -854,16 +752,13 @@ int main(int argc, char *argv[]) {
     	uint32_t contigStep = 0;
     	uint64_t contigLengthStep = 0;
     	uint32_t featuresStep = 0;
-   // 	cout << "now computing coverage for featuresStep " << featuresStep << " and contigLengthStep " << contigLengthStep << " and partial " << partial << "\n";
     	while(featuresStep <= partial) {
     		contigLengthStep += frc.getContigLength(contigStep); // CONTIG[contigStep].contigLength;
     		featuresStep += frc.getFeature(contigStep, TOTAL); // CONTIG[contigStep].TOTAL;
     //		cout << "(" << CONTIG[contigStep].contigLength << "," << CONTIG[contigStep].TOTAL << ") ";
     		contigStep++;
     	}
-    //	cout << "\n";
     	float coveragePartial =  contigLengthStep/(float)estimatedGenomeSize;
-    //	cout << contigLengthStep << " " << estimatedGenomeSize << " " << coveragePartial << "\n";
     	myfile << partial << " " << coveragePartial << "\n";
     	partial += step;
     }

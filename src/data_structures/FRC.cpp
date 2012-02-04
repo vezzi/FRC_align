@@ -38,8 +38,8 @@ void FRC::update(unsigned int ctg, Feature f) {
 	case LOW_NORMAL_AREA: this->CONTIG[ctg].updateLOW_NORMAL_AREA(); break;
 	case HIGH_NORMAL_AREA: this->CONTIG[ctg].updateHIGH_NORMAL_AREA(); break;
 	case HIGH_SINGLE_AREA: this->CONTIG[ctg].updateHIGH_SINGLE_AREA() ; break;
-	case HIGH_SPANING_AREA: this->CONTIG[ctg].updateHIGH_SPANING_AREA() ; break;
-	case HIGH_OUTIE: this->CONTIG[ctg].updateHIGH_OUTIE() ; break;
+	case HIGH_SPANNING_AREA: this->CONTIG[ctg].updateHIGH_SPANNING_AREA() ; break;
+	case HIGH_OUTIE_AREA: this->CONTIG[ctg].updateHIGH_OUTIE_AREA() ; break;
 	case COMPRESSION_AREA: this->CONTIG[ctg].updateCOMPRESSION_AREA() ; break;
 	case STRECH_AREA: this->CONTIG[ctg].updateSTRECH_AREA() ; break;
 	default: cout << f << "undefined feature, exit with error\n";
@@ -62,8 +62,8 @@ unsigned int FRC::getFeature(unsigned int ctg, Feature f) {
 	case LOW_NORMAL_AREA: return this->CONTIG[ctg].getLOW_NORMAL_AREA(); break;
 	case HIGH_NORMAL_AREA:return  this->CONTIG[ctg].getHIGH_NORMAL_AREA(); break;
 	case HIGH_SINGLE_AREA: return this->CONTIG[ctg].getHIGH_SINGLE_AREA() ; break;
-	case HIGH_SPANING_AREA: return this->CONTIG[ctg].getHIGH_SPANING_AREA() ; break;
-	case HIGH_OUTIE: return this->CONTIG[ctg].getHIGH_OUTIE() ; break;
+	case HIGH_SPANNING_AREA: return this->CONTIG[ctg].getHIGH_SPANNING_AREA() ; break;
+	case HIGH_OUTIE_AREA: return this->CONTIG[ctg].getHIGH_OUTIE_AREA() ; break;
 	case COMPRESSION_AREA: return this->CONTIG[ctg].getCOMPRESSION_AREA() ; break;
 	case STRECH_AREA: return this->CONTIG[ctg].getSTRECH_AREA() ; break;
 	case TOTAL: return this->CONTIG[ctg].getTOTAL(); break;
@@ -82,10 +82,11 @@ void FRC::setFeature(unsigned int ctg, Feature f, unsigned int value) {
 	case LOW_NORMAL_AREA: this->CONTIG[ctg].setLOW_NORMAL_AREA(value); break;
 	case HIGH_NORMAL_AREA:  this->CONTIG[ctg].setHIGH_NORMAL_AREA(value); break;
 	case HIGH_SINGLE_AREA: this->CONTIG[ctg].setHIGH_SINGLE_AREA(value) ; break;
-	case HIGH_SPANING_AREA: this->CONTIG[ctg].setHIGH_SPANING_AREA(value) ; break;
-	case HIGH_OUTIE:  this->CONTIG[ctg].setHIGH_OUTIE(value) ; break;
+	case HIGH_SPANNING_AREA: this->CONTIG[ctg].setHIGH_SPANNING_AREA(value) ; break;
+	case HIGH_OUTIE_AREA:  this->CONTIG[ctg].setHIGH_OUTIE_AREA(value) ; break;
 	case COMPRESSION_AREA: this->CONTIG[ctg].setCOMPRESSION_AREA(value) ; break;
 	case STRECH_AREA:  this->CONTIG[ctg].setSTRECH_AREA(value) ; break;
+	case TOTAL: this->CONTIG[ctg].setTOTAL(value); break;
 	default: cout << f << "undefined feature, exit with error\n";;
 	}
 }
@@ -117,19 +118,29 @@ void FRC::computeHighSingleArea(unsigned int ctg, Contig *contig) {
 }
 
 void FRC::computeHighSpanningArea(unsigned int ctg, Contig *contig) {
-
+	unsigned int highSpanningFeatures = contig->getHighSpanningAreas();
+	this->CONTIG[ctg].setHIGH_SPANNING_AREA(highSpanningFeatures);
 }
 
 void FRC::computeHighOutieArea(unsigned int ctg, Contig *contig) {
+	unsigned int highOutieFeatures = contig->getHighOutieAreas();
+	this->CONTIG[ctg].setHIGH_OUTIE_AREA(highOutieFeatures);
 
 }
 
 void FRC::computeCompressionArea(unsigned int ctg, Contig *contig) {
+	unsigned int compressionFeatures = contig->getCompressionAreas(this->insertMean, this->insertStd);
+	this->CONTIG[ctg].setCOMPRESSION_AREA(compressionFeatures);
 
 }
 
 void FRC::computeStrechArea(unsigned int ctg, Contig *contig) {
+	unsigned int expansionFeatures = contig->getExpansionAreas(this->insertMean, this->insertStd);
+	this->CONTIG[ctg].setSTRECH_AREA(expansionFeatures);
+}
 
+void FRC::computeTOTAL(unsigned int ctg) {
+	this->CONTIG[ctg].computeTOTAL();
 }
 
 
@@ -160,6 +171,13 @@ void FRC::setInsertStd(float insertStd) {
 }
 
 
+
+void FRC::printContig(unsigned int ctg) {
+	CONTIG[ctg].print();
+}
+
+
+
 contigFeatures::contigFeatures() {
 	contigLength = 0;
 	LOW_COVERAGE_AREA = 0;
@@ -167,8 +185,8 @@ contigFeatures::contigFeatures() {
 	LOW_NORMAL_AREA = 0;
 	HIGH_NORMAL_AREA = 0;
 	HIGH_SINGLE_AREA = 0;
-	HIGH_SPANING_AREA = 0;
-	HIGH_OUTIE = 0;
+	HIGH_SPANNING_AREA = 0;
+	HIGH_OUTIE_AREA = 0;
 	COMPRESSION_AREA = 0;
 	STRECH_AREA = 0;
 	TOTAL = 0;
@@ -203,16 +221,27 @@ void contigFeatures::setHIGH_NORMAL_AREA(unsigned int numFeat) {
 void contigFeatures::setHIGH_SINGLE_AREA(unsigned int numFeat) {
 	this->HIGH_SINGLE_AREA = numFeat;
 }
-void contigFeatures::setHIGH_SPANING_AREA(unsigned int numFeat) {
-	this->HIGH_SPANING_AREA = numFeat;
+void contigFeatures::setHIGH_SPANNING_AREA(unsigned int numFeat) {
+	this->HIGH_SPANNING_AREA = numFeat;
 }
-void contigFeatures::setHIGH_OUTIE(unsigned int numFeat) {
-	this->HIGH_OUTIE = numFeat;
+void contigFeatures::setHIGH_OUTIE_AREA(unsigned int numFeat) {
+	this->HIGH_OUTIE_AREA = numFeat;
 }
 void contigFeatures::setCOMPRESSION_AREA(unsigned int numFeat) {
 	this->COMPRESSION_AREA = numFeat;
 }
 void contigFeatures::setSTRECH_AREA(unsigned int numFeat) {
+	this->STRECH_AREA = numFeat;
+}
+
+void contigFeatures::computeTOTAL() {
+	this->TOTAL = this->COMPRESSION_AREA + this->HIGH_COVERAGE_AREA + this->HIGH_NORMAL_AREA + this->HIGH_OUTIE_AREA +
+			this->HIGH_SINGLE_AREA + this->HIGH_SINGLE_AREA + this->HIGH_SPANNING_AREA + this->LOW_COVERAGE_AREA +
+			this->LOW_NORMAL_AREA + this->STRECH_AREA ;
+}
+
+
+void contigFeatures::setTOTAL(unsigned int numFeat) {
 	this->STRECH_AREA = numFeat;
 }
 
@@ -242,13 +271,13 @@ void contigFeatures::updateHIGH_SINGLE_AREA() {
 	TOTAL++;
 }
 
-void contigFeatures::updateHIGH_SPANING_AREA() {
-	HIGH_SPANING_AREA++;
+void contigFeatures::updateHIGH_SPANNING_AREA() {
+	HIGH_SPANNING_AREA++;
 	TOTAL++;
 }
 
-void contigFeatures::updateHIGH_OUTIE() {
-	HIGH_OUTIE++;
+void contigFeatures::updateHIGH_OUTIE_AREA() {
+	HIGH_OUTIE_AREA++;
 	TOTAL++;
 }
 
@@ -261,6 +290,8 @@ void contigFeatures::updateSTRECH_AREA() {
 	STRECH_AREA++;
 	TOTAL++;
 }
+
+
 
 /*	void updateFeatures(windowStatistics* window) {
 		float C_A_i = window->readsLength_win/(float)window->insertsLength_win;
@@ -278,8 +309,8 @@ unsigned int contigFeatures::getHIGH_COVERAGE_AREA() {return HIGH_COVERAGE_AREA;
 unsigned int contigFeatures::getLOW_NORMAL_AREA() {return LOW_NORMAL_AREA;}
 unsigned int contigFeatures::getHIGH_NORMAL_AREA() {return HIGH_NORMAL_AREA;}
 unsigned int contigFeatures::getHIGH_SINGLE_AREA() {return HIGH_SINGLE_AREA;}
-unsigned int contigFeatures::getHIGH_SPANING_AREA() {return HIGH_SPANING_AREA;}
-unsigned int contigFeatures::getHIGH_OUTIE() {return HIGH_OUTIE;}
+unsigned int contigFeatures::getHIGH_SPANNING_AREA() {return HIGH_SPANNING_AREA;}
+unsigned int contigFeatures::getHIGH_OUTIE_AREA() {return HIGH_OUTIE_AREA;}
 unsigned int contigFeatures::getCOMPRESSION_AREA() {return COMPRESSION_AREA;}
 unsigned int contigFeatures::getSTRECH_AREA() {return STRECH_AREA;}
 unsigned int contigFeatures::getTOTAL() {return TOTAL;}
@@ -294,8 +325,8 @@ void contigFeatures::print() {
 	cout << "LOW_NORMAL_AREA " << LOW_NORMAL_AREA << "\n";
 	cout << "HIGH_NORMAL_AREA " << HIGH_NORMAL_AREA << "\n";
 	cout << "HIGH_SINGLE_AREA " << HIGH_SINGLE_AREA << "\n";
-	cout << "HIGH_SPANING_AREA " << HIGH_SPANING_AREA << "\n";
-	cout << "HIGH_OUTIE " << HIGH_OUTIE << "\n";
+	cout << "HIGH_SPANNING_AREA " << HIGH_SPANNING_AREA << "\n";
+	cout << "HIGH_OUTIE_AREA " << HIGH_OUTIE_AREA << "\n";
 	cout << "COMPRESSION_AREA " << COMPRESSION_AREA << "\n";
 	cout << "STRECH_AREA " << STRECH_AREA << "\n";
 	cout << "TOTAL " << TOTAL << "\n-----\n";

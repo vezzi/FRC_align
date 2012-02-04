@@ -16,6 +16,7 @@ Position::Position() {
 	WronglyDistance = 0;
 	Singleton = 0;
 	MatedDifferentContig = 0;
+	insertsLength = 0;
 }
 
 Position::~Position() {
@@ -77,6 +78,8 @@ void Contig::updateCov(unsigned int start, unsigned int end, data type) {
 	}
 	// now update
 	if(type == insertCov) {
+		CONTIG[start].StratingInserts++; // a new inserts starts in position start
+		CONTIG[start].insertsLength += (end - start + 1); // save total length of inserts starting at start
 		for(unsigned int i = start; i< end; i++)
 			CONTIG[i].InsertCoverage++;
 	} else if(type == readCov) {
@@ -139,7 +142,6 @@ void Contig::updateContig(bam1_t* b) {
 					//cout << "correctly oriented\n";
 					if (peMinInsert <= iSize && iSize <= peMaxInsert) { //this is a right insert
 						updateCov(startRead, endRead, cmCov); // update good read coverage
-						CONTIG[startRead].StratingInserts++; // another insert starts here
 						updateCov(startInsert,endInsert, insertCov); // update spanning coverage
 					} else {
 						updateCov(startRead, endRead, wdCov);
@@ -158,7 +160,6 @@ void Contig::updateContig(bam1_t* b) {
 					//cout << "correctly oriented\n";
 					if (peMinInsert <= iSize && iSize <= peMaxInsert) { //this is a right insert
 						updateCov(startRead, endRead, cmCov); // update good read coverage
-						CONTIG[startRead].StratingInserts++; // another insert starts here
 						updateCov(startInsert,endInsert, insertCov); // update spanning coverage
 					} else {
 						updateCov(startRead, endRead, wdCov);
@@ -595,8 +596,8 @@ unsigned int Contig::getHighSingleAreas( ) {
 			totalCoverage += CONTIG[i].ReadCoverage ;
 			singleReadCoverage += CONTIG[i].Singleton;
 		}
-		meanTotalCov = totalCoverage/(float)this->contigLength; // this is the "window" total coverage
-		meanSingleCov = singleReadCoverage/(float)this->contigLength; // this is the "window" single read coverage
+		meanTotalCov = totalCoverage/(float)winSize; // this is the "window" total coverage
+		meanSingleCov = singleReadCoverage/(float)winSize; // this is the "window" single read coverage
 		if( meanSingleCov > highSingleFeat*meanTotalCov ) { //first window's covrage
 			startFeat = 0;
 			endFeat = windowSize;
@@ -659,8 +660,398 @@ unsigned int Contig::getHighSingleAreas( ) {
 
 
 
+unsigned int Contig::getHighSpanningAreas( ) {
+	unsigned int totalCoverage = 0;
+	unsigned int matedDifferentContigCoverage = 0;
+	unsigned int features = 0;
+	float meanTotalCov;
+	float meanMatedDifferentContigCoverage;
+	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
+		for(unsigned int i=0; i < this->contigLength ; i++ ) {
+			totalCoverage += CONTIG[i].ReadCoverage ;
+			matedDifferentContigCoverage += CONTIG[i].MatedDifferentContig;
+		}
+		meanTotalCov = totalCoverage/(float)this->contigLength; // this is the "window" total coverage
+		meanMatedDifferentContigCoverage = matedDifferentContigCoverage/(float)this->contigLength; // this is the "window" single read coverage
+		if( meanMatedDifferentContigCoverage > highSingleFeat*meanTotalCov ) { // this is a feature
+			features = 1; // one feature found (in one window)
+		}
+	} else { //otherwise compute features on sliding window of 200 bp
+		unsigned int startFeat, endFeat;
+		bool feat = false;
+		unsigned int startWindow = 0;
+		unsigned int endWindow   = windowSize;
+		unsigned int winSize     = windowSize;
+		for(unsigned int i=startWindow; i < endWindow ; i++ ) {
+			totalCoverage += CONTIG[i].ReadCoverage ;
+			matedDifferentContigCoverage += CONTIG[i].MatedDifferentContig;
+		}
+		meanTotalCov = totalCoverage/(float)winSize; //
+		meanMatedDifferentContigCoverage = matedDifferentContigCoverage/(float)winSize; //
+		if( meanMatedDifferentContigCoverage > highSingleFeat*meanTotalCov ) { // this is a feature
+			startFeat = 0;
+			endFeat = windowSize;
+			feat = true; // there is an open feature
+		}
+		//now update
+		startWindow += windowStep;
+		endWindow += windowStep;
+		if(endWindow > this->contigLength) {
+			endWindow = this->contigLength;
+		}
+
+		while(endWindow < this->contigLength) {
+			totalCoverage = 0; //reset window coverage
+			matedDifferentContigCoverage = 0;
+			for(unsigned int i=startWindow; i < endWindow ; i++ ) {
+				totalCoverage += CONTIG[i].ReadCoverage ;
+				matedDifferentContigCoverage += CONTIG[i].MatedDifferentContig;
+			}
+			meanTotalCov = totalCoverage/(float)(endWindow - startWindow); // compute window total coverage
+			meanMatedDifferentContigCoverage = matedDifferentContigCoverage/(float)(endWindow - startWindow); // compute window single read coverage
+			if( meanMatedDifferentContigCoverage > highSingleFeat*meanTotalCov ) { // this is a feature
+				if(feat) { // if we are already inside a feature area
+					endFeat = endWindow; // simply extend the feature area
+				} else {
+					startFeat = startWindow;
+					endFeat = endWindow;
+					feat = true; // open feature area
+				}
+				startWindow += windowStep;
+				endWindow += windowStep;
+				if(endWindow > this->contigLength) {
+					endWindow = this->contigLength;
+				}
+			} else { // this window is not affected by feature
+				if(feat) { // if before a
+					features += floor((endFeat - startFeat + 1)/(float)windowSize + 0.5) ; // compute number of features
+					startWindow = endWindow;
+					endWindow = startWindow + windowSize;
+					if(endWindow > this->contigLength) {
+						endWindow = this->contigLength;
+					}
+					feat = false; //close feature area
+				} else { // no feature was present in the window before
+					startWindow += windowStep;
+					endWindow += windowStep;
+					if(endWindow > this->contigLength) {
+						endWindow = this->contigLength;
+					}
+				}
+			}
+		}
+//TODO compute statistics for the eventual last overlapping window
+		if(feat) { // a feature are reached contig end
+			features +=   floor((endFeat - startFeat)/(float)windowSize + 0.5); // compute number of features
+		}
+	}
+	return features;
+}
 
 
+
+unsigned int Contig::getHighOutieAreas( ) {
+	unsigned int totalCoverage = 0;
+	unsigned int outieCoverage = 0;
+	unsigned int features = 0;
+	float meanTotalCov;
+	float meanOutieCoverage;
+	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
+		for(unsigned int i=0; i < this->contigLength ; i++ ) {
+			totalCoverage += CONTIG[i].ReadCoverage ;
+			outieCoverage += (CONTIG[i].WronglyDistance + CONTIG[i].WronglyOriented);
+		}
+		meanTotalCov = totalCoverage/(float)this->contigLength; // this is the "window" total coverage
+		meanOutieCoverage = outieCoverage/(float)this->contigLength; // this is the "window" single read coverage
+		if( meanOutieCoverage > highOutieFeat*meanTotalCov ) { // this is a feature
+			features = 1; // one feature found (in one window)
+		}
+	} else { //otherwise compute features on sliding window of 200 bp
+		unsigned int startFeat, endFeat;
+		bool feat = false;
+		unsigned int startWindow = 0;
+		unsigned int endWindow   = windowSize;
+		unsigned int winSize     = windowSize;
+		for(unsigned int i=startWindow; i < endWindow ; i++ ) {
+			totalCoverage += CONTIG[i].ReadCoverage ;
+			outieCoverage +=  (CONTIG[i].WronglyDistance + CONTIG[i].WronglyOriented);
+		}
+		meanTotalCov = totalCoverage/(float)winSize; //
+		meanOutieCoverage = outieCoverage/(float)winSize; //
+		if(  meanOutieCoverage > highOutieFeat*meanTotalCov  ) { // this is a feature
+			startFeat = 0;
+			endFeat = windowSize;
+			feat = true; // there is an open feature
+		}
+		//now update
+		startWindow += windowStep;
+		endWindow += windowStep;
+		if(endWindow > this->contigLength) {
+			endWindow = this->contigLength;
+		}
+
+		while(endWindow < this->contigLength) {
+			totalCoverage = 0; //reset window coverage
+			meanOutieCoverage = 0;
+			for(unsigned int i=startWindow; i < endWindow ; i++ ) {
+				totalCoverage += CONTIG[i].ReadCoverage ;
+				outieCoverage +=  (CONTIG[i].WronglyDistance + CONTIG[i].WronglyOriented);
+			}
+			meanTotalCov = totalCoverage/(float)(endWindow - startWindow); // compute window total coverage
+			meanOutieCoverage = outieCoverage/(float)(endWindow - startWindow); // compute window single read coverage
+			if(  meanOutieCoverage > highOutieFeat*meanTotalCov  ) { // this is a feature
+				if(feat) { // if we are already inside a feature area
+					endFeat = endWindow; // simply extend the feature area
+				} else {
+					startFeat = startWindow;
+					endFeat = endWindow;
+					feat = true; // open feature area
+				}
+				startWindow += windowStep;
+				endWindow += windowStep;
+				if(endWindow > this->contigLength) {
+					endWindow = this->contigLength;
+				}
+			} else { // this window is not affected by feature
+				if(feat) { // if before a
+					features += floor((endFeat - startFeat + 1)/(float)windowSize + 0.5) ; // compute number of features
+					startWindow = endWindow;
+					endWindow = startWindow + windowSize;
+					if(endWindow > this->contigLength) {
+						endWindow = this->contigLength;
+					}
+					feat = false; //close feature area
+				} else { // no feature was present in the window before
+					startWindow += windowStep;
+					endWindow += windowStep;
+					if(endWindow > this->contigLength) {
+						endWindow = this->contigLength;
+					}
+				}
+			}
+		}
+//TODO compute statistics for the eventual last overlapping window
+		if(feat) { // a feature are reached contig end
+			features +=   floor((endFeat - startFeat)/(float)windowSize + 0.5); // compute number of features
+		}
+	}
+	return features;
+}
+
+
+
+
+unsigned int Contig::getCompressionAreas(float insertionMean, float insertionStd) {
+	unsigned long int spanningCoverage = 0; // total insert length
+	unsigned int inserts = 0; // number of inserts
+	unsigned int features = 0;
+	float Z_stats;
+	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
+		for(unsigned int i=0; i < this->contigLength ; i++ ) {
+			if(CONTIG[i].StratingInserts > 0) {
+				inserts += CONTIG[i].StratingInserts;
+				spanningCoverage += CONTIG[i].insertsLength;
+			}
+		}
+		if(inserts > 0) {
+			float localMean = spanningCoverage/(float)inserts;
+			Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
+		} else {
+			Z_stats = -100;
+		}
+		if( Z_stats <  - CE_statistics ) { // this is a feature
+			features = 1; // one feature found (in one window)
+		}
+	} else { //otherwise compute features on sliding window of 200 bp
+		unsigned int startFeat, endFeat;
+		bool feat = false;
+		unsigned int startWindow = 0;
+		unsigned int endWindow   = windowSize;
+		unsigned int winSize     = windowSize;
+		for(unsigned int i=startWindow; i < endWindow; i++ ) {
+			if(CONTIG[i].StratingInserts > 0) {
+				inserts += CONTIG[i].StratingInserts;
+				spanningCoverage += CONTIG[i].insertsLength;
+			}
+		}
+		if(inserts > 0) {
+			float localMean = spanningCoverage/(float)inserts;
+			Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
+		} else {
+			Z_stats = -100;
+		}
+		if( Z_stats <  - CE_statistics ) { // this is a feature
+			startFeat = 0;
+			endFeat = windowSize;
+			feat = true; // there is an open feature
+		}
+		//now update
+		startWindow += windowStep;
+		endWindow += windowStep;
+		if(endWindow > this->contigLength) {
+			endWindow = this->contigLength;
+		}
+
+		while(endWindow < this->contigLength) {
+			inserts = 0; //reset window coverage
+			spanningCoverage = 0;
+			for(unsigned int i=startWindow; i < endWindow; i++ ) {
+				if(CONTIG[i].StratingInserts > 0) {
+					inserts += CONTIG[i].StratingInserts;
+					spanningCoverage += CONTIG[i].insertsLength;
+				}
+			}
+			if(inserts > 0) {
+				float localMean = spanningCoverage/(float)inserts;
+				Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
+			} else {
+				Z_stats = -100;
+			}
+			if( Z_stats <  - CE_statistics ) { // this is a feature
+				if(feat) { // if we are already inside a feature area
+					endFeat = endWindow; // simply extend the feature area
+				} else {
+					startFeat = startWindow;
+					endFeat = endWindow;
+					feat = true; // open feature area
+				}
+				startWindow += windowStep;
+				endWindow += windowStep;
+				if(endWindow > this->contigLength) {
+					endWindow = this->contigLength;
+				}
+			} else { // this window is not affected by feature
+				if(feat) { // if before a
+					features += floor((endFeat - startFeat + 1)/(float)windowSize + 0.5) ; // compute number of features
+					startWindow = endWindow;
+					endWindow = startWindow + windowSize;
+					if(endWindow > this->contigLength) {
+						endWindow = this->contigLength;
+					}
+					feat = false; //close feature area
+				} else { // no feature was present in the window before
+					startWindow += windowStep;
+					endWindow += windowStep;
+					if(endWindow > this->contigLength) {
+						endWindow = this->contigLength;
+					}
+				}
+			}
+		}
+//TODO compute statistics for the eventual last overlapping window
+		if(feat) { // a feature are reached contig end
+			features +=   floor((endFeat - startFeat)/(float)windowSize + 0.5); // compute number of features
+		}
+	}
+	return features;
+}
+
+
+
+unsigned int Contig::getExpansionAreas(float insertionMean, float insertionStd) {
+	unsigned long int spanningCoverage = 0; // total insert length
+	unsigned int inserts = 0; // number of inserts
+	unsigned int features = 0;
+	float Z_stats;
+	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
+		for(unsigned int i=0; i < this->contigLength ; i++ ) {
+			if(CONTIG[i].StratingInserts > 0) {
+				inserts += CONTIG[i].StratingInserts;
+				spanningCoverage += CONTIG[i].insertsLength;
+			}
+		}
+		if(inserts > 0) {
+			float localMean = spanningCoverage/(float)inserts;
+			Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
+		} else {
+			Z_stats = -100;
+		}
+		if( Z_stats >  CE_statistics ) { // this is a feature
+			features = 1; // one feature found (in one window)
+		}
+	} else { //otherwise compute features on sliding window of 200 bp
+		unsigned int startFeat, endFeat;
+		bool feat = false;
+		unsigned int startWindow = 0;
+		unsigned int endWindow   = windowSize;
+		unsigned int winSize     = windowSize;
+		for(unsigned int i=startWindow; i < endWindow; i++ ) {
+			if(CONTIG[i].StratingInserts > 0) {
+				inserts += CONTIG[i].StratingInserts;
+				spanningCoverage += CONTIG[i].insertsLength;
+			}
+		}
+		if(inserts > 0) {
+			float localMean = spanningCoverage/(float)inserts;
+			Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
+		} else {
+			Z_stats = -100;
+		}
+		if( Z_stats > CE_statistics ) { // this is a feature
+			startFeat = 0;
+			endFeat = windowSize;
+			feat = true; // there is an open feature
+		}
+		//now update
+		startWindow += windowStep;
+		endWindow += windowStep;
+		if(endWindow > this->contigLength) {
+			endWindow = this->contigLength;
+		}
+
+		while(endWindow < this->contigLength) {
+			inserts = 0; //reset window coverage
+			spanningCoverage = 0;
+			for(unsigned int i=startWindow; i < endWindow; i++ ) {
+				if(CONTIG[i].StratingInserts > 0) {
+					inserts += CONTIG[i].StratingInserts;
+					spanningCoverage += CONTIG[i].insertsLength;
+				}
+			}
+			if(inserts > 0) {
+				float localMean = spanningCoverage/(float)inserts;
+				Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
+			} else {
+				Z_stats = -100;
+			}
+			if( Z_stats > CE_statistics ) { // this is a feature
+				if(feat) { // if we are already inside a feature area
+					endFeat = endWindow; // simply extend the feature area
+				} else {
+					startFeat = startWindow;
+					endFeat = endWindow;
+					feat = true; // open feature area
+				}
+				startWindow += windowStep;
+				endWindow += windowStep;
+				if(endWindow > this->contigLength) {
+					endWindow = this->contigLength;
+				}
+			} else { // this window is not affected by feature
+				if(feat) { // if before a
+					features += floor((endFeat - startFeat + 1)/(float)windowSize + 0.5) ; // compute number of features
+					startWindow = endWindow;
+					endWindow = startWindow + windowSize;
+					if(endWindow > this->contigLength) {
+						endWindow = this->contigLength;
+					}
+					feat = false; //close feature area
+				} else { // no feature was present in the window before
+					startWindow += windowStep;
+					endWindow += windowStep;
+					if(endWindow > this->contigLength) {
+						endWindow = this->contigLength;
+					}
+				}
+			}
+		}
+//TODO compute statistics for the eventual last overlapping window
+		if(feat) { // a feature are reached contig end
+			features +=   floor((endFeat - startFeat)/(float)windowSize + 0.5); // compute number of features
+		}
+	}
+	return features;
+}
 
 
 

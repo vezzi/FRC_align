@@ -29,6 +29,7 @@ public:
 	unsigned int WronglyDistance;
 	unsigned int Singleton;
 	unsigned int MatedDifferentContig;
+	unsigned long int insertsLength;
 
 	Position();
 
@@ -59,6 +60,7 @@ class Contig{
 	Position *CONTIG;
 
 	void updateCov(unsigned int strat, unsigned int end, data type);
+
 public:
 	Contig();
 	Contig(unsigned int contigLength, unsigned int peMinInsert, unsigned int peMaxInsert);
@@ -72,8 +74,10 @@ public:
 	unsigned int getLowNormalAreas(float C_M);
 	unsigned int getHighNormalAreas(float C_M);
 	unsigned int getHighSingleAreas();
-
-
+	unsigned int getHighSpanningAreas();
+	unsigned int getHighOutieAreas();
+	unsigned int getCompressionAreas(float insertionMean, float insertionStd);
+	unsigned int getExpansionAreas(float insertionMean, float insertionStd);
 
 	void print();
 
