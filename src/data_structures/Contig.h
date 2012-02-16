@@ -43,8 +43,8 @@ public:
 
 class Contig{
 	unsigned int contigLength;
-	unsigned int peMinInsert;
-	unsigned int peMaxInsert;
+	unsigned int minInsert;
+	unsigned int maxInsert;
 	unsigned int windowSize;
 	unsigned int windowStep;
 
@@ -63,7 +63,7 @@ class Contig{
 
 public:
 	Contig();
-	Contig(unsigned int contigLength, unsigned int peMinInsert, unsigned int peMaxInsert);
+	Contig(unsigned int contigLength, unsigned int minInsert, unsigned int maxInsert);
 	~Contig();
 
 	void updateContig(bam1_t* b); // given an alignment it updates the contig situation

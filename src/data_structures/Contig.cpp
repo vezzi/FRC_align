@@ -26,8 +26,8 @@ Position::~Position() {
 
 Contig::Contig() {
 	contigLength = 0;
-	peMinInsert = 0;
-	peMaxInsert = 0;
+	minInsert = 0;
+	maxInsert = 0;
 	windowSize = 1000;
 	windowStep = 200;
 
@@ -43,8 +43,8 @@ Contig::Contig() {
 
 Contig::Contig(unsigned int contigLength, unsigned int peMinInsert, unsigned int peMaxInsert) {
 	this->contigLength = contigLength;
-	this->peMinInsert = peMinInsert;
-	this->peMaxInsert = peMaxInsert;
+	this->minInsert = minInsert;
+	this->maxInsert = maxInsert;
 	this->CONTIG =  new Position[contigLength];
 	windowSize = 1000;
 	windowStep = 200;
@@ -140,7 +140,7 @@ void Contig::updateContig(bam1_t* b) {
 				if(!(core->flag&BAM_FREVERSE) && (core->flag&BAM_FMREVERSE) ) { //
 					//here reads are correctly oriented
 					//cout << "correctly oriented\n";
-					if (peMinInsert <= iSize && iSize <= peMaxInsert) { //this is a right insert
+					if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert
 						updateCov(startRead, endRead, cmCov); // update good read coverage
 						updateCov(startInsert,endInsert, insertCov); // update spanning coverage
 					} else {
@@ -158,7 +158,7 @@ void Contig::updateContig(bam1_t* b) {
 				if((core->flag&BAM_FREVERSE) && !(core->flag&BAM_FMREVERSE) ) { //
 					//here reads are correctly oriented
 					//cout << "correctly oriented\n";
-					if (peMinInsert <= iSize && iSize <= peMaxInsert) { //this is a right insert
+					if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert
 						updateCov(startRead, endRead, cmCov); // update good read coverage
 						updateCov(startInsert,endInsert, insertCov); // update spanning coverage
 					} else {
@@ -178,7 +178,7 @@ void Contig::updateContig(bam1_t* b) {
 				if((core->flag&BAM_FREVERSE) && !(core->flag&BAM_FMREVERSE) ) { //
 					//here reads are correctly oriented
 					//cout << "correctly oriented\n";
-					if (peMinInsert <= iSize && iSize <= peMaxInsert) { //this is a right insert, no need to update insert coverage
+					if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert, no need to update insert coverage
 						updateCov(startRead, endRead, cmCov); // update good read coverage
 					} else {
 						updateCov(startRead, endRead, wdCov);
@@ -193,7 +193,7 @@ void Contig::updateContig(bam1_t* b) {
 				if(!(core->flag&BAM_FREVERSE) && (core->flag&BAM_FMREVERSE) ) { //
 					//here reads are correctly oriented
 					//cout << "correctly oriented\n";
-					if (peMinInsert <= iSize && iSize <= peMaxInsert) { //this is a right insert, no need to update insert coverage
+					if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert, no need to update insert coverage
 						updateCov(startRead, endRead, cmCov); // update good read coverage
 					} else {
 						updateCov(startRead, endRead, wdCov);

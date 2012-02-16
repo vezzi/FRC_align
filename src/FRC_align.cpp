@@ -20,85 +20,15 @@
 #include <time.h>
 #include <string>
 #include <vector>
+#include <map>
 #include "radix.h"
 #include "samtools/sam.h"
 #include "options/Options.h"
 
+
 #include "data_structures/Features.h"
 #include "data_structures/Contig.h"
 #include "data_structures/FRC.h"
-
-
-class windowStatistics {
-public:
-	windowStatistics() {
-		windowLength = 0;
-		readsLength_win=0;
-		insertsLength_win=0;
-		correctlyMatedReadsLength_win=0;
-		wronglyOrientedReadsLength_win=0;
-		singletonReadsLength_win=0;
-		matedDifferentContigLength_win=0;
-
-	}
-
-	void reset() {
-		windowLength = 0;
-		readsLength_win=0;
-		inserts=0;
-		insertsLength_win=0;
-		correctlyMatedReadsLength_win=0;
-		wronglyDistanceReadsLength_win = 0;
-		wronglyOrientedReadsLength_win=0;
-		singletonReadsLength_win=0;
-		matedDifferentContigLength_win=0;
-
-	}
-
-	void print() {
-		cout << "from " << windowStart << " to " << windowEnd << "\n";
-		cout << "windowLength " << windowLength << "\n";
-		cout << "readsLength " << readsLength_win << "\n";
-		cout << "inserts " << inserts << "\n";
-		cout << "insersLength " << insertsLength_win << "\n";
-		cout << "correctlyMatedReadsLength " << correctlyMatedReadsLength_win << "\n";
-		cout << "wronglyOrientedReadsLength " << wronglyOrientedReadsLength_win << "\n";
-		cout << "singletonReadsLength " << singletonReadsLength_win << "\n";
-		cout << "matedDifferentContigLength " << matedDifferentContigLength_win  << "\n";
-		cout << "-----\n";
-	}
-
-	uint32_t windowStart;
-	uint32_t windowEnd;
-	uint32_t windowLength;
-
-	// reads aligned
-	uint64_t readsLength_win; // length of reads placed in window
-	// insert length
-	uint32_t inserts; // number of inserts inside window
-	uint64_t insertsLength_win; // total length of inserts inside window
-	// correctly aligned mates
-	uint64_t correctlyMatedReadsLength_win; // length of correctly mated reads inside window
-	// wrongly oriented reads
-	uint64_t wronglyOrientedReadsLength_win; // length of wrongly oriented reads inside window
-	// wrongly distance reads
-	uint64_t wronglyDistanceReadsLength_win; // total length of reads placed in different contigs  inside window
-	// singletons
-	uint64_t singletonReadsLength_win; // total length of singleton reads  inside window
-	// mates on different contigs
-	uint64_t matedDifferentContigLength_win;// total number of reads placed in different contigs  inside window
-
-
-/*
-	float C_A; // total read coverage
-	float S_A; // total span coverage
-	float C_M; // coverage induced by correctly aligned pairs
-	float C_W; // coverage induced by wrongly mated pairs
-	float C_S; // coverage induced by singletons
-	float C_C; // coverage induced by reads with mate on a different contig
-	float CEstatistics;
-	*/
-};
 
 
 
@@ -155,103 +85,19 @@ samfile_t * open_alignment_file(std::string path)
 }
 
 
-void updateWindow(bam1_t* b, windowStatistics* actualWindow, unsigned int peMinInsert, unsigned int peMaxInsert ) {
-	const bam1_core_t* core =  &b->core;
-	if (core->qual > 0) {
-		uint32_t* cigar = bam1_cigar(b);
 
-		if ((core->flag&BAM_FREAD1) //First in pair
-				&& !(core->flag&BAM_FMUNMAP) /*Mate is also mapped!*/
-				&& (core->tid == core->mtid) /*Mate on the same chromosome*/
-		) {
-			//pair is mapped on the same contig and I'm looking the first pair
-			int32_t start = MIN(core->pos,core->mpos);
-			int32_t end = start+abs(core->isize);
-			uint32_t iSize = end-start; // compute insert size
+struct LibraryStatistics{
+	float C_A;
+	float S_A;
+	float C_C;
+	float C_M;
+	float C_S;
+	float C_W;
+	float insertMean;
+	float insertStd;
+};
 
-
-
-			if (peMinInsert <= iSize && iSize <= peMaxInsert) {
-				actualWindow->insertsLength_win += iSize; // update number of inserts and total length
-				actualWindow->inserts++;
-			}
-
-			if (peMinInsert <= iSize && iSize <= peMaxInsert) {
-				if(core->pos < core->mpos) { // read I'm processing is the first
-					if(!(core->flag&BAM_FREVERSE) && (core->flag&BAM_FMREVERSE) ) { // pairs are one in front of the other
-						actualWindow->correctlyMatedReadsLength_win +=  bam_cigar2qlen(core,cigar); // update number of correctly mapped and their length
-					} else {
-						// wrong orientation
-						actualWindow->wronglyOrientedReadsLength_win += bam_cigar2qlen(core,cigar);
-					}
-				} else {
-					if(!(core->flag&BAM_FMREVERSE) && (core->flag&BAM_FREVERSE)) { // pairs are one in front of the other
-						actualWindow->correctlyMatedReadsLength_win +=  bam_cigar2qlen(core,cigar); // update number of correctly mapped and their length
-					} else {
-						// wrong orientation
-						actualWindow->wronglyOrientedReadsLength_win += bam_cigar2qlen(core,cigar);
-					}
-				}
-			} else {
-				//wrong distance
-				actualWindow->wronglyDistanceReadsLength_win += bam_cigar2qlen(core,cigar);
-			}
-		} else  if ((core->flag&BAM_FREAD2) //Second in pair
-				&& !(core->flag&BAM_FMUNMAP) /*Mate is also mapped!*/
-				&& (core->tid == core->mtid) /*Mate on the same chromosome*/
-		)
-			// if I'm considering the second read in a pair I must check it is is a correctly mated read and if this is tha case update the right variables
-		{
-			uint32_t start = MIN(core->pos,core->mpos);
-			uint32_t end = start+abs(core->isize);
-			uint32_t iSize = end-start; // compute insert size
-
-			if (peMinInsert <= iSize && iSize <= peMaxInsert) { // I have to check if the mate is outside window boundaries
-				if(start <= actualWindow->windowStart || end >= actualWindow->windowEnd) {
-					actualWindow->insertsLength_win += iSize; // update number of inserts and total length
-					actualWindow->inserts++;
-				}
-			}
-
-			if (peMinInsert <= iSize && iSize <= peMaxInsert) {
-				if(core->pos > core->mpos) { // read I'm processing is the first
-					if((core->flag&BAM_FREVERSE) && !(core->flag&BAM_FMREVERSE) ) { // pairs are one in front of the other
-						actualWindow->correctlyMatedReadsLength_win +=  bam_cigar2qlen(core,cigar); //  update number of correctly mapped and their length
-					} else {
-						// wrong orientation
-						actualWindow->wronglyOrientedReadsLength_win += bam_cigar2qlen(core,cigar);
-					}
-				} else {
-					if((core->flag&BAM_FMREVERSE) && !(core->flag&BAM_FREVERSE)) { // pairs are one in front of the other
-						actualWindow->correctlyMatedReadsLength_win +=  bam_cigar2qlen(core,cigar); // update number of correctly mapped and their length
-					} else {
-						// wrong orientation
-						actualWindow->wronglyOrientedReadsLength_win += bam_cigar2qlen(core,cigar);
-					}
-				}
-			} else {
-				//wrong distance
-				actualWindow->wronglyDistanceReadsLength_win += bam_cigar2qlen(core,cigar);
-
-			}
-		} else if (core->tid != core->mtid && !(core->flag&BAM_FMUNMAP)) {
-			//Count inter-chrom pairs
-			actualWindow->matedDifferentContigLength_win += bam_cigar2qlen(core,cigar);
-		} else if(core->flag&BAM_FMUNMAP) {
-			// if mate read is unmapped
-			actualWindow->singletonReadsLength_win =+ bam_cigar2qlen(core,cigar);
-		}
-
-
-		if (core->flag&BAM_FDUP) {   //This is a duplicate. Don't count it!.
-		} else {
-			actualWindow->readsLength_win += bam_cigar2qlen(core,cigar);
-		}
-	}
-}
-
-
-
+LibraryStatistics computeLibraryStats(samfile_t *fp, unsigned int minInsert, unsigned int maxInsert, unsigned int genomeLength);
 
 /**
  * Main of app
@@ -260,28 +106,37 @@ void updateWindow(bam1_t* b, windowStatistics* actualWindow, unsigned int peMinI
 
 int main(int argc, char *argv[]) {
 	//MAIN VARIABLE
-	string alignmentFile = "";
 	string assemblyFile = "";
+
+	string PEalignmentFile = "";
 	vector<string> peFiles;
 	int32_t peMinInsert = 100;
 	int32_t peMaxInsert = 1000000;
+
+	string MPalignmentFile = "";
+	vector<string> mpFiles;
+	int32_t mpMinInsert = 100;
+	int32_t mpMaxInsert = 1000000;
 	unsigned int WINDOW = 1000;
 	unsigned long int estimatedGenomeSize;
 
-	samfile_t *fp;
 
 	// PROCESS PARAMETERS
 	stringstream ss;
 	ss << package_description() << endl << endl << "Allowed options";
 	po::options_description desc(ss.str().c_str());
 	desc.add_options() ("help", "produce help message")
-			("assembly", po::value<string>(), "assembly file name in fasta format")
-			("sam", po::value<string>(), "alignment file")
-			("pe", po::value< vector < string > >(), "paired reads, one pair after the other")
-			("pe-min-insert",  po::value<int>(), "minimum allowed insert size")
-			("pe-max-insert",  po::value<int>(), "maximum allowed insert size")
+			("pe-sam", po::value<string>(), "paired end alignment file (in sam or bam format). Expected orientation -> <-")
+			("pe-min-insert",  po::value<int>(), "paired reads minimum allowed insert size. Used in order to filter outliers. Insert size goeas from beginning of first read to end of second read")
+			("pe-max-insert",  po::value<int>(), "paired reads maximum allowed insert size. Used in order to filter outliers.")
+			("mp-sam", po::value<string>(), "mate pairs alignment file. (in sam or bam format). Expected orientation -> <- (reverse and complement originals)")
+			("mp-min-insert",  po::value<int>(), "mate pairs minimum allowed insert size. Used in order to filter outliers. Insert size goeas from beginning of first read to end of second read")
+			("mp-max-insert",  po::value<int>(), "mate pairs maximum allowed insert size. Used in order to filter outliers.")
 			("window",  po::value<unsigned int>(), "window size for features computation")
-			("genome-size", po::value<unsigned long int>(), "estimated genome size (if not supplied genome size is believed to be the assembly length")
+			("genome-size", po::value<unsigned long int>(), "estimated genome size (if not supplied genome size is believed to be assembly length")
+			("assembly", po::value<string>(), "assembly file name in fasta format [FOR FUTURE USE]")
+			("pe", po::value< vector < string > >(), "paired reads, one pair after the other [FOR FUTURE USE]")
+			("mp", po::value< vector < string > >(), "mate pairs, one pair after the other [FOR FUTURE USE]")
 			;
 
 	po::variables_map vm;
@@ -297,28 +152,64 @@ int main(int argc, char *argv[]) {
 		DEFAULT_CHANNEL << desc << endl;
 		exit(0);
 	}
-	if (!vm.count("assembly") || !vm.count("sam") || !vm.count("pe")) {
-		DEFAULT_CHANNEL << "--assembly, --sam and,  --pe are mandatory" << endl;
+
+// PARSE PE
+	if (!vm.count("pe-sam") && !vm.count("mp-sam")) {
+		DEFAULT_CHANNEL << "At least one library must be present. Please specify at least one between pe-sam and mp-sam" << endl;
 		exit(0);
 	}
 
+	if (vm.count("pe-sam")) {
+		PEalignmentFile = vm["pe-sam"].as<string>();
+	}
+	if (vm.count("pe-min-insert")) {
+		peMinInsert = vm["pe-min-insert"].as<int>();
+		if(peMinInsert <= 0) {
+			DEFAULT_CHANNEL << "pe minimum insert should be at least 1\n";
+			DEFAULT_CHANNEL << desc << endl;
+			exit(2);
+		}
+	}
+	if (vm.count("pe-max-insert")) {
+		peMaxInsert = vm["pe-max-insert"].as<int>();
+	}
+// NOW PARSE MP
+	if (vm.count("mp-sam")) {
+		MPalignmentFile = vm["mp-sam"].as<string>();
+	}
+	if (vm.count("mp-min-insert")) {
+		mpMinInsert = vm["mp-min-insert"].as<int>();
+		if(mpMinInsert <= 0) {
+			DEFAULT_CHANNEL << "mp minimum insert should be at least 1\n";
+			DEFAULT_CHANNEL << desc << endl;
+			exit(2);
+		}
+	}
+	if (vm.count("mp-max-insert")) {
+		mpMaxInsert = vm["mp-max-insert"].as<int>();
+	}
+
+
+	if(vm.count("pe-sam")){
+		cout << "pe-sam file name is " << PEalignmentFile << endl;
+		cout << "pe min " << peMinInsert << "\n";
+		cout << "pe max " << peMaxInsert << "\n";
+	}
+	if(vm.count("mp-sam")){
+		cout << "mp-sam file name is " << MPalignmentFile << endl;
+		cout << "mp min " << mpMinInsert << "\n";
+		cout << "mp max " << mpMaxInsert << "\n";
+	}
+
+
+
 	if (vm.count("assembly")) {
 		assemblyFile = vm["assembly"].as<string>();
-	}
-	if (vm.count("sam")) {
-		alignmentFile = vm["sam"].as<string>();
 	}
 	if (vm.count("pe")) {
 		peFiles = vm["pe"].as<vector<string> >();
 	}
 
-	if (vm.count("pe-min-insert")) {
-		peMinInsert = vm["pe-min-insert"].as<int>();
-	}
-
-	if (vm.count("pe-max-insert")) {
-		peMaxInsert = vm["pe-max-insert"].as<int>();
-	}
 
 	if (vm.count("window")) {
 		WINDOW = vm["window"].as<unsigned int>();
@@ -330,22 +221,195 @@ int main(int argc, char *argv[]) {
 		estimatedGenomeSize = 0;
 	}
 
-
-
-	cout << "assembly file name is " << assemblyFile << endl;
-	cout << "sam file name is " << alignmentFile << endl;
-	for(unsigned int i=0; i< peFiles.size() ; i++ ) {
-		cout << peFiles.at(i) << endl;
+//TODO: OPTION PARSING ENDED, CREATE A FUNCTION FOR IT
+	uint64_t genomeLength = 0;
+	uint32_t contigsNumber = 0;
+	samfile_t *fp;
+	if(vm.count("pe-sam")) { // paired read library is preset, use it to compute basic contig statistics
+		fp = open_alignment_file(PEalignmentFile);
+	} else {  // Otherwise use MP library that must be provided
+		fp = open_alignment_file(MPalignmentFile);
 	}
 
-	fp = open_alignment_file(alignmentFile);
 	EXIT_IF_NULL(fp);
+	bam_header_t* head = fp->header; // sam header
+	for(int i=0; i< head->n_targets ; i++) {
+		genomeLength += head->target_len[i];
+		contigsNumber++;
+	}
+	if (estimatedGenomeSize == 0) {
+		estimatedGenomeSize = genomeLength; // if user has not provided genome size, approaximated it with assembly size
+	}
+	cout << "total number of contigs " << contigsNumber << endl;
+	cout << "assembly length " << genomeLength << "\n";
+	cout << "estimated length " << estimatedGenomeSize << "\n";
 
+    LibraryStatistics libraryPE;
+    LibraryStatistics libraryMP;
+	if(vm.count("pe-sam")) { // in this case file is already OPEN
+		cout << "COMPUTING PE STATISTIC\n";
+		libraryPE = computeLibraryStats(fp, peMinInsert, peMaxInsert, estimatedGenomeSize);
+		samclose(fp); // close the file
+	}
+
+	if(vm.count("mp-sam")) {
+		cout << "COMPUTING MP STATISTIC\n";
+		if(!vm.count("pe-sam")) { // in this case file is already OPEN
+			libraryMP = computeLibraryStats(fp, mpMinInsert, mpMaxInsert, estimatedGenomeSize);
+			samclose(fp); // close the file
+		} else { // in this case I need to open file first
+			fp = open_alignment_file(MPalignmentFile);
+			libraryMP = computeLibraryStats(fp, mpMinInsert, mpMaxInsert, estimatedGenomeSize);
+			samclose(fp); // close the file
+		}
+	}
+
+
+	exit(0);
+
+    //parse BAM file again to compute FRC curve
+    fp = open_alignment_file(PEalignmentFile);
+    EXIT_IF_NULL(fp);
+    head = fp->header; // sam header
+
+    FRC frc = FRC(contigsNumber); // FRC object, will memorize all information on features and contigs
+    uint32_t featuresTotal = 0;
+    frc.setC_A(libraryPE.C_A);
+    frc.setS_A(libraryPE.S_A);
+    frc.setC_C(libraryPE.C_C);
+    frc.setC_M(libraryPE.C_M);
+    frc.setC_S(libraryPE.C_S);
+    frc.setC_W(libraryPE.C_W);
+    frc.setInsertMean(libraryPE.insertMean);
+    frc.setInsertStd(libraryPE.insertStd);
+
+
+    uint32_t peMinInsert_recomputed; // recompute min and max insert on the basis of the new insert size
+    uint32_t peMaxInsert_recomputed; // the original min and max threshold are used only as a first rough approximation
+    if(libraryPE.insertMean - 3*libraryPE.insertStd > 0) {
+    	peMinInsert_recomputed = libraryPE.insertMean - 3*libraryPE.insertStd;
+    } else {
+    	peMinInsert_recomputed = 0;
+    }
+    peMaxInsert_recomputed = libraryPE.insertMean + 3*libraryPE.insertStd;
+
+    cout << "NEW minimum allowed insert " << peMinInsert_recomputed << "\n";
+    cout << "NEW maximum allowed insert " << peMaxInsert_recomputed << "\n";
+
+    Contig *currentContig; // = new Contig(contigSize, peMinInsert, peMaxInsert); // Contig object, memorizes all information to compute contig`s features
+
+    int currentTid = -1;
+    int reads = 0;
+    uint32_t contig=0;
+    uint32_t contigSize = 0;
+    //Initialize bam entity
+    bam1_t *b = bam_init1();
+
+// NOW PROCESS LIBRARIES
+
+
+    while (samread(fp, b) >= 0) {
+    	//Get bam core.
+    	const bam1_core_t *core = &b->core;
+    	if (core == NULL) {
+     		printf("Input file is corrupt!");
+     		return -1;
+    	}
+    	++reads;
+
+    	// new contig
+    	if (is_mapped(core)) {
+    		if (core->tid != currentTid) { // another contig or simply the first one
+    			//cout << "now porcessing contig " << contig << "\n";
+    			if(currentTid == -1) { // first read that I`m processing
+    				contigSize = head->target_len[core->tid];
+    				currentTid = core->tid;
+    				frc.setContigLength(contig, contigSize);
+    				currentContig =  new Contig(contigSize, peMinInsert_recomputed, peMaxInsert_recomputed);
+    			} else {
+    				//count contig features
+        		   	frc.setFeature(contig, LOW_COVERAGE_AREA, 0 );
+        		   	frc.setFeature(contig, HIGH_COVERAGE_AREA, 0 );
+        		   	frc.setFeature(contig, LOW_NORMAL_AREA, 0 );
+        		   	frc.setFeature(contig, HIGH_NORMAL_AREA, 0 );
+        		   	frc.setFeature(contig, HIGH_SINGLE_AREA, 0 );
+        		   	frc.setFeature(contig, HIGH_SPANNING_AREA, 0 );
+        		   	frc.setFeature(contig, HIGH_OUTIE_AREA, 0 );
+        		   	frc.setFeature(contig, COMPRESSION_AREA, 0 );
+        		   	frc.setFeature(contig, STRECH_AREA, 0 );
+        		   	frc.setFeature(contig, TOTAL, 0 );
+
+                   	frc.computeLowCoverageArea(contig, currentContig);
+                   	frc.computeHighCoverageArea(contig, currentContig);
+                   	frc.computeLowNormalArea(contig, currentContig);
+                   	frc.computeHighNormalArea(contig, currentContig);
+                   	frc.computeHighSingleArea(contig, currentContig);
+                   	frc.computeHighSpanningArea(contig, currentContig);
+                   	frc.computeHighOutieArea(contig, currentContig);
+                   	frc.computeCompressionArea(contig, currentContig);
+                   	frc.computeStrechArea(contig, currentContig);
+
+                   	frc.computeTOTAL(contig); // compute total amount of features in each contig
+                   	featuresTotal += frc.getFeature(contig, TOTAL); // update total number of feature seen so far
+                   	//frc.printContig(contig);
+                   	// now create new contig
+        			delete currentContig; // delete hold contig
+        			contig++;
+        			contigSize = head->target_len[core->tid];
+        			if (contigSize < 1) {//We can't have such sizes! this can't be right
+        				fprintf(stderr,"%s has size %d, which can't be right!\nCheck bam header!",head->target_name[core->tid],contigSize);
+        			}
+        			currentTid = core->tid; // update current identifier
+        			currentContig =  new Contig(contigSize, peMinInsert_recomputed, peMaxInsert_recomputed);
+        			frc.setContigLength(contig, contigSize);
+    			}
+    			currentContig->updateContig(b); // update contig with alignment
+    		} else {
+    			//add information to current contig
+    			currentContig->updateContig(b);
+    		}
+    	}
+    }
+ // TODO: UPDATE LAST CONTIG
+
+
+
+    cout << "\n----------\nNow computing FRC \n------\n";
+     frc.sortFRC();
+
+    ofstream myfile;
+    myfile.open ("FRC.txt");
+    myfile << "features coverage\n";
+    float step = featuresTotal/(float)100;
+    float partial=0;
+    while(partial <= featuresTotal) {
+    	uint32_t contigStep = 0;
+    	uint64_t contigLengthStep = 0;
+    	uint32_t featuresStep = 0;
+    	while(featuresStep <= partial) {
+    		contigLengthStep += frc.getContigLength(contigStep); // CONTIG[contigStep].contigLength;
+    		featuresStep += frc.getFeature(contigStep, TOTAL); // CONTIG[contigStep].TOTAL;
+    //		cout << "(" << CONTIG[contigStep].contigLength << "," << CONTIG[contigStep].TOTAL << ") ";
+    		contigStep++;
+    	}
+    	float coveragePartial =  contigLengthStep/(float)estimatedGenomeSize;
+    	myfile << partial << " " << coveragePartial << "\n";
+    	partial += step;
+    }
+    myfile.close();
+    cout << "test\n";
+
+
+}
+
+
+
+LibraryStatistics computeLibraryStats(samfile_t *fp, unsigned int minInsert, unsigned int maxInsert, unsigned int genomeLength) {
+	LibraryStatistics library;
 	//Initialize bam entity
 	bam1_t *b = bam_init1();
 
 	//All var declarations
-	unsigned long int genomeLength = 0; // total genome length
 	unsigned int contigs = 0; // number of contigs/scaffolds
 // total reads
 	uint32_t reads = 0;
@@ -353,11 +417,9 @@ int main(int argc, char *argv[]) {
 	uint32_t unmappedReads = 0;
 	uint32_t mappedReads = 0;
 	uint32_t zeroQualityReads = 0;
-
-	unsigned long int contigSize = 0;
 	uint32_t duplicates = 0;
 
-
+	uint64_t contigSize = 0;
 	uint64_t insertsLength = 0; // total inserts length
 	float insertMean;
 	float insertStd;
@@ -365,44 +427,34 @@ int main(int argc, char *argv[]) {
 // mated reads (not necessary correctly mated)
 	uint32_t matedReads = 0;        // length of reads that align on a contig with the mate
 	uint64_t matedReadsLength = 0;  // total length of mated reads
-
  // correctly aligned mates
 	uint32_t correctlyMatedReads = 0; // total number of correctly mated reads
 	uint64_t correctlyMatedReadsLength = 0; // length of correctly mated reads
-
 // wrongly oriented reads
 	uint32_t wronglyOrientedReads = 0; // number of wrongly oriented reads
 	uint64_t wronglyOrientedReadsLength = 0; // length of wrongly oriented reads
-
 // wrongly distance reads
 	uint32_t wronglyDistanceReads       = 0; // number of reads at the wrong distance
 	uint64_t wronglyDistanceReadsLength = 0;  // total length of reads placed in different contigs
-
-
 // singletons
 	uint32_t singletonReads = 0; // number of singleton reads
 	uint64_t singletonReadsLength = 0;     // total length of singleton reads
-
 // mates on different contigs
 	uint32_t matedDifferentContig = 0; // number of contig placed in a different contig
 	uint64_t matedDifferentContigLength = 0; // total number of reads placed in different contigs
 
 	float C_A = 0; // total read coverage
 	float S_A = 0; // total span coverage
-
 	float C_M = 0; // coverage induced by correctly aligned pairs
 	float C_W = 0; // coverage induced by wrongly mated pairs
 	float C_S = 0; // coverage induced by singletons
 	float C_C = 0; // coverage induced by reads with mate on a diferent contif
 
-
 // compute mean and std on the fly
 	float Mk = 0;
 	float Qk = 0;
 	uint32_t counterK = 1;
-
-
-    //Keep header for further reference
+//Keep header for further reference
     bam_header_t* head = fp->header;
     int32_t currentTid = -1;
     int32_t iSize;
@@ -412,7 +464,7 @@ int main(int argc, char *argv[]) {
 	      const bam1_core_t *core = &b->core;
 	      if (core == NULL) {  //There is something wrong with the read/file
 	    	  printf("Input file is corrupt!");
-	    	  return -1;
+	    	  return library;
 	      }
 	      ++reads; // otherwise one more read is readed
 
@@ -426,7 +478,6 @@ int main(int argc, char *argv[]) {
 	    		  if (contigSize < 1) {//We can't have such sizes! this can't be right
 	    			  fprintf(stderr,"%s has size %d, which can't be right!\nCheck bam header!",head->target_name[core->tid],contigSize);
 	    		  }
-	    		  genomeLength += contigSize;
 	    		  currentTid = core->tid;
 	    	  }
 
@@ -448,7 +499,7 @@ int main(int argc, char *argv[]) {
 	    				  iSize = (startPaired + core->l_qseq -1) - startRead; // insert size, I consider both reads of the same length
 	    				  if(!(core->flag&BAM_FREVERSE) && (core->flag&BAM_FMREVERSE) ) { //
 	    					  //here reads are correctly oriented
-	    					  if (peMinInsert <= iSize && iSize <= peMaxInsert) { //this is a right insert
+	    					  if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert
 	    						  if(counterK == 1) {
 	    							  Mk = iSize;
 	    							  Qk = 0;
@@ -477,7 +528,7 @@ int main(int argc, char *argv[]) {
 	    				  if((core->flag&BAM_FREVERSE) && !(core->flag&BAM_FMREVERSE) ) { //
 	    					  //here reads are correctly oriented
 	    					  //here reads are correctly oriented
-	    					  if (peMinInsert <= iSize && iSize <= peMaxInsert) { //this is a right insert
+	    					  if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert
 	    						  if(counterK == 1) {
 	    							  Mk = iSize;
 	    							  Qk = 0;
@@ -513,7 +564,7 @@ int main(int argc, char *argv[]) {
 	    				  iSize = (startRead + alignmentLength -1) - startPaired;
 	    				  if((core->flag&BAM_FREVERSE) && !(core->flag&BAM_FMREVERSE) ) { //
 	    					  //here reads are correctly oriented
-	    					  if (peMinInsert <= iSize && iSize <= peMaxInsert) { //this is a right insert, no need to update insert coverage
+	    					  if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert, no need to update insert coverage
 	    						  correctlyMatedReads++;
 	    						  correctlyMatedReadsLength +=  bam_cigar2qlen(core,cigar); // update number of correctly mapped and their length
 	    					  } else {
@@ -529,7 +580,7 @@ int main(int argc, char *argv[]) {
 	    				  iSize = (startPaired + core->l_qseq -1) - startRead;
 	    				  if(!(core->flag&BAM_FREVERSE) && (core->flag&BAM_FMREVERSE) ) { //
 	    					  //here reads are correctly oriented
-	    					  if (peMinInsert <= iSize && iSize <= peMaxInsert) { //this is a right insert, no need to update insert coverage
+	    					  if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert, no need to update insert coverage
 	    						  correctlyMatedReads++;
 	    						  correctlyMatedReadsLength +=  bam_cigar2qlen(core,cigar); // update number of correctly mapped and their length
 	    					  }else {
@@ -569,204 +620,45 @@ int main(int argc, char *argv[]) {
 	      }
     }
 
-    genomeLength += contigSize;
-    if (estimatedGenomeSize == 0) {
-    	estimatedGenomeSize = genomeLength;
-    }
-
-    cout << "BAM file has been read and statistics have been computed\n";
-
-    cout << "total number of contigs " << contigs << endl;
-    cout << "total reads number " << reads << "\n";
-    cout << "total mapped reads " << mappedReads << "\n";
-    cout << "total unmapped reads " << unmappedReads << "\n";
-    cout << "proper pairs " << matedReads << "\n";
-    cout << "zero quality reads " << zeroQualityReads << "\n";
-    cout << "correctly oriented " << correctlyMatedReads << "\n";
-    cout << "wrongly oriented " << wronglyOrientedReads << "\n";
-    cout << "wrongly distance " << wronglyDistanceReads << "\n";
-    cout << "wrongly contig " <<  matedDifferentContig << "\n";
-    cout << "singletons " << singletonReads << "\n";
+    cout << "LIBRARY STATISTICS\n";
+    cout << "\ttotal reads number " << reads << "\n";
+    cout << "\ttotal mapped reads " << mappedReads << "\n";
+    cout << "\ttotal unmapped reads " << unmappedReads << "\n";
+    cout << "\tproper pairs " << matedReads << "\n";
+    cout << "\tzero quality reads " << zeroQualityReads << "\n";
+    cout << "\tcorrectly oriented " << correctlyMatedReads << "\n";
+    cout << "\twrongly oriented " << wronglyOrientedReads << "\n";
+    cout << "\twrongly distance " << wronglyDistanceReads << "\n";
+    cout << "\twrongly contig " <<  matedDifferentContig << "\n";
+    cout << "\tsingletons " << singletonReads << "\n";
 
     uint32_t total = correctlyMatedReads + wronglyOrientedReads + wronglyDistanceReads + matedDifferentContig + singletonReads;
-    cout << "total " << total << "\n";
-    cout << "\n-------\n";
+    cout << "\ttotal " << total << "\n";
+    cout << "\tCoverage statistics\n";
 
-    C_A = readsLength/(float)genomeLength;
-    S_A = insertsLength/(float)genomeLength;
-    C_M = correctlyMatedReadsLength/(float)genomeLength;
-    C_W = (wronglyDistanceReadsLength + wronglyOrientedReadsLength)/(float)genomeLength;
-    C_S = (singletonReadsLength)/(float)genomeLength;
-    C_C = matedDifferentContigLength/(float)genomeLength;
-
-
-    cout << "C_A = " << C_A << endl;
-    cout << "S_A = " << S_A << endl;
-    cout << "C_M = " << C_M << endl;
-    cout << "C_W = " << C_W << endl;
-    cout << "C_S = " << C_S << endl;
-    cout << "C_C = " << C_C << endl;
-
-    cout << "\n";
-    cout << "Mean Insert length = " << Mk << endl;
-    insertMean = Mk;
+    library.C_A = C_A = readsLength/(float)genomeLength;
+    library.S_A = S_A = insertsLength/(float)genomeLength;
+    library.C_M = C_M = correctlyMatedReadsLength/(float)genomeLength;
+    library.C_W = C_W = (wronglyDistanceReadsLength + wronglyOrientedReadsLength)/(float)genomeLength;
+    library.C_S = C_S = (singletonReadsLength)/(float)genomeLength;
+    library.C_C = C_C = matedDifferentContigLength/(float)genomeLength;
+    library.insertMean = insertMean = Mk;
     Qk = sqrt(Qk/counterK);
-    cout << "Std Insert length = " << Qk << endl;
-    insertStd = Qk;
+    library.insertStd = insertStd = Qk;
 
+    cout << "\tC_A = " << C_A << endl;
+    cout << "\tS_A = " << S_A << endl;
+    cout << "\tC_M = " << C_M << endl;
+    cout << "\tC_W = " << C_W << endl;
+    cout << "\tC_S = " << C_S << endl;
+    cout << "\tC_C = " << C_C << endl;
+    cout << "\tMean Insert length = " << Mk << endl;
+    cout << "\tStd Insert length = " << Qk << endl;
+    cout << "----------\n";
 
-
-
-    //now close file and parse it again to compute FRC curve
-    samclose(fp);
-
-    cout << "\n----------\nNow computing FRC \n------\n";
-
-    fp = open_alignment_file(alignmentFile);
-    EXIT_IF_NULL(fp);
-    //Keep header for further reference
-    head = fp->header;
-    currentTid = -1;
-    reads = 0;
-
-    FRC frc = FRC(contigs); // FRC object, will memorize all information on features and contigs
-    uint32_t featuresTotal = 0;
-    frc.setC_A(C_A);
-    frc.setS_A(S_A);
-    frc.setC_C(C_C);
-    frc.setC_M(C_M);
-    frc.setC_S(C_S);
-    frc.setC_W(C_W);
-    frc.setInsertMean(insertMean);
-    frc.setInsertStd(insertStd);
-
-    Contig *currentContig; // = new Contig(contigSize, peMinInsert, peMaxInsert); // Contig object, memorizes all information to compute contig`s features
-
-    uint32_t contig=0;
-    contigSize = 0;
-
-	uint32_t windowStart = 0;
-	uint32_t windowEnd   = windowStart + WINDOW;
-	windowStatistics* actualWindow = new windowStatistics();
-
-	actualWindow->windowLength = (windowEnd - windowStart + 1);
-	actualWindow->windowStart = windowStart;
-	actualWindow->windowEnd = windowEnd;
-
-   	float C_A_i = 0;  // read coverage of window
-   	float S_A_i = 0; // span coverage of window
-   	float C_M_i = 0; // coverage of correctly aligned reads of window
-   	float C_W_i = 0; // coverage of wrongly aligned reads
-   	float C_S_i = 0; // singleton coverage of window
-   	float C_C_i = 0; // coverage of reads with mate on different contigs
-   	float Z_i   = 0; // CE statistics
-
-    while (samread(fp, b) >= 0) {
-    	//Get bam core.
-    	const bam1_core_t *core = &b->core;
-    	if (core == NULL) {
-     		printf("Input file is corrupt!");
-     		return -1;
-    	}
-    	++reads;
-
-    	// new contig
-    	if (!is_mapped(core)) {
-    		++unmappedReads;
-    	} else {
-    		if (core->tid != currentTid) { // another contig or simply the first one
-
-    			if(currentTid == -1) { // first read that I`m processing
-    			//	cout << "now porcessing contig " << contig << "\n";
-    				contigSize = head->target_len[core->tid];
-    				currentTid = core->tid;
-    				frc.setContigLength(contig, contigSize);
-    				currentContig =  new Contig(contigSize, peMinInsert, peMaxInsert);
-    			} else {
-    				//count contig features
-        		   	frc.setFeature(contig, LOW_COVERAGE_AREA, 0 );
-        		   	frc.setFeature(contig, HIGH_COVERAGE_AREA, 0 );
-        		   	frc.setFeature(contig, LOW_NORMAL_AREA, 0 );
-        		   	frc.setFeature(contig, HIGH_NORMAL_AREA, 0 );
-        		   	frc.setFeature(contig, HIGH_SINGLE_AREA, 0 );
-        		   	frc.setFeature(contig, HIGH_SPANNING_AREA, 0 );
-        		   	frc.setFeature(contig, HIGH_OUTIE_AREA, 0 );
-        		   	frc.setFeature(contig, COMPRESSION_AREA, 0 );
-        		   	frc.setFeature(contig, STRECH_AREA, 0 );
-        		   	frc.setFeature(contig, TOTAL, 0 );
-
-                   	frc.computeLowCoverageArea(contig, currentContig);
-                   	frc.computeHighCoverageArea(contig, currentContig);
-                   	frc.computeLowNormalArea(contig, currentContig);
-                   	frc.computeHighNormalArea(contig, currentContig);
-                   	frc.computeHighSingleArea(contig, currentContig);
-                   	frc.computeHighSpanningArea(contig, currentContig);
-                   	frc.computeHighOutieArea(contig, currentContig);
-                   	frc.computeCompressionArea(contig, currentContig);
-                   	frc.computeStrechArea(contig, currentContig);
-
-                   	frc.computeTOTAL(contig); // compute total amount of features in each contig
-                   	featuresTotal += frc.getFeature(contig, TOTAL); // update total number of feature seen so far
-
-               //    	frc.printContig(contig);
-
-// now create new contig
-        			delete currentContig; // delete hold contig
-        			contig++;
-        			contigSize = head->target_len[core->tid];
-        			if (contigSize < 1) {//We can't have such sizes! this can't be right
-        				fprintf(stderr,"%s has size %d, which can't be right!\nCheck bam header!",head->target_name[core->tid],contigSize);
-        			}
-        			currentTid = core->tid; // update current identifier
-        			currentContig =  new Contig(contigSize, peMinInsert, peMaxInsert);
-        			frc.setContigLength(contig, contigSize);
-    			}
-
-    			currentContig->updateContig(b); // update contig with alignment
-
-    		} else {
-    			//add information to current contig
-    			updateWindow(b, actualWindow,  peMinInsert, peMaxInsert);
-    			currentContig->updateContig(b);
-    		}
-
-
-    	}
-
-
-    }
-  //  currentContig->print();
-
- // TODO: UPDATE LAST CONTIG
-    cout << "estimated genome size " << estimatedGenomeSize << endl;
-    //SORT CONTIGS ACCORDING TO THEIR LENGTH
-    cout << "Now computing FRC \n";
-    frc.sortFRC();
-
-    ofstream myfile;
-    myfile.open ("FRC.txt");
-    myfile << "features coverage\n";
-    float step = featuresTotal/(float)100;
-    float partial=0;
-    while(partial <= featuresTotal) {
-    	uint32_t contigStep = 0;
-    	uint64_t contigLengthStep = 0;
-    	uint32_t featuresStep = 0;
-    	while(featuresStep <= partial) {
-    		contigLengthStep += frc.getContigLength(contigStep); // CONTIG[contigStep].contigLength;
-    		featuresStep += frc.getFeature(contigStep, TOTAL); // CONTIG[contigStep].TOTAL;
-    //		cout << "(" << CONTIG[contigStep].contigLength << "," << CONTIG[contigStep].TOTAL << ") ";
-    		contigStep++;
-    	}
-    	float coveragePartial =  contigLengthStep/(float)estimatedGenomeSize;
-    	myfile << partial << " " << coveragePartial << "\n";
-    	partial += step;
-    }
-    myfile.close();
-    cout << "test\n";
+    return library;
 
 
 }
-
 
 
