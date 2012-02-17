@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
 		estimatedGenomeSize = 0;
 	}
 
-//TODO: OPTION PARSING ENDED, CREATE A FUNCTION FOR IT
+//TODO: PARSING ENDED, CREATE A FUNCTION FOR IT
 	uint64_t genomeLength = 0;
 	uint32_t contigsNumber = 0;
 	samfile_t *fp;
@@ -233,8 +233,10 @@ int main(int argc, char *argv[]) {
 
 	EXIT_IF_NULL(fp);
 	bam_header_t* head = fp->header; // sam header
+	map<string,unsigned int> contig2position;
 	for(int i=0; i< head->n_targets ; i++) {
 		genomeLength += head->target_len[i];
+		contig2position[head->target_name[i]]=contigsNumber; // keep track of contig name and position in order to avoid problems when processing two libraries
 		contigsNumber++;
 	}
 	if (estimatedGenomeSize == 0) {
@@ -246,10 +248,23 @@ int main(int argc, char *argv[]) {
 
     LibraryStatistics libraryPE;
     LibraryStatistics libraryMP;
+    uint32_t peMinInsert_recomputed; // recompute min and max insert on the basis of the new insert size
+    uint32_t peMaxInsert_recomputed; // the original min and max threshold are used only as a first rough approximation
+    uint32_t mpMinInsert_recomputed; // recompute min and max insert on the basis of the new insert size
+    uint32_t mpMaxInsert_recomputed; // the original min and max threshold are used only as a first rough approximation
+
 	if(vm.count("pe-sam")) { // in this case file is already OPEN
 		cout << "COMPUTING PE STATISTIC\n";
 		libraryPE = computeLibraryStats(fp, peMinInsert, peMaxInsert, estimatedGenomeSize);
 		samclose(fp); // close the file
+	    if(libraryPE.insertMean - 3*libraryPE.insertStd > 0) {
+	    	peMinInsert_recomputed = libraryPE.insertMean - 3*libraryPE.insertStd;
+	    } else {
+	    	peMinInsert_recomputed = 0;
+	    }
+	    peMaxInsert_recomputed = libraryPE.insertMean + 3*libraryPE.insertStd;
+	    cout << "\tNEW minimum allowed insert " << peMinInsert_recomputed << "\n";
+	    cout << "\tNEW maximum allowed insert " << peMaxInsert_recomputed << "\n";
 	}
 
 	if(vm.count("mp-sam")) {
@@ -262,18 +277,42 @@ int main(int argc, char *argv[]) {
 			libraryMP = computeLibraryStats(fp, mpMinInsert, mpMaxInsert, estimatedGenomeSize);
 			samclose(fp); // close the file
 		}
+		if(libraryMP.insertMean - 3*libraryMP.insertStd > 0) {
+			mpMinInsert_recomputed = libraryMP.insertMean - 3*libraryMP.insertStd;
+		} else {
+			mpMinInsert_recomputed = 0;
+		}
+		mpMaxInsert_recomputed = libraryMP.insertMean + 3*libraryMP.insertStd;
+
+		cout << "\tNEW minimum allowed insert " << mpMinInsert_recomputed << "\n";
+		cout << "\tNEW maximum allowed insert " << mpMaxInsert_recomputed << "\n";
 	}
 
 
-	exit(0);
-
     //parse BAM file again to compute FRC curve
-    fp = open_alignment_file(PEalignmentFile);
+    FRC frc = FRC(contigsNumber); // FRC object, will memorize all information on features and contigs
+    if(vm.count("pe-sam")) { // paired read library is preset, use it to compute basic contig statistics
+    	fp = open_alignment_file(PEalignmentFile);
+    } else {  // Otherwise use MP library that must be provided
+    	fp = open_alignment_file(MPalignmentFile);
+    }
     EXIT_IF_NULL(fp);
     head = fp->header; // sam header
-
-    FRC frc = FRC(contigsNumber); // FRC object, will memorize all information on features and contigs
     uint32_t featuresTotal = 0;
+    for(int i=0; i< head->n_targets ; i++) { // Initialize FRC structure
+    	frc.setContigLength(i, head->target_len[i]);
+	   	frc.setFeature(i, LOW_COVERAGE_AREA, 0 );
+	   	frc.setFeature(i, HIGH_COVERAGE_AREA, 0 );
+	   	frc.setFeature(i, LOW_NORMAL_AREA, 0 );
+	   	frc.setFeature(i, HIGH_NORMAL_AREA, 0 );
+	   	frc.setFeature(i, HIGH_SINGLE_AREA, 0 );
+	   	frc.setFeature(i, HIGH_SPANNING_AREA, 0 );
+	   	frc.setFeature(i, HIGH_OUTIE_AREA, 0 );
+	   	frc.setFeature(i, COMPRESSION_AREA, 0 );
+	   	frc.setFeature(i, STRECH_AREA, 0 );
+	   	frc.setFeature(i, TOTAL, 0 );
+    }
+    //set FRC parameters
     frc.setC_A(libraryPE.C_A);
     frc.setS_A(libraryPE.S_A);
     frc.setC_C(libraryPE.C_C);
@@ -283,99 +322,171 @@ int main(int argc, char *argv[]) {
     frc.setInsertMean(libraryPE.insertMean);
     frc.setInsertStd(libraryPE.insertStd);
 
-
-    uint32_t peMinInsert_recomputed; // recompute min and max insert on the basis of the new insert size
-    uint32_t peMaxInsert_recomputed; // the original min and max threshold are used only as a first rough approximation
-    if(libraryPE.insertMean - 3*libraryPE.insertStd > 0) {
-    	peMinInsert_recomputed = libraryPE.insertMean - 3*libraryPE.insertStd;
-    } else {
-    	peMinInsert_recomputed = 0;
-    }
-    peMaxInsert_recomputed = libraryPE.insertMean + 3*libraryPE.insertStd;
-
-    cout << "NEW minimum allowed insert " << peMinInsert_recomputed << "\n";
-    cout << "NEW maximum allowed insert " << peMaxInsert_recomputed << "\n";
-
     Contig *currentContig; // = new Contig(contigSize, peMinInsert, peMaxInsert); // Contig object, memorizes all information to compute contig`s features
-
     int currentTid = -1;
     int reads = 0;
     uint32_t contig=0;
     uint32_t contigSize = 0;
-    //Initialize bam entity
     bam1_t *b = bam_init1();
 
 // NOW PROCESS LIBRARIES
 
+    if(vm.count("pe-sam")) {
+    	fp = open_alignment_file(PEalignmentFile);
+    	EXIT_IF_NULL(fp);
+    	head = fp->header; // sam header
+    	while (samread(fp, b) >= 0) {
+    		//Get bam core.
+    		const bam1_core_t *core = &b->core;
+    		if (core == NULL) {
+    			printf("Input file is corrupt!");
+    			return -1;
+    		}
+    		++reads;
 
-    while (samread(fp, b) >= 0) {
-    	//Get bam core.
-    	const bam1_core_t *core = &b->core;
-    	if (core == NULL) {
-     		printf("Input file is corrupt!");
-     		return -1;
-    	}
-    	++reads;
-
-    	// new contig
-    	if (is_mapped(core)) {
-    		if (core->tid != currentTid) { // another contig or simply the first one
-    			//cout << "now porcessing contig " << contig << "\n";
-    			if(currentTid == -1) { // first read that I`m processing
-    				contigSize = head->target_len[core->tid];
-    				currentTid = core->tid;
-    				frc.setContigLength(contig, contigSize);
-    				currentContig =  new Contig(contigSize, peMinInsert_recomputed, peMaxInsert_recomputed);
+    		// new contig
+    		if (is_mapped(core)) {
+    			if (core->tid != currentTid) { // another contig or simply the first one
+    				//cout << "now porcessing contig " << contig << "\n";
+    				if(currentTid == -1) { // first read that I`m processing
+    					contigSize = head->target_len[core->tid];
+    					currentTid = core->tid;
+    					contig = contig2position[head->target_name[currentTid]];
+    					currentContig =  new Contig(contigSize, peMinInsert_recomputed, peMaxInsert_recomputed);
+    				} else {
+    					//count contig features
+    					frc.computeLowCoverageArea(contig, currentContig);
+    					frc.computeHighCoverageArea(contig, currentContig);
+    					frc.computeLowNormalArea(contig, currentContig);
+    					frc.computeHighNormalArea(contig, currentContig);
+    					frc.computeHighSingleArea(contig, currentContig);
+    					frc.computeHighSpanningArea(contig, currentContig);
+    					frc.computeHighOutieArea(contig, currentContig);
+    					frc.computeCompressionArea(contig, currentContig);
+    					frc.computeStrechArea(contig, currentContig);
+    					frc.computeTOTAL(contig); // compute total amount of features in each contig
+    					//frc.printContig(contig);
+    					// now create new contig
+    					delete currentContig; // delete hold contig
+    					contigSize = head->target_len[core->tid];
+    					if (contigSize < 1) {//We can't have such sizes! this can't be right
+    						fprintf(stderr,"%s has size %d, which can't be right!\nCheck bam header!",head->target_name[core->tid],contigSize);
+    					}
+    					currentTid = core->tid; // update current identifier
+    					contig = contig2position[head->target_name[currentTid]];
+    					currentContig =  new Contig(contigSize, peMinInsert_recomputed, peMaxInsert_recomputed);
+    				}
+    				currentContig->updateContig(b); // update contig with alignment
     			} else {
-    				//count contig features
-        		   	frc.setFeature(contig, LOW_COVERAGE_AREA, 0 );
-        		   	frc.setFeature(contig, HIGH_COVERAGE_AREA, 0 );
-        		   	frc.setFeature(contig, LOW_NORMAL_AREA, 0 );
-        		   	frc.setFeature(contig, HIGH_NORMAL_AREA, 0 );
-        		   	frc.setFeature(contig, HIGH_SINGLE_AREA, 0 );
-        		   	frc.setFeature(contig, HIGH_SPANNING_AREA, 0 );
-        		   	frc.setFeature(contig, HIGH_OUTIE_AREA, 0 );
-        		   	frc.setFeature(contig, COMPRESSION_AREA, 0 );
-        		   	frc.setFeature(contig, STRECH_AREA, 0 );
-        		   	frc.setFeature(contig, TOTAL, 0 );
-
-                   	frc.computeLowCoverageArea(contig, currentContig);
-                   	frc.computeHighCoverageArea(contig, currentContig);
-                   	frc.computeLowNormalArea(contig, currentContig);
-                   	frc.computeHighNormalArea(contig, currentContig);
-                   	frc.computeHighSingleArea(contig, currentContig);
-                   	frc.computeHighSpanningArea(contig, currentContig);
-                   	frc.computeHighOutieArea(contig, currentContig);
-                   	frc.computeCompressionArea(contig, currentContig);
-                   	frc.computeStrechArea(contig, currentContig);
-
-                   	frc.computeTOTAL(contig); // compute total amount of features in each contig
-                   	featuresTotal += frc.getFeature(contig, TOTAL); // update total number of feature seen so far
-                   	//frc.printContig(contig);
-                   	// now create new contig
-        			delete currentContig; // delete hold contig
-        			contig++;
-        			contigSize = head->target_len[core->tid];
-        			if (contigSize < 1) {//We can't have such sizes! this can't be right
-        				fprintf(stderr,"%s has size %d, which can't be right!\nCheck bam header!",head->target_name[core->tid],contigSize);
-        			}
-        			currentTid = core->tid; // update current identifier
-        			currentContig =  new Contig(contigSize, peMinInsert_recomputed, peMaxInsert_recomputed);
-        			frc.setContigLength(contig, contigSize);
+    				//add information to current contig
+    				currentContig->updateContig(b);
     			}
-    			currentContig->updateContig(b); // update contig with alignment
-    		} else {
-    			//add information to current contig
-    			currentContig->updateContig(b);
     		}
     	}
+    	//UPDATE LAST CONTIG
+    	frc.computeLowCoverageArea(contig, currentContig);
+    	frc.computeHighCoverageArea(contig, currentContig);
+    	frc.computeLowNormalArea(contig, currentContig);
+    	frc.computeHighNormalArea(contig, currentContig);
+    	frc.computeHighSingleArea(contig, currentContig);
+    	frc.computeHighSpanningArea(contig, currentContig);
+    	frc.computeHighOutieArea(contig, currentContig);
+    	frc.computeCompressionArea(contig, currentContig);
+    	frc.computeStrechArea(contig, currentContig);
+    	frc.computeTOTAL(contig); // compute total amount of features in each contig
+
+    	delete currentContig; // delete hold contig
+    	samclose(fp); // close the file
     }
- // TODO: UPDATE LAST CONTIG
 
+    featuresTotal = 0;
+    for(unsigned int i=0; i< contigsNumber; i++) {
+    	featuresTotal += frc.getFeature(i, TOTAL); // update total number of feature seen so far
+    }
+    cout << "total number of features " << featuresTotal << "\n";
 
+//NOW COMPUTE MP FEATURES
+    currentTid = -1;
+    reads = 0;
+    contig=0;
+    contigSize = 0;
+    b = bam_init1();
 
+    if(vm.count("pe-sam")) {
+    	fp = open_alignment_file(MPalignmentFile);
+    	EXIT_IF_NULL(fp);
+    	head = fp->header; // sam header
+    	while (samread(fp, b) >= 0) {
+    		//Get bam core.
+    		const bam1_core_t *core = &b->core;
+    		if (core == NULL) {
+    			printf("Input file is corrupt!");
+    			return -1;
+    		}
+    		++reads;
+
+    		// new contig
+    		if (is_mapped(core)) {
+    			if (core->tid != currentTid) { // another contig or simply the first one
+    				//cout << "now porcessing contig " << contig << "\n";
+    				if(currentTid == -1) { // first read that I`m processing
+    					contigSize = head->target_len[core->tid];
+    					currentTid = core->tid;
+    					contig = contig2position[head->target_name[currentTid]];
+    					currentContig =  new Contig(contigSize, mpMinInsert_recomputed, mpMaxInsert_recomputed);
+    				} else {
+    					//count contig features
+ //   					frc.computeLowCoverageArea(contig, currentContig);
+ //  					frc.computeHighCoverageArea(contig, currentContig);
+ //   					frc.computeLowNormalArea(contig, currentContig);
+ //   					frc.computeHighNormalArea(contig, currentContig);
+    					frc.computeHighSingleArea(contig, currentContig);
+    					frc.computeHighSpanningArea(contig, currentContig);
+    					frc.computeHighOutieArea(contig, currentContig);
+    					frc.computeCompressionArea(contig, currentContig);
+    					frc.computeStrechArea(contig, currentContig);
+    					frc.computeTOTAL(contig); // compute total amount of features in each contig
+    					//frc.printContig(contig);
+    					// now create new contig
+    					delete currentContig; // delete hold contig
+    					contigSize = head->target_len[core->tid];
+    					if (contigSize < 1) {//We can't have such sizes! this can't be right
+    						fprintf(stderr,"%s has size %d, which can't be right!\nCheck bam header!",head->target_name[core->tid],contigSize);
+    					}
+    					currentTid = core->tid; // update current identifier
+    					contig = contig2position[head->target_name[currentTid]];
+    					currentContig =  new Contig(contigSize, peMinInsert_recomputed, peMaxInsert_recomputed);
+    				}
+    				currentContig->updateContig(b); // update contig with alignment
+    			} else {
+    				//add information to current contig
+    				currentContig->updateContig(b);
+    			}
+    		}
+    	}
+    	//UPDATE LAST CONTIG
+    	frc.computeHighSingleArea(contig, currentContig);
+    	frc.computeHighSpanningArea(contig, currentContig);
+    	frc.computeHighOutieArea(contig, currentContig);
+    	frc.computeCompressionArea(contig, currentContig);
+    	frc.computeStrechArea(contig, currentContig);
+    	frc.computeTOTAL(contig); // compute total amount of features in each contig
+    	samclose(fp); // close the file
+
+    }
+
+    featuresTotal = 0;
     cout << "\n----------\nNow computing FRC \n------\n";
-     frc.sortFRC();
+    frc.sortFRC();
+
+    for(unsigned int i=0; i< contigsNumber; i++) {
+    	featuresTotal += frc.getFeature(i, TOTAL); // update total number of feature seen so far
+	//   	cout << frc.getContigLength(i) << " " << frc.getFeature(i, TOTAL) << "\n";
+    }
+    cout << "total number of features " << featuresTotal << "\n";
+
+
+
 
     ofstream myfile;
     myfile.open ("FRC.txt");
@@ -387,9 +498,9 @@ int main(int argc, char *argv[]) {
     	uint64_t contigLengthStep = 0;
     	uint32_t featuresStep = 0;
     	while(featuresStep <= partial) {
-    		contigLengthStep += frc.getContigLength(contigStep); // CONTIG[contigStep].contigLength;
+    		contigLengthStep += frc.getContigLength(contigStep); // CONTIG[contigStep].contigLength
     		featuresStep += frc.getFeature(contigStep, TOTAL); // CONTIG[contigStep].TOTAL;
-    //		cout << "(" << CONTIG[contigStep].contigLength << "," << CONTIG[contigStep].TOTAL << ") ";
+
     		contigStep++;
     	}
     	float coveragePartial =  contigLengthStep/(float)estimatedGenomeSize;

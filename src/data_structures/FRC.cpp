@@ -31,21 +31,6 @@ void FRC::sortFRC() {
 	sort(CONTIG.begin(), CONTIG.end(), sortContigs);
 }
 
-void FRC::update(unsigned int ctg, Feature f) {
-	switch(f) {
-	case LOW_COVERAGE_AREA: this->CONTIG[ctg].updateLOW_COVERAGE_AREA(); break;
-	case HIGH_COVERAGE_AREA: this->CONTIG[ctg].updateHIGH_COVERAGE_AREA() ; break;
-	case LOW_NORMAL_AREA: this->CONTIG[ctg].updateLOW_NORMAL_AREA(); break;
-	case HIGH_NORMAL_AREA: this->CONTIG[ctg].updateHIGH_NORMAL_AREA(); break;
-	case HIGH_SINGLE_AREA: this->CONTIG[ctg].updateHIGH_SINGLE_AREA() ; break;
-	case HIGH_SPANNING_AREA: this->CONTIG[ctg].updateHIGH_SPANNING_AREA() ; break;
-	case HIGH_OUTIE_AREA: this->CONTIG[ctg].updateHIGH_OUTIE_AREA() ; break;
-	case COMPRESSION_AREA: this->CONTIG[ctg].updateCOMPRESSION_AREA() ; break;
-	case STRECH_AREA: this->CONTIG[ctg].updateSTRECH_AREA() ; break;
-	default: cout << f << "undefined feature, exit with error\n";
-
-	}
-}
 
 void FRC::setContigLength(unsigned int ctg, unsigned int contigLength) {
 	CONTIG[ctg].setContigLength(contigLength);
@@ -93,50 +78,50 @@ void FRC::setFeature(unsigned int ctg, Feature f, unsigned int value) {
 
 void FRC::computeLowCoverageArea(unsigned int ctg, Contig *contig) {
 	unsigned int lowCoverageFeatures = contig->getLowCoverageAreas(this->C_A);
-	this->CONTIG[ctg].setLOW_COVERAGE_AREA(lowCoverageFeatures);
+	this->CONTIG[ctg].updateLOW_COVERAGE_AREA(lowCoverageFeatures);
 }
 
 void FRC::computeHighCoverageArea(unsigned int ctg, Contig *contig) {
 	unsigned int highCoverageFeatures = contig->getHighCoverageAreas(this->C_A);
-	this->CONTIG[ctg].setHIGH_COVERAGE_AREA(highCoverageFeatures);
+	this->CONTIG[ctg].updateHIGH_COVERAGE_AREA(highCoverageFeatures);
 }
 
 void FRC::computeLowNormalArea(unsigned int ctg, Contig *contig) {
 	unsigned int lowNormalFeatures = contig->getLowNormalAreas(this->C_M);
-	this->CONTIG[ctg].setLOW_NORMAL_AREA(lowNormalFeatures);
+	this->CONTIG[ctg].updateLOW_NORMAL_AREA(lowNormalFeatures);
 }
 
 void FRC::computeHighNormalArea(unsigned int ctg, Contig *contig) {
 	unsigned int highNormalFeatures = contig->getHighNormalAreas(this->C_M);
-	this->CONTIG[ctg].setHIGH_NORMAL_AREA(highNormalFeatures);
+	this->CONTIG[ctg].updateHIGH_NORMAL_AREA(highNormalFeatures);
 
 }
 
 void FRC::computeHighSingleArea(unsigned int ctg, Contig *contig) {
 	unsigned int highSingleFeatures = contig->getHighSingleAreas();
-	this->CONTIG[ctg].setHIGH_SINGLE_AREA(highSingleFeatures);
+	this->CONTIG[ctg].updateHIGH_SINGLE_AREA(highSingleFeatures);
 }
 
 void FRC::computeHighSpanningArea(unsigned int ctg, Contig *contig) {
 	unsigned int highSpanningFeatures = contig->getHighSpanningAreas();
-	this->CONTIG[ctg].setHIGH_SPANNING_AREA(highSpanningFeatures);
+	this->CONTIG[ctg].updateHIGH_SPANNING_AREA(highSpanningFeatures);
 }
 
 void FRC::computeHighOutieArea(unsigned int ctg, Contig *contig) {
 	unsigned int highOutieFeatures = contig->getHighOutieAreas();
-	this->CONTIG[ctg].setHIGH_OUTIE_AREA(highOutieFeatures);
+	this->CONTIG[ctg].updateHIGH_OUTIE_AREA(highOutieFeatures);
 
 }
 
 void FRC::computeCompressionArea(unsigned int ctg, Contig *contig) {
 	unsigned int compressionFeatures = contig->getCompressionAreas(this->insertMean, this->insertStd);
-	this->CONTIG[ctg].setCOMPRESSION_AREA(compressionFeatures);
+	this->CONTIG[ctg].updateCOMPRESSION_AREA(compressionFeatures);
 
 }
 
 void FRC::computeStrechArea(unsigned int ctg, Contig *contig) {
 	unsigned int expansionFeatures = contig->getExpansionAreas(this->insertMean, this->insertStd);
-	this->CONTIG[ctg].setSTRECH_AREA(expansionFeatures);
+	this->CONTIG[ctg].updateSTRECH_AREA(expansionFeatures);
 }
 
 void FRC::computeTOTAL(unsigned int ctg) {
@@ -205,7 +190,6 @@ void contigFeatures::setContigLength(unsigned int contigLength) {
 	this->contigLength = contigLength;
 }
 
-
 void contigFeatures::setLOW_COVERAGE_AREA(unsigned int numFeat) {
 	this->LOW_COVERAGE_AREA = numFeat;
 }
@@ -234,6 +218,36 @@ void contigFeatures::setSTRECH_AREA(unsigned int numFeat) {
 	this->STRECH_AREA = numFeat;
 }
 
+
+void contigFeatures::updateLOW_COVERAGE_AREA(unsigned int numFeat) {
+	this->LOW_COVERAGE_AREA += numFeat;
+}
+void contigFeatures::updateHIGH_COVERAGE_AREA(unsigned int numFeat) {
+	this->HIGH_COVERAGE_AREA += numFeat;
+}
+void contigFeatures::updateLOW_NORMAL_AREA(unsigned int numFeat) {
+	this->LOW_NORMAL_AREA += numFeat;
+}
+void contigFeatures::updateHIGH_NORMAL_AREA(unsigned int numFeat) {
+	this->HIGH_NORMAL_AREA += numFeat;
+}
+void contigFeatures::updateHIGH_SINGLE_AREA(unsigned int numFeat) {
+	this->HIGH_SINGLE_AREA += numFeat;
+}
+void contigFeatures::updateHIGH_SPANNING_AREA(unsigned int numFeat) {
+	this->HIGH_SPANNING_AREA += numFeat;
+}
+void contigFeatures::updateHIGH_OUTIE_AREA(unsigned int numFeat) {
+	this->HIGH_OUTIE_AREA += numFeat;
+}
+void contigFeatures::updateCOMPRESSION_AREA(unsigned int numFeat) {
+	this->COMPRESSION_AREA += numFeat;
+}
+void contigFeatures::updateSTRECH_AREA(unsigned int numFeat) {
+	this->STRECH_AREA += numFeat;
+}
+
+
 void contigFeatures::computeTOTAL() {
 	this->TOTAL = this->COMPRESSION_AREA + this->HIGH_COVERAGE_AREA + this->HIGH_NORMAL_AREA + this->HIGH_OUTIE_AREA +
 			this->HIGH_SINGLE_AREA + this->HIGH_SINGLE_AREA + this->HIGH_SPANNING_AREA + this->LOW_COVERAGE_AREA +
@@ -246,50 +260,6 @@ void contigFeatures::setTOTAL(unsigned int numFeat) {
 }
 
 
-void contigFeatures::updateLOW_COVERAGE_AREA() {
-	LOW_COVERAGE_AREA++;
-	TOTAL++;
-}
-
-void contigFeatures::updateHIGH_COVERAGE_AREA() {
-	HIGH_COVERAGE_AREA++;
-	TOTAL++;
-}
-
-void contigFeatures::updateLOW_NORMAL_AREA() {
-	LOW_NORMAL_AREA++;
-	TOTAL++;
-}
-
-void contigFeatures::updateHIGH_NORMAL_AREA() {
-	HIGH_NORMAL_AREA++;
-	TOTAL++;
-}
-
-void contigFeatures::updateHIGH_SINGLE_AREA() {
-	HIGH_SINGLE_AREA++;
-	TOTAL++;
-}
-
-void contigFeatures::updateHIGH_SPANNING_AREA() {
-	HIGH_SPANNING_AREA++;
-	TOTAL++;
-}
-
-void contigFeatures::updateHIGH_OUTIE_AREA() {
-	HIGH_OUTIE_AREA++;
-	TOTAL++;
-}
-
-void contigFeatures::updateCOMPRESSION_AREA() {
-	COMPRESSION_AREA++;
-	TOTAL++;
-}
-
-void contigFeatures::updateSTRECH_AREA() {
-	STRECH_AREA++;
-	TOTAL++;
-}
 
 
 

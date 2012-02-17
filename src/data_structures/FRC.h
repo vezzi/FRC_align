@@ -54,15 +54,15 @@ public:
 
 	void computeTOTAL();
 
-	void updateLOW_COVERAGE_AREA();
-	void updateHIGH_COVERAGE_AREA();
-	void updateLOW_NORMAL_AREA();
-	void updateHIGH_NORMAL_AREA();
-	void updateHIGH_SINGLE_AREA();
-	void updateHIGH_SPANNING_AREA();
-	void updateHIGH_OUTIE_AREA();
-	void updateCOMPRESSION_AREA();
-	void updateSTRECH_AREA();
+	void updateLOW_COVERAGE_AREA(unsigned int numFeat);
+	void updateHIGH_COVERAGE_AREA(unsigned int numFeat);
+	void updateLOW_NORMAL_AREA(unsigned int numFeat);
+	void updateHIGH_NORMAL_AREA(unsigned int numFeat);
+	void updateHIGH_SINGLE_AREA(unsigned int numFeat);
+	void updateHIGH_SPANNING_AREA(unsigned int numFeat);
+	void updateHIGH_OUTIE_AREA(unsigned int numFeat);
+	void updateCOMPRESSION_AREA(unsigned int numFeat);
+	void updateSTRECH_AREA(unsigned int numFeat);
 	//void updateFeatures(windowStatistics* window)
 
 
@@ -107,7 +107,6 @@ public:
 	FRC(unsigned int contigs);
 	~FRC();
 
-	void update(unsigned int ctg, Feature f);
 	unsigned int getFeature(unsigned int ctg, Feature f);
 	void setFeature(unsigned int ctg, Feature f, unsigned int value);
 	void setContigLength(unsigned int ctg, unsigned int contigLength);
