@@ -77,51 +77,107 @@ void FRC::setFeature(unsigned int ctg, Feature f, unsigned int value) {
 }
 
 void FRC::computeLowCoverageArea(unsigned int ctg, Contig *contig) {
-	unsigned int lowCoverageFeatures = contig->getLowCoverageAreas(this->C_A);
-	this->CONTIG[ctg].updateLOW_COVERAGE_AREA(lowCoverageFeatures);
+	unsigned int feat = contig->getLowCoverageAreasZones(this->C_A);
+	cout << "LOW COV " << feat << " " << contig->lowCoverageAreas.size() << "\n";
+	this->CONTIG[ctg].updateLOW_COVERAGE_AREA(feat);
+	for(unsigned int i=0; i< contig->lowCoverageAreas.size(); i++) {
+		this->CONTIG[ctg].LOW_COVERAGE_AREAS.push_back(contig->lowCoverageAreas.at(i));
+	}
+
+//	unsigned int lowCoverageFeatures = contig->getLowCoverageAreas(this->C_A);
+//	this->CONTIG[ctg].updateLOW_COVERAGE_AREA(lowCoverageFeatures);
 }
 
 void FRC::computeHighCoverageArea(unsigned int ctg, Contig *contig) {
-	unsigned int highCoverageFeatures = contig->getHighCoverageAreas(this->C_A);
-	this->CONTIG[ctg].updateHIGH_COVERAGE_AREA(highCoverageFeatures);
+	unsigned int feat = contig->getHighCoverageAreasZones(this->C_A);
+	cout << "HIGH COV " << feat << " " << contig->highCoverageAreas.size() << "\n";
+	this->CONTIG[ctg].updateHIGH_COVERAGE_AREA(feat);
+	for(unsigned int i=0; i< contig->highCoverageAreas.size(); i++) {
+		this->CONTIG[ctg].HIGH_COVERAGE_AREAS.push_back(contig->highCoverageAreas.at(i));
+	}
+
+//	unsigned int highCoverageFeatures = contig->getHighCoverageAreas(this->C_A);
+//	this->CONTIG[ctg].updateHIGH_COVERAGE_AREA(highCoverageFeatures);
 }
 
 void FRC::computeLowNormalArea(unsigned int ctg, Contig *contig) {
-	unsigned int lowNormalFeatures = contig->getLowNormalAreas(this->C_M);
-	this->CONTIG[ctg].updateLOW_NORMAL_AREA(lowNormalFeatures);
+//	ContigsFeat featuresAreas = contig->getLowNormalAreasZones(this->C_M);
+//	this->CONTIG[ctg].updateLOW_NORMAL_AREA(featuresAreas.feature);
+//	for(unsigned int i=0; i<featuresAreas.startStopPositions.size(); i++) {
+//		this->CONTIG[ctg].LOW_NORMAL_AREAS.push_back(featuresAreas.startStopPositions.at(i));
+//	}
+
+//	unsigned int lowNormalFeatures = contig->getLowNormalAreas(this->C_M);
+//	this->CONTIG[ctg].updateLOW_NORMAL_AREA(lowNormalFeatures);
 }
 
 void FRC::computeHighNormalArea(unsigned int ctg, Contig *contig) {
-	unsigned int highNormalFeatures = contig->getHighNormalAreas(this->C_M);
-	this->CONTIG[ctg].updateHIGH_NORMAL_AREA(highNormalFeatures);
+//	ContigsFeat featuresAreas = contig->getHighNormalAreasZones(this->C_M);
+//	this->CONTIG[ctg].updateHIGH_NORMAL_AREA(featuresAreas.feature);
+//	for(unsigned int i=0; i<featuresAreas.startStopPositions.size(); i++) {
+//		this->CONTIG[ctg].HIGH_NORMAL_AREAS.push_back(featuresAreas.startStopPositions.at(i));
+//	}
+
+//	unsigned int highNormalFeatures = contig->getHighNormalAreas(this->C_M);
+//	this->CONTIG[ctg].updateHIGH_NORMAL_AREA(highNormalFeatures);
 
 }
 
 void FRC::computeHighSingleArea(unsigned int ctg, Contig *contig) {
-	unsigned int highSingleFeatures = contig->getHighSingleAreas();
-	this->CONTIG[ctg].updateHIGH_SINGLE_AREA(highSingleFeatures);
+//	ContigsFeat featuresAreas = contig->getHighSingleAreasZones();
+//	this->CONTIG[ctg].updateHIGH_SINGLE_AREA(featuresAreas.feature);
+//	for(unsigned int i=0; i<featuresAreas.startStopPositions.size(); i++) {
+//		this->CONTIG[ctg].HIGH_SINGLE_AREAS.push_back(featuresAreas.startStopPositions.at(i));
+//	}
+
+//	unsigned int highSingleFeatures = contig->getHighSingleAreas();
+//	this->CONTIG[ctg].updateHIGH_SINGLE_AREA(highSingleFeatures);
 }
 
 void FRC::computeHighSpanningArea(unsigned int ctg, Contig *contig) {
-	unsigned int highSpanningFeatures = contig->getHighSpanningAreas();
-	this->CONTIG[ctg].updateHIGH_SPANNING_AREA(highSpanningFeatures);
+//	ContigsFeat featuresAreas = contig->getHighSpanningAreasZones();
+//	this->CONTIG[ctg].updateHIGH_SPANNING_AREA(featuresAreas.feature);
+//	for(unsigned int i=0; i<featuresAreas.startStopPositions.size(); i++) {
+//		this->CONTIG[ctg].HIGH_SPANNING_AREAS.push_back(featuresAreas.startStopPositions.at(i));
+//	}
+
+//	unsigned int highSpanningFeatures = contig->getHighSpanningAreas();
+//	this->CONTIG[ctg].updateHIGH_SPANNING_AREA(highSpanningFeatures);
 }
 
 void FRC::computeHighOutieArea(unsigned int ctg, Contig *contig) {
-	unsigned int highOutieFeatures = contig->getHighOutieAreas();
-	this->CONTIG[ctg].updateHIGH_OUTIE_AREA(highOutieFeatures);
+//	ContigsFeat featuresAreas = contig->getHighOutieAreasZones();
+//	this->CONTIG[ctg].updateHIGH_OUTIE_AREA(featuresAreas.feature);
+//	for(unsigned int i=0; i<featuresAreas.startStopPositions.size(); i++) {
+//		this->CONTIG[ctg].HIGH_OUTIE_AREAS.push_back(featuresAreas.startStopPositions.at(i));
+//	}
+
+//	unsigned int highOutieFeatures = contig->getHighOutieAreas();
+//	this->CONTIG[ctg].updateHIGH_OUTIE_AREA(highOutieFeatures);
 
 }
 
 void FRC::computeCompressionArea(unsigned int ctg, Contig *contig) {
-	unsigned int compressionFeatures = contig->getCompressionAreas(this->insertMean, this->insertStd);
-	this->CONTIG[ctg].updateCOMPRESSION_AREA(compressionFeatures);
+//	ContigsFeat featuresAreas = contig->getCompressionAreasZones(this->insertMean, this->insertStd);
+//	this->CONTIG[ctg].updateCOMPRESSION_AREA(featuresAreas.feature);
+//	for(unsigned int i=0; i<featuresAreas.startStopPositions.size(); i++) {
+//		this->CONTIG[ctg].COMPRESSION_AREAS.push_back(featuresAreas.startStopPositions.at(i));
+//	}
+
+//	unsigned int compressionFeatures = contig->getCompressionAreas(this->insertMean, this->insertStd);
+//	this->CONTIG[ctg].updateCOMPRESSION_AREA(compressionFeatures);
 
 }
 
 void FRC::computeStrechArea(unsigned int ctg, Contig *contig) {
-	unsigned int expansionFeatures = contig->getExpansionAreas(this->insertMean, this->insertStd);
-	this->CONTIG[ctg].updateSTRECH_AREA(expansionFeatures);
+//	ContigsFeat featuresAreas = contig->getExpansionAreasZones(this->insertMean, this->insertStd);
+//	this->CONTIG[ctg].updateSTRECH_AREA(featuresAreas.feature);
+//	for(unsigned int i=0; i<featuresAreas.startStopPositions.size(); i++) {
+//		this->CONTIG[ctg].STRECH_AREAS.push_back(featuresAreas.startStopPositions.at(i));
+//	}
+
+//	unsigned int expansionFeatures = contig->getExpansionAreas(this->insertMean, this->insertStd);
+//	this->CONTIG[ctg].updateSTRECH_AREA(expansionFeatures);
 }
 
 void FRC::computeTOTAL(unsigned int ctg) {
@@ -175,6 +231,18 @@ contigFeatures::contigFeatures() {
 	COMPRESSION_AREA = 0;
 	STRECH_AREA = 0;
 	TOTAL = 0;
+
+
+	LOW_COVERAGE_AREAS.clear();
+	HIGH_COVERAGE_AREAS.clear();;
+	LOW_NORMAL_AREAS.clear();;
+	HIGH_NORMAL_AREAS.clear();;
+	HIGH_SINGLE_AREAS.clear();;
+	HIGH_SPANNING_AREAS.clear();;
+	HIGH_OUTIE_AREAS.clear();;
+	COMPRESSION_AREAS.clear();;
+	STRECH_AREAS.clear();;
+	TOTAL_AREAS.clear();;
 }
 
 contigFeatures::~contigFeatures() {
@@ -290,16 +358,66 @@ unsigned int contigFeatures::getTOTAL() {return TOTAL;}
 
 void contigFeatures::print() {
 	cout << "contigLength " << contigLength << "\n";
-	cout << "LOW_COVERAGE_AREA " << LOW_COVERAGE_AREA << "\n";
-	cout << "HIGH_COVERAGE_AREA " << HIGH_COVERAGE_AREA << "\n";
-	cout << "LOW_NORMAL_AREA " << LOW_NORMAL_AREA << "\n";
-	cout << "HIGH_NORMAL_AREA " << HIGH_NORMAL_AREA << "\n";
-	cout << "HIGH_SINGLE_AREA " << HIGH_SINGLE_AREA << "\n";
-	cout << "HIGH_SPANNING_AREA " << HIGH_SPANNING_AREA << "\n";
-	cout << "HIGH_OUTIE_AREA " << HIGH_OUTIE_AREA << "\n";
-	cout << "COMPRESSION_AREA " << COMPRESSION_AREA << "\n";
-	cout << "STRECH_AREA " << STRECH_AREA << "\n";
-	cout << "TOTAL " << TOTAL << "\n-----\n";
+	cout << "LOW_COVERAGE_AREA " << LOW_COVERAGE_AREA << ": ";
+	for(unsigned int i = 0; i < this->LOW_COVERAGE_AREAS.size(); i++) {
+		cout << "(" << this->LOW_COVERAGE_AREAS[i].first << "," << this->LOW_COVERAGE_AREAS[i].second << ") ";
+	}
+	cout << "\n";
+
+	cout << "HIGH_COVERAGE_AREA " << HIGH_COVERAGE_AREA << ": ";
+	for(unsigned int i = 0; i < this->HIGH_COVERAGE_AREAS.size(); i++) {
+		cout << "(" << this->HIGH_COVERAGE_AREAS[i].first << "," << this->HIGH_COVERAGE_AREAS[i].second << ") ";
+	}
+	cout << "\n";
+
+	cout << "LOW_NORMAL_AREA " << LOW_NORMAL_AREA << ": ";
+	for(unsigned int i = 0; i < this->LOW_NORMAL_AREAS.size(); i++) {
+		cout << "(" << this->LOW_NORMAL_AREAS[i].first << "," << this->LOW_NORMAL_AREAS[i].second << ") ";
+	}
+	cout << "\n";
+
+	cout << "HIGH_NORMAL_AREA " << HIGH_NORMAL_AREA << ": ";
+	for(unsigned int i = 0; i < this->HIGH_NORMAL_AREAS.size(); i++) {
+		cout << "(" << this->HIGH_NORMAL_AREAS[i].first << "," << this->HIGH_NORMAL_AREAS[i].second << ") ";
+	}
+	cout << "\n";
+
+	cout << "HIGH_SINGLE_AREA " << HIGH_SINGLE_AREA << ": ";
+	for(unsigned int i = 0; i < this->HIGH_SINGLE_AREAS.size(); i++) {
+		cout << "(" << this->HIGH_SINGLE_AREAS[i].first << "," << this->HIGH_SINGLE_AREAS[i].second << ") ";
+	}
+	cout << "\n";
+
+	cout << "HIGH_SPANNING_AREA " << HIGH_SPANNING_AREA << ": ";
+	for(unsigned int i = 0; i < this->HIGH_SPANNING_AREAS.size(); i++) {
+		cout << "(" << this->HIGH_SPANNING_AREAS[i].first << "," << this->HIGH_SPANNING_AREAS[i].second << ") ";
+	}
+	cout << "\n";
+
+	cout << "HIGH_OUTIE_AREA " << HIGH_OUTIE_AREA << ": ";
+	for(unsigned int i = 0; i < this->HIGH_OUTIE_AREAS.size(); i++) {
+		cout << "(" << this->HIGH_OUTIE_AREAS[i].first << "," << this->HIGH_OUTIE_AREAS[i].second << ") ";
+	}
+	cout << "\n";
+
+	cout << "COMPRESSION_AREA " << COMPRESSION_AREA << ": ";
+	for(unsigned int i = 0; i < this->COMPRESSION_AREAS.size(); i++) {
+		cout << "(" << this->COMPRESSION_AREAS[i].first << "," << this->COMPRESSION_AREAS[i].second << ") ";
+	}
+	cout << "\n";
+
+	cout << "STRECH_AREA " << STRECH_AREA << ": ";
+	for(unsigned int i = 0; i < this->STRECH_AREAS.size(); i++) {
+		cout << "(" << this->STRECH_AREAS[i].first << "," << this->STRECH_AREAS[i].second << ") ";
+	}
+	cout << "\n";
+
+	cout << "TOTAL " << TOTAL << "\n";
+
+
+
+
+	cout << "-----\n";
 }
 
 

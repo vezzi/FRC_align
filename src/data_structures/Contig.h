@@ -17,6 +17,18 @@ using namespace std;
 #include "common.h"
 
 
+
+
+class ContigsFeat{
+public:
+	unsigned int feature;
+	vector<pair<unsigned int, unsigned int> > startStopPositions;
+	ContigsFeat();
+
+	~ContigsFeat();
+
+};
+
 enum data {readCov, insertCov, cmCov, woCov, wdCov, singCov, mdcCov};
 
 class Position {
@@ -80,6 +92,27 @@ public:
 	unsigned int getExpansionAreas(float insertionMean, float insertionStd);
 
 	void print();
+
+
+	unsigned int getLowCoverageAreasZones(float C_A);
+	unsigned int getHighCoverageAreasZones(float C_A);
+	unsigned int getLowNormalAreasZones(float C_M);
+	unsigned int getHighNormalAreasZones(float C_M);
+	unsigned int getHighSingleAreasZones();
+	unsigned int getHighSpanningAreasZones();
+	unsigned int getHighOutieAreasZones();
+	unsigned int getCompressionAreasZones(float insertionMean, float insertionStd);
+	unsigned int getExpansionAreasZones(float insertionMean, float insertionStd);
+
+	vector<pair<unsigned int, unsigned int> > lowCoverageAreas;
+	vector<pair<unsigned int, unsigned int> > highCoverageAreas;
+	vector<pair<unsigned int, unsigned int> > lowNormalAreas;
+	vector<pair<unsigned int, unsigned int> > highNormalAreas;
+	vector<pair<unsigned int, unsigned int> > highSingleAreas;
+	vector<pair<unsigned int, unsigned int> > highSpanningAreas;
+	vector<pair<unsigned int, unsigned int> > highOutieAreas;
+	vector<pair<unsigned int, unsigned int> > compressionAreas;
+	vector<pair<unsigned int, unsigned int> > expansionAreas;
 
 };
 

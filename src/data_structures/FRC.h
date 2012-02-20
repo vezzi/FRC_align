@@ -77,7 +77,16 @@ public:
 	unsigned int getSTRECH_AREA();
 	unsigned int getTOTAL();
 
-
+	vector<pair<unsigned int, unsigned int> > LOW_COVERAGE_AREAS;
+	vector<pair<unsigned int, unsigned int> > HIGH_COVERAGE_AREAS;
+	vector<pair<unsigned int, unsigned int> > LOW_NORMAL_AREAS;
+	vector<pair<unsigned int, unsigned int> > HIGH_NORMAL_AREAS;
+	vector<pair<unsigned int, unsigned int> > HIGH_SINGLE_AREAS;
+	vector<pair<unsigned int, unsigned int> > HIGH_SPANNING_AREAS;
+	vector<pair<unsigned int, unsigned int> > HIGH_OUTIE_AREAS;
+	vector<pair<unsigned int, unsigned int> > COMPRESSION_AREAS;
+	vector<pair<unsigned int, unsigned int> > STRECH_AREAS;
+	vector<pair<unsigned int, unsigned int> > TOTAL_AREAS;
 
 	void print();
 

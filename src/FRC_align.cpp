@@ -120,6 +120,7 @@ int main(int argc, char *argv[]) {
 	unsigned int WINDOW = 1000;
 	unsigned long int estimatedGenomeSize;
 
+	string outputFile = "FRC.txt";
 
 	// PROCESS PARAMETERS
 	stringstream ss;
@@ -134,6 +135,7 @@ int main(int argc, char *argv[]) {
 			("mp-max-insert",  po::value<int>(), "mate pairs maximum allowed insert size. Used in order to filter outliers.")
 			("window",  po::value<unsigned int>(), "window size for features computation")
 			("genome-size", po::value<unsigned long int>(), "estimated genome size (if not supplied genome size is believed to be assembly length")
+			("output",  po::value<string>(), "Output file name (default FRC.txt)")
 			("assembly", po::value<string>(), "assembly file name in fasta format [FOR FUTURE USE]")
 			("pe", po::value< vector < string > >(), "paired reads, one pair after the other [FOR FUTURE USE]")
 			("mp", po::value< vector < string > >(), "mate pairs, one pair after the other [FOR FUTURE USE]")
@@ -213,6 +215,10 @@ int main(int argc, char *argv[]) {
 
 	if (vm.count("window")) {
 		WINDOW = vm["window"].as<unsigned int>();
+	}
+
+	if (vm.count("output")) {
+		outputFile = vm["output"].as<string>();
 	}
 
 	if (vm.count("genome-size")) {
@@ -312,15 +318,7 @@ int main(int argc, char *argv[]) {
 	   	frc.setFeature(i, STRECH_AREA, 0 );
 	   	frc.setFeature(i, TOTAL, 0 );
     }
-    //set FRC parameters
-    frc.setC_A(libraryPE.C_A);
-    frc.setS_A(libraryPE.S_A);
-    frc.setC_C(libraryPE.C_C);
-    frc.setC_M(libraryPE.C_M);
-    frc.setC_S(libraryPE.C_S);
-    frc.setC_W(libraryPE.C_W);
-    frc.setInsertMean(libraryPE.insertMean);
-    frc.setInsertStd(libraryPE.insertStd);
+
 
     Contig *currentContig; // = new Contig(contigSize, peMinInsert, peMaxInsert); // Contig object, memorizes all information to compute contig`s features
     int currentTid = -1;
@@ -332,6 +330,17 @@ int main(int argc, char *argv[]) {
 // NOW PROCESS LIBRARIES
 
     if(vm.count("pe-sam")) {
+        //set FRC parameters
+        frc.setC_A(libraryPE.C_A);
+        frc.setS_A(libraryPE.S_A);
+        frc.setC_C(libraryPE.C_C);
+        frc.setC_M(libraryPE.C_M);
+        frc.setC_S(libraryPE.C_S);
+        frc.setC_W(libraryPE.C_W);
+        frc.setInsertMean(libraryPE.insertMean);
+        frc.setInsertStd(libraryPE.insertStd);
+
+
     	fp = open_alignment_file(PEalignmentFile);
     	EXIT_IF_NULL(fp);
     	head = fp->header; // sam header
@@ -365,7 +374,7 @@ int main(int argc, char *argv[]) {
     					frc.computeCompressionArea(contig, currentContig);
     					frc.computeStrechArea(contig, currentContig);
     					frc.computeTOTAL(contig); // compute total amount of features in each contig
-    					//frc.printContig(contig);
+    					frc.printContig(contig);
     					// now create new contig
     					delete currentContig; // delete hold contig
     					contigSize = head->target_len[core->tid];
@@ -403,7 +412,7 @@ int main(int argc, char *argv[]) {
     for(unsigned int i=0; i< contigsNumber; i++) {
     	featuresTotal += frc.getFeature(i, TOTAL); // update total number of feature seen so far
     }
-    cout << "total number of features " << featuresTotal << "\n";
+    cout << "TOTAL number of features " << featuresTotal << "\n";
 
 //NOW COMPUTE MP FEATURES
     currentTid = -1;
@@ -412,7 +421,18 @@ int main(int argc, char *argv[]) {
     contigSize = 0;
     b = bam_init1();
 
-    if(vm.count("pe-sam")) {
+    if(vm.count("mp-sam")) {
+        //set FRC parameters
+        frc.setC_A(libraryMP.C_A);
+        frc.setS_A(libraryMP.S_A);
+        frc.setC_C(libraryMP.C_C);
+        frc.setC_M(libraryMP.C_M);
+        frc.setC_S(libraryMP.C_S);
+        frc.setC_W(libraryMP.C_W);
+        frc.setInsertMean(libraryMP.insertMean);
+        frc.setInsertStd(libraryMP.insertStd);
+
+
     	fp = open_alignment_file(MPalignmentFile);
     	EXIT_IF_NULL(fp);
     	head = fp->header; // sam header
@@ -439,7 +459,7 @@ int main(int argc, char *argv[]) {
  //   					frc.computeLowCoverageArea(contig, currentContig);
  //  					frc.computeHighCoverageArea(contig, currentContig);
  //   					frc.computeLowNormalArea(contig, currentContig);
- //   					frc.computeHighNormalArea(contig, currentContig);
+    					frc.computeHighNormalArea(contig, currentContig);
     					frc.computeHighSingleArea(contig, currentContig);
     					frc.computeHighSpanningArea(contig, currentContig);
     					frc.computeHighOutieArea(contig, currentContig);
@@ -455,7 +475,7 @@ int main(int argc, char *argv[]) {
     					}
     					currentTid = core->tid; // update current identifier
     					contig = contig2position[head->target_name[currentTid]];
-    					currentContig =  new Contig(contigSize, peMinInsert_recomputed, peMaxInsert_recomputed);
+    					currentContig =  new Contig(contigSize, mpMinInsert_recomputed, mpMaxInsert_recomputed);
     				}
     				currentContig->updateContig(b); // update contig with alignment
     			} else {
@@ -489,11 +509,11 @@ int main(int argc, char *argv[]) {
 
 
     ofstream myfile;
-    myfile.open ("FRC.txt");
-    myfile << "features coverage\n";
+    myfile.open (outputFile.c_str());
+//    myfile << "features coverage\n";
     float step = featuresTotal/(float)100;
     float partial=0;
-    while(partial <= featuresTotal) {
+    while(partial < featuresTotal) {
     	uint32_t contigStep = 0;
     	uint64_t contigLengthStep = 0;
     	uint32_t featuresStep = 0;
@@ -503,13 +523,12 @@ int main(int argc, char *argv[]) {
 
     		contigStep++;
     	}
-    	float coveragePartial =  contigLengthStep/(float)estimatedGenomeSize;
+    	float coveragePartial =  100*(contigLengthStep/(float)estimatedGenomeSize);
     	myfile << partial << " " << coveragePartial << "\n";
+   // 	cout <<  partial << " " << coveragePartial << " " << contigStep << "\n";
     	partial += step;
     }
     myfile.close();
-    cout << "test\n";
-
 
 }
 
