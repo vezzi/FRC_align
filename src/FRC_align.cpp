@@ -121,6 +121,7 @@ int main(int argc, char *argv[]) {
 	unsigned long int estimatedGenomeSize;
 
 	string outputFile = "FRC.txt";
+	string featureFile = "Features.txt";
 
 	// PROCESS PARAMETERS
 	stringstream ss;
@@ -135,7 +136,7 @@ int main(int argc, char *argv[]) {
 			("mp-max-insert",  po::value<int>(), "mate pairs maximum allowed insert size. Used in order to filter outliers.")
 			("window",  po::value<unsigned int>(), "window size for features computation")
 			("genome-size", po::value<unsigned long int>(), "estimated genome size (if not supplied genome size is believed to be assembly length")
-			("output",  po::value<string>(), "Output file name (default FRC.txt)")
+			("output",  po::value<string>(), "Header output file names (default FRC.txt and Features.txt)")
 			("assembly", po::value<string>(), "assembly file name in fasta format [FOR FUTURE USE]")
 			("pe", po::value< vector < string > >(), "paired reads, one pair after the other [FOR FUTURE USE]")
 			("mp", po::value< vector < string > >(), "mate pairs, one pair after the other [FOR FUTURE USE]")
@@ -218,7 +219,9 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (vm.count("output")) {
-		outputFile = vm["output"].as<string>();
+		string header = vm["output"].as<string>();
+		outputFile = header + "_FRC.txt";
+		featureFile = header + "_Features.txt";
 	}
 
 	if (vm.count("genome-size")) {
@@ -240,9 +243,11 @@ int main(int argc, char *argv[]) {
 	EXIT_IF_NULL(fp);
 	bam_header_t* head = fp->header; // sam header
 	map<string,unsigned int> contig2position;
+	map<unsigned int,string> position2contig;
 	for(int i=0; i< head->n_targets ; i++) {
 		genomeLength += head->target_len[i];
 		contig2position[head->target_name[i]]=contigsNumber; // keep track of contig name and position in order to avoid problems when processing two libraries
+		position2contig[contigsNumber] = head->target_name[i]; //
 		contigsNumber++;
 	}
 	if (estimatedGenomeSize == 0) {
@@ -317,6 +322,7 @@ int main(int argc, char *argv[]) {
 	   	frc.setFeature(i, COMPRESSION_AREA, 0 );
 	   	frc.setFeature(i, STRECH_AREA, 0 );
 	   	frc.setFeature(i, TOTAL, 0 );
+	   	frc.setID(i, position2contig[i]);
     }
 
 
@@ -364,18 +370,31 @@ int main(int argc, char *argv[]) {
     					currentContig =  new Contig(contigSize, peMinInsert_recomputed, peMaxInsert_recomputed);
     				} else {
     					//count contig features
+    					//currentContig->print();
     					frc.computeLowCoverageArea(contig, currentContig);
     					frc.computeHighCoverageArea(contig, currentContig);
-    					frc.computeLowNormalArea(contig, currentContig);
-    					frc.computeHighNormalArea(contig, currentContig);
     					frc.computeHighSingleArea(contig, currentContig);
     					frc.computeHighSpanningArea(contig, currentContig);
     					frc.computeHighOutieArea(contig, currentContig);
-    					frc.computeCompressionArea(contig, currentContig);
-    					frc.computeStrechArea(contig, currentContig);
+
+    					if(contigSize >= libraryPE.insertMean) { // compute paired based features only on long enough contigs
+    						frc.computeLowNormalArea(contig, currentContig);
+    						frc.computeHighNormalArea(contig, currentContig);
+    						frc.computeCompressionArea(contig, currentContig);
+    						frc.computeStrechArea(contig, currentContig);
+    					}
     					frc.computeTOTAL(contig); // compute total amount of features in each contig
-    					frc.printContig(contig);
+    					//frc.printContig(contig);
     					// now create new contig
+
+    					/*
+    					if(frc.getID(contig).compare("4") == 0) {
+    						cout << "processing contig " << frc.getID(contig) << "\n";
+    						frc.printContig(contig);
+    						currentContig->print();
+    					}
+    					 */
+
     					delete currentContig; // delete hold contig
     					contigSize = head->target_len[core->tid];
     					if (contigSize < 1) {//We can't have such sizes! this can't be right
@@ -384,6 +403,7 @@ int main(int argc, char *argv[]) {
     					currentTid = core->tid; // update current identifier
     					contig = contig2position[head->target_name[currentTid]];
     					currentContig =  new Contig(contigSize, peMinInsert_recomputed, peMaxInsert_recomputed);
+    					//cout << "contig " << contig << "\n";
     				}
     				currentContig->updateContig(b); // update contig with alignment
     			} else {
@@ -393,15 +413,18 @@ int main(int argc, char *argv[]) {
     		}
     	}
     	//UPDATE LAST CONTIG
-    	frc.computeLowCoverageArea(contig, currentContig);
-    	frc.computeHighCoverageArea(contig, currentContig);
-    	frc.computeLowNormalArea(contig, currentContig);
-    	frc.computeHighNormalArea(contig, currentContig);
-    	frc.computeHighSingleArea(contig, currentContig);
-    	frc.computeHighSpanningArea(contig, currentContig);
-    	frc.computeHighOutieArea(contig, currentContig);
-    	frc.computeCompressionArea(contig, currentContig);
-    	frc.computeStrechArea(contig, currentContig);
+		frc.computeLowCoverageArea(contig, currentContig);
+		frc.computeHighCoverageArea(contig, currentContig);
+		frc.computeHighSingleArea(contig, currentContig);
+		frc.computeHighSpanningArea(contig, currentContig);
+		frc.computeHighOutieArea(contig, currentContig);
+
+		if(contigSize >= libraryPE.insertMean) { // compute paired based features only on long enough contigs
+			frc.computeLowNormalArea(contig, currentContig);
+			frc.computeHighNormalArea(contig, currentContig);
+			frc.computeCompressionArea(contig, currentContig);
+			frc.computeStrechArea(contig, currentContig);
+		}
     	frc.computeTOTAL(contig); // compute total amount of features in each contig
 
     	delete currentContig; // delete hold contig
@@ -456,18 +479,30 @@ int main(int argc, char *argv[]) {
     					currentContig =  new Contig(contigSize, mpMinInsert_recomputed, mpMaxInsert_recomputed);
     				} else {
     					//count contig features
- //   					frc.computeLowCoverageArea(contig, currentContig);
- //  					frc.computeHighCoverageArea(contig, currentContig);
- //   					frc.computeLowNormalArea(contig, currentContig);
-    					frc.computeHighNormalArea(contig, currentContig);
-    					frc.computeHighSingleArea(contig, currentContig);
+    					//frc.computeLowCoverageArea(contig, currentContig);
+    					//frc.computeHighCoverageArea(contig, currentContig);
+    					//frc.computeLowNormalArea(contig, currentContig);
+    					//frc.computeHighNormalArea(contig, currentContig);
+    					//frc.computeHighSingleArea(contig, currentContig);
     					frc.computeHighSpanningArea(contig, currentContig);
-    					frc.computeHighOutieArea(contig, currentContig);
-    					frc.computeCompressionArea(contig, currentContig);
-    					frc.computeStrechArea(contig, currentContig);
+   						frc.computeHighOutieArea(contig, currentContig);
+    					if(contigSize >= libraryMP.insertMean) {
+    						frc.computeCompressionArea(contig, currentContig);
+    						frc.computeStrechArea(contig, currentContig);
+    					}
     					frc.computeTOTAL(contig); // compute total amount of features in each contig
     					//frc.printContig(contig);
     					// now create new contig
+
+
+    				/*	if(frc.getID(contig).compare("361") == 0) {
+    						cout << "processing contig " << frc.getID(contig) << contigSize << "\n";
+    						frc.printContig(contig);
+    						currentContig->print();
+    					}
+    				 */
+
+
     					delete currentContig; // delete hold contig
     					contigSize = head->target_len[core->tid];
     					if (contigSize < 1) {//We can't have such sizes! this can't be right
@@ -485,11 +520,17 @@ int main(int argc, char *argv[]) {
     		}
     	}
     	//UPDATE LAST CONTIG
-    	frc.computeHighSingleArea(contig, currentContig);
+    	//frc.computeLowCoverageArea(contig, currentContig);
+    	//frc.computeHighCoverageArea(contig, currentContig);
+    	//frc.computeLowNormalArea(contig, currentContig);
+    	//frc.computeHighNormalArea(contig, currentContig);
+    	//frc.computeHighSingleArea(contig, currentContig);
     	frc.computeHighSpanningArea(contig, currentContig);
-    	frc.computeHighOutieArea(contig, currentContig);
-    	frc.computeCompressionArea(contig, currentContig);
-    	frc.computeStrechArea(contig, currentContig);
+		frc.computeHighOutieArea(contig, currentContig);
+    	if(contigSize >= libraryMP.insertMean) {
+    		frc.computeCompressionArea(contig, currentContig);
+    		frc.computeStrechArea(contig, currentContig);
+    	}
     	frc.computeTOTAL(contig); // compute total amount of features in each contig
     	samclose(fp); // close the file
 
@@ -497,16 +538,23 @@ int main(int argc, char *argv[]) {
 
     featuresTotal = 0;
     cout << "\n----------\nNow computing FRC \n------\n";
-    frc.sortFRC();
 
+
+
+    frc.setUpContigs();
+
+    ofstream featureOutFile;
+    featureOutFile.open (featureFile.c_str());
+    for(unsigned int i=0; i< contigsNumber; i++) {
+    	frc.printFeatures(i, featureOutFile);
+    }
+
+//// attenzione il total e' ricalcolato!!!!
+    frc.sortFRC();
     for(unsigned int i=0; i< contigsNumber; i++) {
     	featuresTotal += frc.getFeature(i, TOTAL); // update total number of feature seen so far
-	//   	cout << frc.getContigLength(i) << " " << frc.getFeature(i, TOTAL) << "\n";
     }
     cout << "total number of features " << featuresTotal << "\n";
-
-
-
 
     ofstream myfile;
     myfile.open (outputFile.c_str());

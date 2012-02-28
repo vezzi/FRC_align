@@ -19,9 +19,9 @@ using namespace std;
 
 
 
-
 class contigFeatures {
 
+	string contigID;
 	unsigned long int contigLength;
 	unsigned int LOW_COVERAGE_AREA;
 	unsigned int HIGH_COVERAGE_AREA;
@@ -51,6 +51,7 @@ public:
 	void setCOMPRESSION_AREA(unsigned int numFeat);
 	void setSTRECH_AREA(unsigned int numFeat);
 	void setTOTAL(unsigned int numFeat);
+	void setID(string ID);
 
 	void computeTOTAL();
 
@@ -76,6 +77,7 @@ public:
 	unsigned int getCOMPRESSION_AREA();
 	unsigned int getSTRECH_AREA();
 	unsigned int getTOTAL();
+	string getID();
 
 	vector<pair<unsigned int, unsigned int> > LOW_COVERAGE_AREAS;
 	vector<pair<unsigned int, unsigned int> > HIGH_COVERAGE_AREAS;
@@ -88,7 +90,11 @@ public:
 	vector<pair<unsigned int, unsigned int> > STRECH_AREAS;
 	vector<pair<unsigned int, unsigned int> > TOTAL_AREAS;
 
+	void setUpContig();
+
 	void print();
+	void printFeatures(ofstream &file);
+
 
 };
 
@@ -129,6 +135,8 @@ public:
 	void setC_C(float C_C);
 	void setInsertMean(float insertMean);
 	void setInsertStd(float insertStd);
+	void setID(unsigned int i, string ID);
+	string  getID(unsigned int i);
 
 	void sortFRC();
 	void computeLowCoverageArea(unsigned int ctg, Contig *contig);
@@ -143,7 +151,10 @@ public:
 
 	void computeTOTAL(unsigned int ctg);
 
+	void setUpContigs();
+
 	void printContig(unsigned int ctg);
+	void printFeatures(unsigned int ctg, ofstream &f);
 
 
 };
