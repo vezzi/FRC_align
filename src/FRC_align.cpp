@@ -375,7 +375,7 @@ int main(int argc, char *argv[]) {
     					frc.computeHighCoverageArea(contig, currentContig);
     					frc.computeHighSingleArea(contig, currentContig);
     					frc.computeHighSpanningArea(contig, currentContig);
-    					frc.computeHighOutieArea(contig, currentContig);
+    					//frc.computeHighOutieArea(contig, currentContig);
 
     					if(contigSize >= libraryPE.insertMean) { // compute paired based features only on long enough contigs
     						frc.computeLowNormalArea(contig, currentContig);
@@ -417,7 +417,7 @@ int main(int argc, char *argv[]) {
 		frc.computeHighCoverageArea(contig, currentContig);
 		frc.computeHighSingleArea(contig, currentContig);
 		frc.computeHighSpanningArea(contig, currentContig);
-		frc.computeHighOutieArea(contig, currentContig);
+		//frc.computeHighOutieArea(contig, currentContig);
 
 		if(contigSize >= libraryPE.insertMean) { // compute paired based features only on long enough contigs
 			frc.computeLowNormalArea(contig, currentContig);
@@ -485,7 +485,7 @@ int main(int argc, char *argv[]) {
     					//frc.computeHighNormalArea(contig, currentContig);
     					//frc.computeHighSingleArea(contig, currentContig);
     					frc.computeHighSpanningArea(contig, currentContig);
-   						frc.computeHighOutieArea(contig, currentContig);
+   						//frc.computeHighOutieArea(contig, currentContig);
     					if(contigSize >= libraryMP.insertMean) {
     						frc.computeCompressionArea(contig, currentContig);
     						frc.computeStrechArea(contig, currentContig);
