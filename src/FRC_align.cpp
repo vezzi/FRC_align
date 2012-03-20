@@ -479,11 +479,11 @@ int main(int argc, char *argv[]) {
     					currentContig =  new Contig(contigSize, mpMinInsert_recomputed, mpMaxInsert_recomputed);
     				} else {
     					//count contig features
-    					//frc.computeLowCoverageArea(contig, currentContig);
-    					//frc.computeHighCoverageArea(contig, currentContig);
+    					frc.computeLowCoverageArea(contig, currentContig);
+    					frc.computeHighCoverageArea(contig, currentContig);
     					//frc.computeLowNormalArea(contig, currentContig);
     					//frc.computeHighNormalArea(contig, currentContig);
-    					//frc.computeHighSingleArea(contig, currentContig);
+    					frc.computeHighSingleArea(contig, currentContig);
     					frc.computeHighSpanningArea(contig, currentContig);
    						//frc.computeHighOutieArea(contig, currentContig);
     					if(contigSize >= libraryMP.insertMean) {
@@ -520,13 +520,13 @@ int main(int argc, char *argv[]) {
     		}
     	}
     	//UPDATE LAST CONTIG
-    	//frc.computeLowCoverageArea(contig, currentContig);
-    	//frc.computeHighCoverageArea(contig, currentContig);
+    	frc.computeLowCoverageArea(contig, currentContig);
+    	frc.computeHighCoverageArea(contig, currentContig);
     	//frc.computeLowNormalArea(contig, currentContig);
     	//frc.computeHighNormalArea(contig, currentContig);
-    	//frc.computeHighSingleArea(contig, currentContig);
+    	frc.computeHighSingleArea(contig, currentContig);
     	frc.computeHighSpanningArea(contig, currentContig);
-		frc.computeHighOutieArea(contig, currentContig);
+		//frc.computeHighOutieArea(contig, currentContig);
     	if(contigSize >= libraryMP.insertMean) {
     		frc.computeCompressionArea(contig, currentContig);
     		frc.computeStrechArea(contig, currentContig);
