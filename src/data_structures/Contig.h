@@ -67,7 +67,6 @@ class Contig{
 	float highSingleFeat;
 	float highSpanningFeat;
 	float highOutieFeat;
-	float CE_statistics;
 
 	Position *CONTIG;
 
@@ -101,8 +100,8 @@ public:
 	unsigned int getHighSingleAreasZones();
 	unsigned int getHighSpanningAreasZones();
 	unsigned int getHighOutieAreasZones();
-	unsigned int getCompressionAreasZones(float insertionMean, float insertionStd);
-	unsigned int getExpansionAreasZones(float insertionMean, float insertionStd);
+	unsigned int getCompressionAreasZones(float insertionMean, float insertionStd, float Zscore);
+	unsigned int getExpansionAreasZones(float insertionMean, float insertionStd, float Zscore);
 
 	vector<pair<unsigned int, unsigned int> > lowCoverageAreas;
 	vector<pair<unsigned int, unsigned int> > highCoverageAreas;

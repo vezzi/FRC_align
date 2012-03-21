@@ -17,84 +17,36 @@ using namespace std;
 #include <algorithm>
 #include <vector>
 
+#include "Features.h";
 
 
 class contigFeatures {
-
 	string contigID;
 	unsigned long int contigLength;
-	unsigned int LOW_COVERAGE_AREA;
-	unsigned int HIGH_COVERAGE_AREA;
-	unsigned int LOW_NORMAL_AREA;
-	unsigned int HIGH_NORMAL_AREA;
-	unsigned int HIGH_SINGLE_AREA;
-	unsigned int HIGH_SPANNING_AREA;
-	unsigned int HIGH_OUTIE_AREA;
-	unsigned int COMPRESSION_AREA;
-	unsigned int STRECH_AREA;
+
 	unsigned int TOTAL;
 
 public:
 
+
+	Features PE;
+	Features MP;
+
 	contigFeatures();
 	~contigFeatures();
 
-	unsigned long int getContigLength();
-	void setContigLength(unsigned int contigLength);
-	void setLOW_COVERAGE_AREA(unsigned int numFeat);
-	void setHIGH_COVERAGE_AREA(unsigned int numFeat);
-	void setLOW_NORMAL_AREA(unsigned int numFeat);
-	void setHIGH_NORMAL_AREA(unsigned int numFeat);
-	void setHIGH_SINGLE_AREA(unsigned int numFeat);
-	void setHIGH_SPANNING_AREA(unsigned int numFeat);
-	void setHIGH_OUTIE_AREA(unsigned int numFeat);
-	void setCOMPRESSION_AREA(unsigned int numFeat);
-	void setSTRECH_AREA(unsigned int numFeat);
-	void setTOTAL(unsigned int numFeat);
 	void setID(string ID);
-
-	void computeTOTAL();
-
-	void updateLOW_COVERAGE_AREA(unsigned int numFeat);
-	void updateHIGH_COVERAGE_AREA(unsigned int numFeat);
-	void updateLOW_NORMAL_AREA(unsigned int numFeat);
-	void updateHIGH_NORMAL_AREA(unsigned int numFeat);
-	void updateHIGH_SINGLE_AREA(unsigned int numFeat);
-	void updateHIGH_SPANNING_AREA(unsigned int numFeat);
-	void updateHIGH_OUTIE_AREA(unsigned int numFeat);
-	void updateCOMPRESSION_AREA(unsigned int numFeat);
-	void updateSTRECH_AREA(unsigned int numFeat);
-	//void updateFeatures(windowStatistics* window)
-
-
-	unsigned int getLOW_COVERAGE_AREA();
-	unsigned int getHIGH_COVERAGE_AREA();
-	unsigned int getLOW_NORMAL_AREA();
-	unsigned int getHIGH_NORMAL_AREA();
-	unsigned int getHIGH_SINGLE_AREA();
-	unsigned int getHIGH_SPANNING_AREA();
-	unsigned int getHIGH_OUTIE_AREA();
-	unsigned int getCOMPRESSION_AREA();
-	unsigned int getSTRECH_AREA();
-	unsigned int getTOTAL();
 	string getID();
 
-	vector<pair<unsigned int, unsigned int> > LOW_COVERAGE_AREAS;
-	vector<pair<unsigned int, unsigned int> > HIGH_COVERAGE_AREAS;
-	vector<pair<unsigned int, unsigned int> > LOW_NORMAL_AREAS;
-	vector<pair<unsigned int, unsigned int> > HIGH_NORMAL_AREAS;
-	vector<pair<unsigned int, unsigned int> > HIGH_SINGLE_AREAS;
-	vector<pair<unsigned int, unsigned int> > HIGH_SPANNING_AREAS;
-	vector<pair<unsigned int, unsigned int> > HIGH_OUTIE_AREAS;
-	vector<pair<unsigned int, unsigned int> > COMPRESSION_AREAS;
-	vector<pair<unsigned int, unsigned int> > STRECH_AREAS;
-	vector<pair<unsigned int, unsigned int> > TOTAL_AREAS;
+	void setContigLength(unsigned int contigLength);
+	unsigned long int getContigLength();
 
-	void setUpContig();
 
-	void print();
+	unsigned int getTotal();
+
+	vector<ternary> SUSPICIOUS_AREAS;
+
 	void printFeatures(ofstream &file);
-
 
 };
 
@@ -112,6 +64,8 @@ class FRC {
     float C_W; // coverage induced by wrongly mated pairs
     float C_S; // coverage induced by singletons
     float C_C; // coverage induced by reads with mate on a diferent contif
+    float Expansion;
+    float Compression;
 
     float insertMean;
     float insertStd;
@@ -122,8 +76,6 @@ public:
 	FRC(unsigned int contigs);
 	~FRC();
 
-	unsigned int getFeature(unsigned int ctg, Feature f);
-	void setFeature(unsigned int ctg, Feature f, unsigned int value);
 	void setContigLength(unsigned int ctg, unsigned int contigLength);
 	unsigned int getContigLength(unsigned int ctg);
 
@@ -139,21 +91,19 @@ public:
 	string  getID(unsigned int i);
 
 	void sortFRC();
-	void computeLowCoverageArea(unsigned int ctg, Contig *contig);
-	void computeHighCoverageArea(unsigned int ctg, Contig *contig);
-	void computeLowNormalArea(unsigned int ctg, Contig *contig);
-	void computeHighNormalArea(unsigned int ctg, Contig *contig);
-	void computeHighSingleArea(unsigned int ctg, Contig *contig);
-	void computeHighSpanningArea(unsigned int ctg, Contig *contig);
-	void computeHighOutieArea(unsigned int ctg, Contig *contig);
-	void computeCompressionArea(unsigned int ctg, Contig *contig);
-	void computeStrechArea(unsigned int ctg, Contig *contig);
+	void computeLowCoverageArea(string type, unsigned int ctg, Contig *contig);
+	void computeHighCoverageArea(string type, unsigned int ctg, Contig *contig);
+	void computeLowNormalArea(string type, unsigned int ctg, Contig *contig);
+	void computeHighNormalArea(string type, unsigned int ctg, Contig *contig);
+	void computeHighSingleArea(string type, unsigned int ctg, Contig *contig);
+	void computeHighSpanningArea(string type, unsigned int ctg, Contig *contig);
+	void computeHighOutieArea(string type, unsigned int ctg, Contig *contig);
+	void computeCompressionArea(string type, unsigned int ctg, Contig *contig, float Zscore);
+	void computeStrechArea(string type, unsigned int ctg, Contig *contig, float Zscore);
 
-	void computeTOTAL(unsigned int ctg);
+	unsigned int getTotal(unsigned int ctg);
 
-	void setUpContigs();
 
-	void printContig(unsigned int ctg);
 	void printFeatures(unsigned int ctg, ofstream &f);
 
 

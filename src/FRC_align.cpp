@@ -312,16 +312,6 @@ int main(int argc, char *argv[]) {
     uint32_t featuresTotal = 0;
     for(int i=0; i< head->n_targets ; i++) { // Initialize FRC structure
     	frc.setContigLength(i, head->target_len[i]);
-	   	frc.setFeature(i, LOW_COVERAGE_AREA, 0 );
-	   	frc.setFeature(i, HIGH_COVERAGE_AREA, 0 );
-	   	frc.setFeature(i, LOW_NORMAL_AREA, 0 );
-	   	frc.setFeature(i, HIGH_NORMAL_AREA, 0 );
-	   	frc.setFeature(i, HIGH_SINGLE_AREA, 0 );
-	   	frc.setFeature(i, HIGH_SPANNING_AREA, 0 );
-	   	frc.setFeature(i, HIGH_OUTIE_AREA, 0 );
-	   	frc.setFeature(i, COMPRESSION_AREA, 0 );
-	   	frc.setFeature(i, STRECH_AREA, 0 );
-	   	frc.setFeature(i, TOTAL, 0 );
 	   	frc.setID(i, position2contig[i]);
     }
 
@@ -369,31 +359,23 @@ int main(int argc, char *argv[]) {
     					contig = contig2position[head->target_name[currentTid]];
     					currentContig =  new Contig(contigSize, peMinInsert_recomputed, peMaxInsert_recomputed);
     				} else {
-    					//count contig features
-    					//currentContig->print();
-    					frc.computeLowCoverageArea(contig, currentContig);
-    					frc.computeHighCoverageArea(contig, currentContig);
-    					frc.computeHighSingleArea(contig, currentContig);
-    					frc.computeHighSpanningArea(contig, currentContig);
-    					//frc.computeHighOutieArea(contig, currentContig);
-
-    					if(contigSize >= libraryPE.insertMean) { // compute paired based features only on long enough contigs
-    						frc.computeLowNormalArea(contig, currentContig);
-    						frc.computeHighNormalArea(contig, currentContig);
-    						frc.computeCompressionArea(contig, currentContig);
-    						frc.computeStrechArea(contig, currentContig);
+    					if(libraryPE.C_A > 15) { // if mate pair library provides an enough high covereage
+    						frc.computeLowCoverageArea("PE", contig, currentContig);
+    						frc.computeHighCoverageArea("PE", contig, currentContig);
     					}
-    					frc.computeTOTAL(contig); // compute total amount of features in each contig
-    					//frc.printContig(contig);
-    					// now create new contig
-
-    					/*
-    					if(frc.getID(contig).compare("4") == 0) {
-    						cout << "processing contig " << frc.getID(contig) << "\n";
-    						frc.printContig(contig);
-    						currentContig->print();
+    					if(libraryPE.C_M > 12) {
+    						frc.computeLowNormalArea("PE", contig, currentContig);
+    						frc.computeHighNormalArea("PE", contig, currentContig);
     					}
-    					 */
+
+    					frc.computeHighSingleArea("PE", contig, currentContig);
+    					frc.computeHighOutieArea("PE", contig, currentContig);
+
+    					if(contigSize >= libraryPE.insertMean) {
+    						frc.computeHighSpanningArea("PE", contig, currentContig);
+    						frc.computeCompressionArea("PE", contig, currentContig, -4.0);
+    						frc.computeStrechArea("PE", contig, currentContig, 4.0);
+    					}
 
     					delete currentContig; // delete hold contig
     					contigSize = head->target_len[core->tid];
@@ -413,19 +395,23 @@ int main(int argc, char *argv[]) {
     		}
     	}
     	//UPDATE LAST CONTIG
-		frc.computeLowCoverageArea(contig, currentContig);
-		frc.computeHighCoverageArea(contig, currentContig);
-		frc.computeHighSingleArea(contig, currentContig);
-		frc.computeHighSpanningArea(contig, currentContig);
-		//frc.computeHighOutieArea(contig, currentContig);
-
-		if(contigSize >= libraryPE.insertMean) { // compute paired based features only on long enough contigs
-			frc.computeLowNormalArea(contig, currentContig);
-			frc.computeHighNormalArea(contig, currentContig);
-			frc.computeCompressionArea(contig, currentContig);
-			frc.computeStrechArea(contig, currentContig);
+		if(libraryPE.C_A > 15) { // if mate pair library provides an enough high covereage
+			frc.computeLowCoverageArea("PE", contig, currentContig);
+			frc.computeHighCoverageArea("PE", contig, currentContig);
 		}
-    	frc.computeTOTAL(contig); // compute total amount of features in each contig
+		if(libraryPE.C_M > 12) {
+			frc.computeLowNormalArea("PE", contig, currentContig);
+			frc.computeHighNormalArea("PE", contig, currentContig);
+		}
+
+		frc.computeHighSingleArea("PE", contig, currentContig);
+		frc.computeHighOutieArea("PE", contig, currentContig);
+
+		if(contigSize >= libraryPE.insertMean) {
+			frc.computeHighSpanningArea("PE", contig, currentContig);
+			frc.computeCompressionArea("PE", contig, currentContig, -4.0);
+			frc.computeStrechArea("PE", contig, currentContig, 4.0);
+		}
 
     	delete currentContig; // delete hold contig
     	samclose(fp); // close the file
@@ -433,7 +419,8 @@ int main(int argc, char *argv[]) {
 
     featuresTotal = 0;
     for(unsigned int i=0; i< contigsNumber; i++) {
-    	featuresTotal += frc.getFeature(i, TOTAL); // update total number of feature seen so far
+    	featuresTotal += frc.getTotal(i);
+    //	featuresTotal += frc.getFeature(i, TOTAL); // update total number of feature seen so far
     }
     cout << "TOTAL number of features " << featuresTotal << "\n";
 
@@ -479,29 +466,23 @@ int main(int argc, char *argv[]) {
     					currentContig =  new Contig(contigSize, mpMinInsert_recomputed, mpMaxInsert_recomputed);
     				} else {
     					//count contig features
-    					frc.computeLowCoverageArea(contig, currentContig);
-    					frc.computeHighCoverageArea(contig, currentContig);
-    					//frc.computeLowNormalArea(contig, currentContig);
-    					//frc.computeHighNormalArea(contig, currentContig);
-    					frc.computeHighSingleArea(contig, currentContig);
-    					frc.computeHighSpanningArea(contig, currentContig);
-   						//frc.computeHighOutieArea(contig, currentContig);
-    					if(contigSize >= libraryMP.insertMean) {
-    						frc.computeCompressionArea(contig, currentContig);
-    						frc.computeStrechArea(contig, currentContig);
+    					if(libraryMP.C_A > 15) { // if mate pair library provides an enough high covereage
+    						frc.computeLowCoverageArea("MP", contig, currentContig);
+    						frc.computeHighCoverageArea("MP", contig, currentContig);
     					}
-    					frc.computeTOTAL(contig); // compute total amount of features in each contig
-    					//frc.printContig(contig);
-    					// now create new contig
-
-
-    				/*	if(frc.getID(contig).compare("361") == 0) {
-    						cout << "processing contig " << frc.getID(contig) << contigSize << "\n";
-    						frc.printContig(contig);
-    						currentContig->print();
+    					if(libraryMP.C_M > 12) {
+    						frc.computeLowNormalArea("MP", contig, currentContig);
+    						frc.computeHighNormalArea("MP", contig, currentContig);
     					}
-    				 */
 
+    				//	frc.computeHighSingleArea("MP", contig, currentContig);
+   						frc.computeHighOutieArea("MP", contig, currentContig);
+
+   						if(contigSize >= libraryMP.insertMean) {
+   	    					frc.computeHighSpanningArea("MP", contig, currentContig);
+   							frc.computeCompressionArea("MP", contig, currentContig, -4.0);
+    						frc.computeStrechArea("MP", contig, currentContig, 4.0);
+    					}
 
     					delete currentContig; // delete hold contig
     					contigSize = head->target_len[core->tid];
@@ -520,18 +501,21 @@ int main(int argc, char *argv[]) {
     		}
     	}
     	//UPDATE LAST CONTIG
-    	frc.computeLowCoverageArea(contig, currentContig);
-    	frc.computeHighCoverageArea(contig, currentContig);
-    	//frc.computeLowNormalArea(contig, currentContig);
-    	//frc.computeHighNormalArea(contig, currentContig);
-    	frc.computeHighSingleArea(contig, currentContig);
-    	frc.computeHighSpanningArea(contig, currentContig);
-		//frc.computeHighOutieArea(contig, currentContig);
-    	if(contigSize >= libraryMP.insertMean) {
-    		frc.computeCompressionArea(contig, currentContig);
-    		frc.computeStrechArea(contig, currentContig);
+    	if(libraryMP.C_A > 15) { // if mate pair library provides an enough high covereage
+    		frc.computeLowCoverageArea("MP", contig, currentContig);
+    		frc.computeHighCoverageArea("MP", contig, currentContig);
     	}
-    	frc.computeTOTAL(contig); // compute total amount of features in each contig
+    	if(libraryMP.C_M > 12) {
+    		frc.computeLowNormalArea("MP", contig, currentContig);
+    		frc.computeHighNormalArea("MP", contig, currentContig);
+    	}
+    //	frc.computeHighSingleArea("MP", contig, currentContig);
+		frc.computeHighOutieArea("MP", contig, currentContig);
+    	if(contigSize >= libraryMP.insertMean) {
+        	frc.computeHighSpanningArea("MP", contig, currentContig);
+    		frc.computeCompressionArea("MP", contig, currentContig, -4.0);
+    		frc.computeStrechArea("MP", contig, currentContig, 4.0);
+    	}
     	samclose(fp); // close the file
 
     }
@@ -539,9 +523,6 @@ int main(int argc, char *argv[]) {
     featuresTotal = 0;
     cout << "\n----------\nNow computing FRC \n------\n";
 
-
-
-    frc.setUpContigs();
 
     ofstream featureOutFile;
     featureOutFile.open (featureFile.c_str());
@@ -552,7 +533,7 @@ int main(int argc, char *argv[]) {
 //// attenzione il total e' ricalcolato!!!!
     frc.sortFRC();
     for(unsigned int i=0; i< contigsNumber; i++) {
-    	featuresTotal += frc.getFeature(i, TOTAL); // update total number of feature seen so far
+    	featuresTotal += frc.getTotal(i); // update total number of feature seen so far
     }
     cout << "total number of features " << featuresTotal << "\n";
 
@@ -567,7 +548,7 @@ int main(int argc, char *argv[]) {
     	uint32_t featuresStep = 0;
     	while(featuresStep <= partial) {
     		contigLengthStep += frc.getContigLength(contigStep); // CONTIG[contigStep].contigLength
-    		featuresStep += frc.getFeature(contigStep, TOTAL); // CONTIG[contigStep].TOTAL;
+    		featuresStep += frc.getTotal(contigStep); // CONTIG[contigStep].TOTAL;
 
     		contigStep++;
     	}

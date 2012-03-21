@@ -45,11 +45,10 @@ Contig::Contig() {
 	lowCoverageFeat = 1/(float)3;
 	highCoverageFeat = 3.0;
 	lowNormalFeat = 1/(float)3;
-	highNormalFeat = 4.0;
+	highNormalFeat = 3.0;
 	highSingleFeat = 0.4;
 	highSpanningFeat = 0.4;
 	highOutieFeat = 0.4;
-	CE_statistics = 3.0;
 
 }
 
@@ -64,11 +63,11 @@ Contig::Contig(unsigned int contigLength, unsigned int minInsert, unsigned int m
 	lowCoverageFeat = 1/(float)3;
 	highCoverageFeat = 3.0;
 	lowNormalFeat = 1/(float)3;
-	highNormalFeat = 4.0;
+	highNormalFeat = 3.0;
 	highSingleFeat = 0.4;
 	highSpanningFeat = 0.4;
 	highOutieFeat = 0.4;
-	CE_statistics = 3.0;
+
 }
 
 Contig::~Contig() {
@@ -149,10 +148,9 @@ void Contig::updateContig(bam1_t* b) {
 				iSize = (startPaired + core->l_qseq -1) - startRead; // insert size, I consider both reads of the same length
 				startInsert = startRead;
 				endInsert = startRead + iSize;
-				if (minInsert <= iSize && iSize <= maxInsert) { //useful to compute CE stats
+//				if (minInsert <= iSize && iSize <= maxInsert) { //useful to compute CE stats
 					updateCov(startInsert,endInsert, insertCov); // update spanning coverage
-					//cout << iSize << " " << minInsert << " " << maxInsert << " " << (endInsert - startInsert) << "\n";
-				}
+//				}
 
 				if(!(core->flag&BAM_FREVERSE) && (core->flag&BAM_FMREVERSE) ) { //
 					//here reads are correctly oriented
@@ -170,10 +168,9 @@ void Contig::updateContig(bam1_t* b) {
 				startInsert = startPaired;
 				endInsert = startInsert + iSize;
 
-				if (minInsert <= iSize && iSize <= maxInsert) { //useful to compute CE stats
+//				if (minInsert <= iSize && iSize <= maxInsert) { //useful to compute CE stats
 					updateCov(startInsert,endInsert, insertCov); // update spanning coverage
-					//cout << iSize << " " << minInsert << " " << maxInsert << " " << (endInsert - startInsert) << "\n";
-				}
+//				}
 
 				if((core->flag&BAM_FREVERSE) && !(core->flag&BAM_FMREVERSE) ) { //
 					//here reads are correctly oriented
@@ -908,7 +905,7 @@ unsigned int Contig::getHighOutieAreasZones( ) {
 
 
 
-unsigned int Contig::getCompressionAreasZones(float insertionMean, float insertionStd) {
+unsigned int Contig::getCompressionAreasZones(float insertionMean, float insertionStd, float Zscore) {
 
 	unsigned long int spanningCoverage = 0; // total insert length
 	unsigned int inserts = 0; // number of inserts
@@ -927,7 +924,7 @@ unsigned int Contig::getCompressionAreasZones(float insertionMean, float inserti
 		} else {
 			Z_stats = 0;
 		}
-		if( Z_stats <  - CE_statistics ) { // this is a feature
+		if( Z_stats <  Zscore ) { // this is a feature
 			features = 1; // one feature found (in one window)
 			pair<unsigned int , unsigned int > SS (0, this->contigLength);
 			this->compressionAreas.push_back(SS);
@@ -949,7 +946,7 @@ unsigned int Contig::getCompressionAreasZones(float insertionMean, float inserti
 		} else {
 			Z_stats = 0;
 		}
-		if( Z_stats <  - CE_statistics ) { // this is a feature
+		if( Z_stats <  Zscore ) { // this is a feature
 			startFeat = 0;
 			endFeat = windowSize;
 			feat = true; // there is an open feature
@@ -976,7 +973,7 @@ unsigned int Contig::getCompressionAreasZones(float insertionMean, float inserti
 			} else {
 				Z_stats = 0;
 			}
-			if( Z_stats <  - CE_statistics ) { // this is a feature
+			if( Z_stats <  Zscore ) { // this is a feature
 				if(feat) { // if we are already inside a feature area
 					endFeat = endWindow; // simply extend the feature area
 				} else {
@@ -1022,12 +1019,11 @@ unsigned int Contig::getCompressionAreasZones(float insertionMean, float inserti
 }
 
 
-unsigned int Contig::getExpansionAreasZones(float insertionMean, float insertionStd) {
+unsigned int Contig::getExpansionAreasZones(float insertionMean, float insertionStd, float Zscore) {
 	unsigned long int spanningCoverage = 0; // total insert length
 	unsigned int inserts = 0; // number of inserts
 	unsigned int features = 0;
 	float Z_stats = 0;
-	float CE_statistics = 5;
 	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
 		for(unsigned int i=0; i < this->contigLength ; i++ ) {
 			if(CONTIG[i].StratingInserts > 0) {
@@ -1041,7 +1037,7 @@ unsigned int Contig::getExpansionAreasZones(float insertionMean, float insertion
 		} else {
 			Z_stats = 0;
 		}
-		if( Z_stats >  CE_statistics ) { // this is a feature
+		if( Z_stats >  Zscore ) { // this is a feature
 			features = 1; // one feature found (in one window)
 			pair<unsigned int , unsigned int > SS (0, this->contigLength);
 			this->expansionAreas.push_back(SS);
@@ -1063,7 +1059,7 @@ unsigned int Contig::getExpansionAreasZones(float insertionMean, float insertion
 		} else {
 			Z_stats = 0;
 		}
-		if( Z_stats > CE_statistics ) { // this is a feature
+		if( Z_stats > Zscore ) { // this is a feature
 			startFeat = 0;
 			endFeat = windowSize;
 			feat = true; // there is an open feature
@@ -1090,7 +1086,7 @@ unsigned int Contig::getExpansionAreasZones(float insertionMean, float insertion
 			} else {
 				Z_stats = 0;
 			}
-			if( Z_stats > CE_statistics ) { // this is a feature
+			if( Z_stats > Zscore ) { // this is a feature
 				if(feat) { // if we are already inside a feature area
 					endFeat = endWindow; // simply extend the feature area
 				} else {
