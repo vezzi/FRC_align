@@ -47,7 +47,7 @@ Contig::Contig() {
 	highNormalFeat = 3.0;
 	highSingleFeat = 0.4;
 	highSpanningFeat = 0.4;
-	highOutieFeat = 0.4;
+	highOutieFeat = 0.6;
 
 }
 
@@ -65,7 +65,7 @@ Contig::Contig(unsigned int contigLength, unsigned int minInsert, unsigned int m
 	highNormalFeat = 3.0;
 	highSingleFeat = 0.4;
 	highSpanningFeat = 0.4;
-	highOutieFeat = 0.4;
+	highOutieFeat = 0.6;
 
 }
 
