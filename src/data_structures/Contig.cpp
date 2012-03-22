@@ -911,6 +911,8 @@ unsigned int Contig::getCompressionAreasZones(float insertionMean, float inserti
 	unsigned int inserts = 0; // number of inserts
 	unsigned int features = 0;
 	float Z_stats;
+	unsigned int minInsertNum = 10;
+
 	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
 		for(unsigned int i=0; i < this->contigLength ; i++ ) {
 			if(CONTIG[i].StratingInserts > 0) {
@@ -918,7 +920,7 @@ unsigned int Contig::getCompressionAreasZones(float insertionMean, float inserti
 				spanningCoverage += CONTIG[i].insertsLength;
 			}
 		}
-		if(inserts > 4) {
+		if(inserts > minInsertNum) {
 			float localMean = spanningCoverage/(float)inserts;
 			Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
 		} else {
@@ -940,7 +942,7 @@ unsigned int Contig::getCompressionAreasZones(float insertionMean, float inserti
 				spanningCoverage += CONTIG[i].insertsLength;
 			}
 		}
-		if(inserts > 4) {
+		if(inserts > minInsertNum) {
 			float localMean = spanningCoverage/(float)inserts;
 			Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
 		} else {
@@ -967,7 +969,7 @@ unsigned int Contig::getCompressionAreasZones(float insertionMean, float inserti
 					spanningCoverage += CONTIG[i].insertsLength;
 				}
 			}
-			if(inserts > 4) {
+			if(inserts > minInsertNum) {
 				float localMean = spanningCoverage/(float)inserts;
 				Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
 			} else {
@@ -1024,6 +1026,7 @@ unsigned int Contig::getExpansionAreasZones(float insertionMean, float insertion
 	unsigned int inserts = 0; // number of inserts
 	unsigned int features = 0;
 	float Z_stats = 0;
+	unsigned int minInsertNum = 10;
 	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
 		for(unsigned int i=0; i < this->contigLength ; i++ ) {
 			if(CONTIG[i].StratingInserts > 0) {
@@ -1031,7 +1034,7 @@ unsigned int Contig::getExpansionAreasZones(float insertionMean, float insertion
 				spanningCoverage += CONTIG[i].insertsLength;
 			}
 		}
-		if(inserts > 4) {
+		if(inserts > minInsertNum) {
 			float localMean = spanningCoverage/(float)inserts;
 			Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
 		} else {
@@ -1053,7 +1056,7 @@ unsigned int Contig::getExpansionAreasZones(float insertionMean, float insertion
 				spanningCoverage += CONTIG[i].insertsLength;
 			}
 		}
-		if(inserts > 4) {
+		if(inserts > minInsertNum) {
 			float localMean = spanningCoverage/(float)inserts;
 			Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
 		} else {
@@ -1080,7 +1083,7 @@ unsigned int Contig::getExpansionAreasZones(float insertionMean, float insertion
 					spanningCoverage += CONTIG[i].insertsLength;
 				}
 			}
-			if(inserts > 4) {
+			if(inserts > minInsertNum) {
 				float localMean = spanningCoverage/(float)inserts;
 				Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
 			} else {
