@@ -261,6 +261,7 @@ int main(int argc, char *argv[]) {
 	    cout << "\tNEW maximum allowed insert " << peMaxInsert_recomputed << "\n";
 	}
 
+	timesStdDev = 4;
 	if(vm.count("mp-sam")) {
 		cout << "COMPUTING MP STATISTIC\n";
 		if(!vm.count("pe-sam")) { // in this case file is already OPEN
@@ -353,8 +354,8 @@ int main(int argc, char *argv[]) {
 
     					if(contigSize >= libraryPE.insertMean) {
     						frc.computeHighSpanningArea("PE", contig, currentContig);
-    						frc.computeCompressionArea("PE", contig, currentContig, -3.0);
-    						frc.computeStrechArea("PE", contig, currentContig, 3.0);
+    						frc.computeCompressionArea("PE", contig, currentContig, -4.0);
+    						frc.computeStrechArea("PE", contig, currentContig, 4.0);
     					}
 
     					delete currentContig; // delete hold contig
@@ -386,8 +387,8 @@ int main(int argc, char *argv[]) {
 
 		if(contigSize >= libraryPE.insertMean) {
 			frc.computeHighSpanningArea("PE", contig, currentContig);
-			frc.computeCompressionArea("PE", contig, currentContig, -3.0);
-			frc.computeStrechArea("PE", contig, currentContig, 3.0);
+			frc.computeCompressionArea("PE", contig, currentContig, -4.0);
+			frc.computeStrechArea("PE", contig, currentContig, 4.0);
 		}
 
     	delete currentContig; // delete hold contig
@@ -457,7 +458,7 @@ int main(int argc, char *argv[]) {
    						if(contigSize >= libraryMP.insertMean) {
    							frc.computeHighSingleArea("MP", contig, currentContig);
    	    					frc.computeHighSpanningArea("MP", contig, currentContig);
-   							frc.computeCompressionArea("MP", contig, currentContig, -3.0);
+   							frc.computeCompressionArea("MP", contig, currentContig, -4.0);
     						frc.computeStrechArea("MP", contig, currentContig, 5.0);
     					}
 
@@ -490,7 +491,7 @@ int main(int argc, char *argv[]) {
     	if(contigSize >= libraryMP.insertMean) {
     		frc.computeHighSingleArea("MP", contig, currentContig);
     		frc.computeHighSpanningArea("MP", contig, currentContig);
-    		frc.computeCompressionArea("MP", contig, currentContig, -3.0);
+    		frc.computeCompressionArea("MP", contig, currentContig, -4.0);
     		frc.computeStrechArea("MP", contig, currentContig, 5.0);
     	}
     	samclose(fp); // close the file
