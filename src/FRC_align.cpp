@@ -30,20 +30,6 @@
 #include "data_structures/Contig.h"
 #include "data_structures/FRC.h"
 
-
-
-
-
-float lowCoverageFeat = 1/(float)3;
-float highCoverageFeat = 3;
-float lowNormalFeat = 1/(float)3;
-float highNormalFeat = 3;
-float highSingleFeat = 0.6;
-float highSpanningFeat = 0.6;
-float highOutieFeat = 0.6;
-float CE_statistics = 3;
-
-
 #define MIN(x,y) \
   ((x) < (y)) ? (x) : (y)
 
@@ -98,10 +84,6 @@ struct LibraryStatistics{
 };
 
 LibraryStatistics computeLibraryStats(samfile_t *fp, unsigned int minInsert, unsigned int maxInsert, unsigned int genomeLength);
-
-/**
- * Main of app
- */
 
 
 int main(int argc, char *argv[]) {
@@ -369,7 +351,7 @@ int main(int argc, char *argv[]) {
     					}
 
     					frc.computeHighSingleArea("PE", contig, currentContig);
-    					frc.computeHighOutieArea("PE", contig, currentContig);
+    					//frc.computeHighOutieArea("PE", contig, currentContig);
 
     					if(contigSize >= libraryPE.insertMean) {
     						frc.computeHighSpanningArea("PE", contig, currentContig);
