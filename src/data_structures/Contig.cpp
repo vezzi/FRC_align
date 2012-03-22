@@ -144,9 +144,9 @@ void Contig::updateContig(bam1_t* b) {
 				iSize = (startPaired + core->l_qseq -1) - startRead; // insert size, I consider both reads of the same length
 				startInsert = startRead;
 				endInsert = startRead + iSize;
-//				if (minInsert <= iSize && iSize <= maxInsert) { //useful to compute CE stats
+				if (minInsert <= iSize && iSize <= maxInsert) { //useful to compute CE stats
 					updateCov(startInsert,endInsert, insertCov); // update spanning coverage
-//				}
+				}
 
 				if(!(core->flag&BAM_FREVERSE) && (core->flag&BAM_FMREVERSE) ) { //
 					//here reads are correctly oriented
@@ -162,9 +162,9 @@ void Contig::updateContig(bam1_t* b) {
 				startInsert = startPaired;
 				endInsert = startInsert + iSize;
 
-//				if (minInsert <= iSize && iSize <= maxInsert) { //useful to compute CE stats
+				if (minInsert <= iSize && iSize <= maxInsert) { //useful to compute CE stats
 					updateCov(startInsert,endInsert, insertCov); // update spanning coverage
-//				}
+				}
 
 				if((core->flag&BAM_FREVERSE) && !(core->flag&BAM_FMREVERSE) ) { //
 					//here reads are correctly oriented

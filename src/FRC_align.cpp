@@ -246,16 +246,17 @@ int main(int argc, char *argv[]) {
     uint32_t mpMinInsert_recomputed; // recompute min and max insert on the basis of the new insert size
     uint32_t mpMaxInsert_recomputed; // the original min and max threshold are used only as a first rough approximation
 
+    unsigned int timesStdDev = 6;
 	if(vm.count("pe-sam")) { // in this case file is already OPEN
 		cout << "COMPUTING PE STATISTIC\n";
 		libraryPE = computeLibraryStats(fp, peMinInsert, peMaxInsert, estimatedGenomeSize);
 		samclose(fp); // close the file
-	    if(libraryPE.insertMean - 3*libraryPE.insertStd > 0) {
-	    	peMinInsert_recomputed = libraryPE.insertMean - 3*libraryPE.insertStd;
+	    if(libraryPE.insertMean - timesStdDev*libraryPE.insertStd > 0) {
+	    	peMinInsert_recomputed = libraryPE.insertMean - timesStdDev*libraryPE.insertStd;
 	    } else {
 	    	peMinInsert_recomputed = 0;
 	    }
-	    peMaxInsert_recomputed = libraryPE.insertMean + 3*libraryPE.insertStd;
+	    peMaxInsert_recomputed = libraryPE.insertMean + timesStdDev*libraryPE.insertStd;
 	    cout << "\tNEW minimum allowed insert " << peMinInsert_recomputed << "\n";
 	    cout << "\tNEW maximum allowed insert " << peMaxInsert_recomputed << "\n";
 	}
@@ -270,12 +271,12 @@ int main(int argc, char *argv[]) {
 			libraryMP = computeLibraryStats(fp, mpMinInsert, mpMaxInsert, estimatedGenomeSize);
 			samclose(fp); // close the file
 		}
-		if(libraryMP.insertMean - 3*libraryMP.insertStd > 0) {
-			mpMinInsert_recomputed = libraryMP.insertMean - 3*libraryMP.insertStd;
+		if(libraryMP.insertMean - timesStdDev*libraryMP.insertStd > 0) {
+			mpMinInsert_recomputed = libraryMP.insertMean - timesStdDev*libraryMP.insertStd;
 		} else {
 			mpMinInsert_recomputed = 0;
 		}
-		mpMaxInsert_recomputed = libraryMP.insertMean + 3*libraryMP.insertStd;
+		mpMaxInsert_recomputed = libraryMP.insertMean + timesStdDev*libraryMP.insertStd;
 
 		cout << "\tNEW minimum allowed insert " << mpMinInsert_recomputed << "\n";
 		cout << "\tNEW maximum allowed insert " << mpMaxInsert_recomputed << "\n";
@@ -449,12 +450,12 @@ int main(int argc, char *argv[]) {
     				} else {
     					//count contig features
     					if(libraryMP.C_A > 15) { // if mate pair library provides an enough high covereage
-    						frc.computeLowCoverageArea("MP", contig, currentContig);
-    						frc.computeHighCoverageArea("MP", contig, currentContig);
+//    						frc.computeLowCoverageArea("MP", contig, currentContig);
+//    						frc.computeHighCoverageArea("MP", contig, currentContig);
     					}
     					if(libraryMP.C_M > 12) {
-    						frc.computeLowNormalArea("MP", contig, currentContig);
-    						frc.computeHighNormalArea("MP", contig, currentContig);
+//   						frc.computeLowNormalArea("MP", contig, currentContig);
+//    						frc.computeHighNormalArea("MP", contig, currentContig);
     					}
 
    					//	frc.computeHighOutieArea("MP", contig, currentContig);
@@ -484,12 +485,12 @@ int main(int argc, char *argv[]) {
     	}
     	//UPDATE LAST CONTIG
     	if(libraryMP.C_A > 15) { // if mate pair library provides an enough high covereage
-    		frc.computeLowCoverageArea("MP", contig, currentContig);
-    		frc.computeHighCoverageArea("MP", contig, currentContig);
+  //  		frc.computeLowCoverageArea("MP", contig, currentContig);
+  //  		frc.computeHighCoverageArea("MP", contig, currentContig);
     	}
     	if(libraryMP.C_M > 12) {
-    		frc.computeLowNormalArea("MP", contig, currentContig);
-    		frc.computeHighNormalArea("MP", contig, currentContig);
+  //  		frc.computeLowNormalArea("MP", contig, currentContig);
+  //  		frc.computeHighNormalArea("MP", contig, currentContig);
     	}
 	//	frc.computeHighOutieArea("MP", contig, currentContig);
     	if(contigSize >= libraryMP.insertMean) {
