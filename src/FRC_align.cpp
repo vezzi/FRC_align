@@ -387,7 +387,7 @@ int main(int argc, char *argv[]) {
 		}
 
 		frc.computeHighSingleArea("PE", contig, currentContig);
-		frc.computeHighOutieArea("PE", contig, currentContig);
+		//frc.computeHighOutieArea("PE", contig, currentContig);
 
 		if(contigSize >= libraryPE.insertMean) {
 			frc.computeHighSpanningArea("PE", contig, currentContig);
@@ -457,10 +457,10 @@ int main(int argc, char *argv[]) {
     						frc.computeHighNormalArea("MP", contig, currentContig);
     					}
 
-    				//	frc.computeHighSingleArea("MP", contig, currentContig);
-   						frc.computeHighOutieArea("MP", contig, currentContig);
+   					//	frc.computeHighOutieArea("MP", contig, currentContig);
 
    						if(contigSize >= libraryMP.insertMean) {
+   							frc.computeHighSingleArea("MP", contig, currentContig);
    	    					frc.computeHighSpanningArea("MP", contig, currentContig);
    							frc.computeCompressionArea("MP", contig, currentContig, -4.0);
     						frc.computeStrechArea("MP", contig, currentContig, 4.0);
@@ -491,10 +491,10 @@ int main(int argc, char *argv[]) {
     		frc.computeLowNormalArea("MP", contig, currentContig);
     		frc.computeHighNormalArea("MP", contig, currentContig);
     	}
-    //	frc.computeHighSingleArea("MP", contig, currentContig);
-		frc.computeHighOutieArea("MP", contig, currentContig);
+	//	frc.computeHighOutieArea("MP", contig, currentContig);
     	if(contigSize >= libraryMP.insertMean) {
-        	frc.computeHighSpanningArea("MP", contig, currentContig);
+    		frc.computeHighSingleArea("MP", contig, currentContig);
+    		frc.computeHighSpanningArea("MP", contig, currentContig);
     		frc.computeCompressionArea("MP", contig, currentContig, -4.0);
     		frc.computeStrechArea("MP", contig, currentContig, 4.0);
     	}
