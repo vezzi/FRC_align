@@ -47,7 +47,7 @@ Contig::Contig() {
 	highNormalFeat = 3.0;
 	highSingleFeat = 0.4;
 	highSpanningFeat = 0.4;
-	highOutieFeat = 0.6;
+	highOutieFeat = 0.4;
 
 }
 
@@ -65,7 +65,7 @@ Contig::Contig(unsigned int contigLength, unsigned int minInsert, unsigned int m
 	highNormalFeat = 3.0;
 	highSingleFeat = 0.4;
 	highSpanningFeat = 0.4;
-	highOutieFeat = 0.6;
+	highOutieFeat = 0.4;
 
 }
 
@@ -899,7 +899,7 @@ unsigned int Contig::getCompressionAreasZones(float insertionMean, float inserti
 	unsigned int inserts = 0; // number of inserts
 	unsigned int features = 0;
 	float Z_stats;
-	unsigned int minInsertNum = 10;
+	unsigned int minInsertNum = 5;
 
 	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
 		for(unsigned int i=0; i < this->contigLength ; i++ ) {
@@ -1014,7 +1014,7 @@ unsigned int Contig::getExpansionAreasZones(float insertionMean, float insertion
 	unsigned int inserts = 0; // number of inserts
 	unsigned int features = 0;
 	float Z_stats = 0;
-	unsigned int minInsertNum = 10;
+	unsigned int minInsertNum = 5;
 	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
 		for(unsigned int i=0; i < this->contigLength ; i++ ) {
 			if(CONTIG[i].StratingInserts > 0) {
