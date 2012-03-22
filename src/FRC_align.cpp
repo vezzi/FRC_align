@@ -342,14 +342,11 @@ int main(int argc, char *argv[]) {
     					contig = contig2position[head->target_name[currentTid]];
     					currentContig =  new Contig(contigSize, peMinInsert_recomputed, peMaxInsert_recomputed);
     				} else {
-    					if(libraryPE.C_A > 15) { // if mate pair library provides an enough high covereage
-    						frc.computeLowCoverageArea("PE", contig, currentContig);
-    						frc.computeHighCoverageArea("PE", contig, currentContig);
-    					}
-    					if(libraryPE.C_M > 12) {
-    						frc.computeLowNormalArea("PE", contig, currentContig);
-    						frc.computeHighNormalArea("PE", contig, currentContig);
-    					}
+
+   						frc.computeLowCoverageArea("PE", contig, currentContig);
+   						frc.computeHighCoverageArea("PE", contig, currentContig);
+   						frc.computeLowNormalArea("PE", contig, currentContig);
+   						frc.computeHighNormalArea("PE", contig, currentContig);
 
     					frc.computeHighSingleArea("PE", contig, currentContig);
     					//frc.computeHighOutieArea("PE", contig, currentContig);
@@ -378,14 +375,11 @@ int main(int argc, char *argv[]) {
     		}
     	}
     	//UPDATE LAST CONTIG
-		if(libraryPE.C_A > 15) { // if mate pair library provides an enough high covereage
-			frc.computeLowCoverageArea("PE", contig, currentContig);
-			frc.computeHighCoverageArea("PE", contig, currentContig);
-		}
-		if(libraryPE.C_M > 12) {
-			frc.computeLowNormalArea("PE", contig, currentContig);
-			frc.computeHighNormalArea("PE", contig, currentContig);
-		}
+
+    	frc.computeLowCoverageArea("PE", contig, currentContig);
+    	frc.computeHighCoverageArea("PE", contig, currentContig);
+    	frc.computeLowNormalArea("PE", contig, currentContig);
+    	frc.computeHighNormalArea("PE", contig, currentContig);
 
 		frc.computeHighSingleArea("PE", contig, currentContig);
 		//frc.computeHighOutieArea("PE", contig, currentContig);
