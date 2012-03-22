@@ -24,7 +24,6 @@ Position::Position() {
 	InsertCoverage = 0;
 	CorrectlyMated = 0;
 	WronglyOriented = 0;
-	WronglyDistance = 0;
 	Singleton = 0;
 	MatedDifferentContig = 0;
 	insertsLength = 0;
@@ -102,9 +101,6 @@ void Contig::updateCov(unsigned int start, unsigned int end, data type) {
 	} else if(type == woCov) {
 		for(unsigned int i = start; i< end; i++)
 			CONTIG[i].WronglyOriented++;
-	}else if(type == wdCov) {
-		for(unsigned int i = start; i< end; i++)
-			CONTIG[i].WronglyDistance++;
 	} else if(type == singCov) {
 		for(unsigned int i = start; i< end; i++)
 			CONTIG[i].Singleton++;
@@ -156,8 +152,6 @@ void Contig::updateContig(bam1_t* b) {
 					//here reads are correctly oriented
 					if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert
 						updateCov(startRead, endRead, cmCov); // update good read coverage
-					} else {
-					//	updateCov(startRead, endRead, wdCov);
 					}
 				} else {
 					//pair is wrongly oriented
@@ -176,8 +170,6 @@ void Contig::updateContig(bam1_t* b) {
 					//here reads are correctly oriented
 					if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert
 						updateCov(startRead, endRead, cmCov); // update good read coverage
-					} else {
-					//	updateCov(startRead, endRead, wdCov);
 					}
 				} else {
 					updateCov(startRead, endRead, woCov);
@@ -194,8 +186,6 @@ void Contig::updateContig(bam1_t* b) {
 					//here reads are correctly oriented
 					if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert, no need to update insert coverage
 						updateCov(startRead, endRead, cmCov); // update good read coverage
-					} else {
-					//	updateCov(startRead, endRead, wdCov);
 					}
 				} else {
 					//pair is wrongly oriented
@@ -207,8 +197,6 @@ void Contig::updateContig(bam1_t* b) {
 					//here reads are correctly oriented
 					if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert, no need to update insert coverage
 						updateCov(startRead, endRead, cmCov); // update good read coverage
-					} else {
-					//	updateCov(startRead, endRead, wdCov);
 					}
 				} else {
 					//pair is wrongly oriented
@@ -816,7 +804,7 @@ unsigned int Contig::getHighOutieAreasZones( ) {
 	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
 		for(unsigned int i=0; i < this->contigLength ; i++ ) {
 			totalCoverage += CONTIG[i].ReadCoverage ;
-			outieCoverage += (CONTIG[i].WronglyDistance + CONTIG[i].WronglyOriented);
+			outieCoverage += CONTIG[i].WronglyOriented;
 		}
 		meanTotalCov = totalCoverage/(float)this->contigLength; // this is the "window" total coverage
 		meanOutieCoverage = outieCoverage/(float)this->contigLength; // this is the "window" single read coverage
@@ -833,7 +821,7 @@ unsigned int Contig::getHighOutieAreasZones( ) {
 		unsigned int winSize     = windowSize;
 		for(unsigned int i=startWindow; i < endWindow ; i++ ) {
 			totalCoverage += CONTIG[i].ReadCoverage ;
-			outieCoverage +=  (CONTIG[i].WronglyDistance + CONTIG[i].WronglyOriented);
+			outieCoverage +=  (CONTIG[i].WronglyOriented);
 		}
 		meanTotalCov = totalCoverage/(float)winSize; //
 		meanOutieCoverage = outieCoverage/(float)winSize; //
@@ -854,7 +842,7 @@ unsigned int Contig::getHighOutieAreasZones( ) {
 			meanOutieCoverage = 0;
 			for(unsigned int i=startWindow; i < endWindow ; i++ ) {
 				totalCoverage += CONTIG[i].ReadCoverage ;
-				outieCoverage +=  (CONTIG[i].WronglyDistance + CONTIG[i].WronglyOriented);
+				outieCoverage +=  (CONTIG[i].WronglyOriented);
 			}
 			meanTotalCov = totalCoverage/(float)(endWindow - startWindow); // compute window total coverage
 			meanOutieCoverage = outieCoverage/(float)(endWindow - startWindow); // compute window single read coverage

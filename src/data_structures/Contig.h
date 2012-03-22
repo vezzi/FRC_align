@@ -29,7 +29,7 @@ public:
 
 };
 
-enum data {readCov, insertCov, cmCov, woCov, wdCov, singCov, mdcCov};
+enum data {readCov, insertCov, cmCov, woCov, singCov, mdcCov};
 
 class Position {
 public:
@@ -38,7 +38,6 @@ public:
 	unsigned int InsertCoverage;
 	unsigned int CorrectlyMated;
 	unsigned int WronglyOriented;
-	unsigned int WronglyDistance;
 	unsigned int Singleton;
 	unsigned int MatedDifferentContig;
 	unsigned long int insertsLength;
