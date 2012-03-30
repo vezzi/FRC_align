@@ -41,7 +41,7 @@ Contig::Contig() {
 	windowSize = 1000;
 	windowStep = 200;
 
-	lowCoverageFeat = 1/(float)3;
+	lowCoverageFeat = 1/(float)2;
 	highCoverageFeat = 3.0;
 	lowNormalFeat = 1/(float)3;
 	highNormalFeat = 3.0;
@@ -59,7 +59,7 @@ Contig::Contig(unsigned int contigLength, unsigned int minInsert, unsigned int m
 	windowSize = 1000;
 	windowStep = 200;
 
-	lowCoverageFeat = 1/(float)3;
+	lowCoverageFeat = 1/(float)2;
 	highCoverageFeat = 3.0;
 	lowNormalFeat = 1/(float)3;
 	highNormalFeat = 3.0;
