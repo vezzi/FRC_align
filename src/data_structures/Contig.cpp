@@ -38,7 +38,7 @@ Contig::Contig() {
 	contigLength = 0;
 	minInsert = 0;
 	maxInsert = 0;
-	windowSize = 1000;
+	windowSize = 500;
 	windowStep = 200;
 
 	lowCoverageFeat = 1/(float)2;
@@ -56,7 +56,7 @@ Contig::Contig(unsigned int contigLength, unsigned int minInsert, unsigned int m
 	this->minInsert = minInsert;
 	this->maxInsert = maxInsert;
 	this->CONTIG =  new Position[contigLength];
-	windowSize = 1000;
+	windowSize = 500;
 	windowStep = 200;
 
 	lowCoverageFeat = 1/(float)2;
