@@ -56,8 +56,6 @@ class Contig{
 	unsigned int contigLength;
 	unsigned int minInsert;
 	unsigned int maxInsert;
-	unsigned int windowSize;
-	unsigned int windowStep;
 
 	float lowCoverageFeat;
 	float highCoverageFeat;
@@ -79,28 +77,19 @@ public:
 	void updateContig(bam1_t* b); // given an alignment it updates the contig situation
 
 
-	unsigned int getLowCoverageAreas(float C_A);
-	unsigned int getHighCoverageAreas(float C_A);
-	unsigned int getLowNormalAreas(float C_M);
-	unsigned int getHighNormalAreas(float C_M);
-	unsigned int getHighSingleAreas();
-	unsigned int getHighSpanningAreas();
-	unsigned int getHighOutieAreas();
-	unsigned int getCompressionAreas(float insertionMean, float insertionStd);
-	unsigned int getExpansionAreas(float insertionMean, float insertionStd);
+	unsigned int getLowCoverageAreas(float C_A, unsigned int windowSize, unsigned int windowStep);
+	unsigned int getHighCoverageAreas(float C_A, unsigned int windowSize, unsigned int windowStep);
+	unsigned int getLowNormalAreas(float C_M, unsigned int windowSize, unsigned int windowStep);
+	unsigned int getHighNormalAreas(float C_M, unsigned int windowSize, unsigned int windowStep);
+	unsigned int getHighSingleAreas(unsigned int windowSize, unsigned int windowStep);
+	unsigned int getHighSpanningAreas(unsigned int windowSize, unsigned int windowStep);
+	unsigned int getHighOutieAreas(unsigned int windowSize, unsigned int windowStep);
+	unsigned int getCompressionAreas(float insertionMean, float insertionStd, float Zscore, unsigned int windowSize, unsigned int windowStep);
+	unsigned int getExpansionAreas(float insertionMean, float insertionStd, float Zscore, unsigned int windowSize, unsigned int windowStep);
 
 	void print();
 
 
-	unsigned int getLowCoverageAreasZones(float C_A);
-	unsigned int getHighCoverageAreasZones(float C_A);
-	unsigned int getLowNormalAreasZones(float C_M);
-	unsigned int getHighNormalAreasZones(float C_M);
-	unsigned int getHighSingleAreasZones();
-	unsigned int getHighSpanningAreasZones();
-	unsigned int getHighOutieAreasZones();
-	unsigned int getCompressionAreasZones(float insertionMean, float insertionStd, float Zscore);
-	unsigned int getExpansionAreasZones(float insertionMean, float insertionStd, float Zscore);
 
 	vector<pair<unsigned int, unsigned int> > lowCoverageAreas;
 	vector<pair<unsigned int, unsigned int> > highCoverageAreas;

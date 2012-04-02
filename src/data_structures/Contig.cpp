@@ -38,8 +38,6 @@ Contig::Contig() {
 	contigLength = 0;
 	minInsert = 0;
 	maxInsert = 0;
-	windowSize = 500;
-	windowStep = 200;
 
 	lowCoverageFeat = 1/(float)2;
 	highCoverageFeat = 2.5;
@@ -56,8 +54,6 @@ Contig::Contig(unsigned int contigLength, unsigned int minInsert, unsigned int m
 	this->minInsert = minInsert;
 	this->maxInsert = maxInsert;
 	this->CONTIG =  new Position[contigLength];
-	windowSize = 500;
-	windowStep = 200;
 
 	lowCoverageFeat = 1/(float)2;
 	highCoverageFeat = 2.5;
@@ -230,7 +226,7 @@ void Contig::print() {
 }
 
 
-unsigned int Contig::getLowCoverageAreasZones(float C_A) {
+unsigned int Contig::getLowCoverageAreas(float C_A, unsigned int windowSize, unsigned int windowStep) {
 	//compute length of low coverage areas in the contig
 	//use a 1K sliding window
 
@@ -238,7 +234,7 @@ unsigned int Contig::getLowCoverageAreasZones(float C_A) {
 	unsigned int totalCoverage = 0;
 	unsigned int features = 0;
 	float meanCov;
-	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
+	if(this->contigLength < windowSize) { // if contig less than window size, only one window
 		for(unsigned int i=0; i < this->contigLength ; i++ ) {
 			totalCoverage += CONTIG[i].ReadCoverage;
 		}
@@ -330,11 +326,11 @@ unsigned int Contig::getLowCoverageAreasZones(float C_A) {
 
 
 
-unsigned int  Contig::getHighCoverageAreasZones(float C_A) {
+unsigned int  Contig::getHighCoverageAreas(float C_A, unsigned int windowSize, unsigned int windowStep) {
 	unsigned int totalCoverage = 0;
 	unsigned int features = 0;
 	float meanCov;
-	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
+	if(this->contigLength < windowSize) { // if contig less than window size, only one window
 		for(unsigned int i=0; i < this->contigLength ; i++ ) {
 			totalCoverage += CONTIG[i].ReadCoverage;
 		}
@@ -420,14 +416,14 @@ unsigned int  Contig::getHighCoverageAreasZones(float C_A) {
 
 
 
-unsigned int Contig::getLowNormalAreasZones(float C_M) {
+unsigned int Contig::getLowNormalAreas(float C_M, unsigned int windowSize, unsigned int windowStep) {
 
 	//compute length of low coverage areas in the contig
 	//use a 1K sliding window
 	unsigned int totalCoverage = 0;
 	unsigned int features = 0;
 	float meanCov;
-	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
+	if(this->contigLength < windowSize) { // if contig less than window size, only one window
 		for(unsigned int i=0; i < this->contigLength ; i++ ) {
 			totalCoverage += CONTIG[i].CorrectlyMated ;
 		}
@@ -511,14 +507,14 @@ unsigned int Contig::getLowNormalAreasZones(float C_M) {
 
 
 
-unsigned int Contig::getHighNormalAreasZones(float C_M) {
+unsigned int Contig::getHighNormalAreas(float C_M, unsigned int windowSize, unsigned int windowStep) {
 
 	//compute length of low coverage areas in the contig
 	//use a 1K sliding window
 	unsigned int totalCoverage = 0;
 	unsigned int features = 0;
 	float meanCov;
-	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
+	if(this->contigLength < windowSize) { // if contig less than window size, only one window
 		for(unsigned int i=0; i < this->contigLength ; i++ ) {
 			totalCoverage += CONTIG[i].CorrectlyMated ;
 		}
@@ -598,14 +594,14 @@ unsigned int Contig::getHighNormalAreasZones(float C_M) {
 	return features;
 }
 
-unsigned int Contig::getHighSingleAreasZones( ) {
+unsigned int Contig::getHighSingleAreas( unsigned int windowSize, unsigned int windowStep ) {
 
 	unsigned int totalCoverage = 0;
 	unsigned int singleReadCoverage = 0;
 	unsigned int features = 0;
 	float meanTotalCov;
 	float meanSingleCov;
-	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
+	if(this->contigLength < windowSize) { // if contig less than window size, only one window
 		for(unsigned int i=0; i < this->contigLength ; i++ ) {
 			totalCoverage += CONTIG[i].ReadCoverage ;
 			singleReadCoverage += CONTIG[i].Singleton;
@@ -695,14 +691,14 @@ unsigned int Contig::getHighSingleAreasZones( ) {
 
 
 
-unsigned int Contig::getHighSpanningAreasZones( ) {
+unsigned int Contig::getHighSpanningAreas( unsigned int windowSize, unsigned int windowStep ) {
 
 	unsigned int totalCoverage = 0;
 	unsigned int matedDifferentContigCoverage = 0;
 	unsigned int features = 0;
 	float meanTotalCov;
 	float meanMatedDifferentContigCoverage;
-	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
+	if(this->contigLength < windowSize) { // if contig less than window size, only one window
 		for(unsigned int i=0; i < this->contigLength ; i++ ) {
 			totalCoverage += CONTIG[i].ReadCoverage ;
 			matedDifferentContigCoverage += CONTIG[i].MatedDifferentContig;
@@ -795,13 +791,13 @@ unsigned int Contig::getHighSpanningAreasZones( ) {
 
 
 
-unsigned int Contig::getHighOutieAreasZones( ) {
+unsigned int Contig::getHighOutieAreas( unsigned int windowSize, unsigned int windowStep ) {
 	unsigned int totalCoverage = 0;
 	unsigned int outieCoverage = 0;
 	unsigned int features = 0;
 	float meanTotalCov;
 	float meanOutieCoverage;
-	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
+	if(this->contigLength < windowSize) { // if contig less than window size, only one window
 		for(unsigned int i=0; i < this->contigLength ; i++ ) {
 			totalCoverage += CONTIG[i].ReadCoverage ;
 			outieCoverage += CONTIG[i].WronglyOriented;
@@ -893,7 +889,7 @@ unsigned int Contig::getHighOutieAreasZones( ) {
 
 
 
-unsigned int Contig::getCompressionAreasZones(float insertionMean, float insertionStd, float Zscore) {
+unsigned int Contig::getCompressionAreas(float insertionMean, float insertionStd, float Zscore, unsigned int windowSize, unsigned int windowStep) {
 
 	unsigned long int spanningCoverage = 0; // total insert length
 	unsigned int inserts = 0; // number of inserts
@@ -901,7 +897,7 @@ unsigned int Contig::getCompressionAreasZones(float insertionMean, float inserti
 	float Z_stats;
 	unsigned int minInsertNum = 5;
 
-	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
+	if(this->contigLength < windowSize) { // if contig less than window size, only one window
 		for(unsigned int i=0; i < this->contigLength ; i++ ) {
 			if(CONTIG[i].StratingInserts > 0) {
 				inserts += CONTIG[i].StratingInserts;
@@ -1009,13 +1005,13 @@ unsigned int Contig::getCompressionAreasZones(float insertionMean, float inserti
 }
 
 
-unsigned int Contig::getExpansionAreasZones(float insertionMean, float insertionStd, float Zscore) {
+unsigned int Contig::getExpansionAreas(float insertionMean, float insertionStd, float Zscore, unsigned int windowSize, unsigned int windowStep) {
 	unsigned long int spanningCoverage = 0; // total insert length
 	unsigned int inserts = 0; // number of inserts
 	unsigned int features = 0;
 	float Z_stats = 0;
 	unsigned int minInsertNum = 5;
-	if(this->contigLength < this->windowSize) { // if contig less than window size, only one window
+	if(this->contigLength < windowSize) { // if contig less than window size, only one window
 		for(unsigned int i=0; i < this->contigLength ; i++ ) {
 			if(CONTIG[i].StratingInserts > 0) {
 				inserts += CONTIG[i].StratingInserts;

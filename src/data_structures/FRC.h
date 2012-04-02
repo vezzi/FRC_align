@@ -91,15 +91,15 @@ public:
 	string  getID(unsigned int i);
 
 	void sortFRC();
-	void computeLowCoverageArea(string type, unsigned int ctg, Contig *contig);
-	void computeHighCoverageArea(string type, unsigned int ctg, Contig *contig);
-	void computeLowNormalArea(string type, unsigned int ctg, Contig *contig);
-	void computeHighNormalArea(string type, unsigned int ctg, Contig *contig);
-	void computeHighSingleArea(string type, unsigned int ctg, Contig *contig);
-	void computeHighSpanningArea(string type, unsigned int ctg, Contig *contig);
-	void computeHighOutieArea(string type, unsigned int ctg, Contig *contig);
-	void computeCompressionArea(string type, unsigned int ctg, Contig *contig, float Zscore);
-	void computeStrechArea(string type, unsigned int ctg, Contig *contig, float Zscore);
+	void computeLowCoverageArea(string type, unsigned int ctg, Contig *contig, unsigned int WindowSize, unsigned int WindowStep);
+	void computeHighCoverageArea(string type, unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep);
+	void computeLowNormalArea(string type, unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep);
+	void computeHighNormalArea(string type, unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep);
+	void computeHighSingleArea(string type, unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep);
+	void computeHighSpanningArea(string type, unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep);
+	void computeHighOutieArea(string type, unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep);
+	void computeCompressionArea(string type, unsigned int ctg, Contig *contig, float Zscore, unsigned int windowSize, unsigned int windowStep);
+	void computeStrechArea(string type, unsigned int ctg, Contig *contig, float Zscore, unsigned int windowSize, unsigned int windowStep);
 
 	unsigned int getTotal(unsigned int ctg);
 

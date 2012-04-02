@@ -43,8 +43,8 @@ unsigned int FRC::getContigLength(unsigned int ctg) {
 
 
 
-void FRC::computeLowCoverageArea(string type, unsigned int ctg, Contig *contig) {
-	unsigned int feat = contig->getLowCoverageAreasZones(this->C_A);
+void FRC::computeLowCoverageArea(string type, unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep) {
+	unsigned int feat = contig->getLowCoverageAreas(C_A,windowSize, windowStep);
 	if(type.compare("PE") == 0) {
 		this->CONTIG[ctg].PE.updateLOW_COVERAGE_AREA(feat);
 	} else {
@@ -60,8 +60,8 @@ void FRC::computeLowCoverageArea(string type, unsigned int ctg, Contig *contig) 
 
 }
 
-void FRC::computeHighCoverageArea(string type, unsigned int ctg, Contig *contig) {
-	unsigned int feat = contig->getHighCoverageAreasZones(this->C_A);
+void FRC::computeHighCoverageArea(string type, unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep) {
+	unsigned int feat = contig->getHighCoverageAreas(this->C_A, windowSize, windowStep);
 	if(type.compare("PE") == 0) {
 		this->CONTIG[ctg].PE.updateHIGH_COVERAGE_AREA(feat);
 	} else {
@@ -77,8 +77,8 @@ void FRC::computeHighCoverageArea(string type, unsigned int ctg, Contig *contig)
 	}
 }
 
-void FRC::computeLowNormalArea(string type,unsigned int ctg, Contig *contig) {
-	unsigned int feat = contig->getLowNormalAreasZones(this->C_M);
+void FRC::computeLowNormalArea(string type,unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep) {
+	unsigned int feat = contig->getLowNormalAreas(this->C_M, windowSize, windowStep);
 	if(type.compare("PE") == 0) {
 		this->CONTIG[ctg].PE.updateLOW_NORMAL_AREA(feat);
 	} else {
@@ -93,8 +93,8 @@ void FRC::computeLowNormalArea(string type,unsigned int ctg, Contig *contig) {
 	}
 }
 
-void FRC::computeHighNormalArea(string type,unsigned int ctg, Contig *contig) {
-	unsigned int feat = contig->getHighNormalAreasZones(this->C_M);
+void FRC::computeHighNormalArea(string type,unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep) {
+	unsigned int feat = contig->getHighNormalAreas(this->C_M, windowSize, windowStep);
 	if(type.compare("PE") == 0) {
 		this->CONTIG[ctg].PE.updateHIGH_NORMAL_AREA(feat);
 	} else {
@@ -110,8 +110,8 @@ void FRC::computeHighNormalArea(string type,unsigned int ctg, Contig *contig) {
 	}
 }
 
-void FRC::computeHighSingleArea(string type,unsigned int ctg, Contig *contig) {
-	unsigned int feat = contig->getHighSingleAreasZones();
+void FRC::computeHighSingleArea(string type,unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep) {
+	unsigned int feat = contig->getHighSingleAreas( windowSize, windowStep);
 	if(type.compare("PE") == 0) {
 		this->CONTIG[ctg].PE.updateHIGH_SINGLE_AREA(feat);
 	} else {
@@ -129,8 +129,8 @@ void FRC::computeHighSingleArea(string type,unsigned int ctg, Contig *contig) {
 
 }
 
-void FRC::computeHighSpanningArea(string type,unsigned int ctg, Contig *contig) {
-	unsigned int feat = contig->getHighSpanningAreasZones();
+void FRC::computeHighSpanningArea(string type,unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep) {
+	unsigned int feat = contig->getHighSpanningAreas( windowSize, windowStep);
 	if(type.compare("PE") == 0) {
 		this->CONTIG[ctg].PE.updateHIGH_SPANNING_AREA(feat);
 	} else {
@@ -147,8 +147,8 @@ void FRC::computeHighSpanningArea(string type,unsigned int ctg, Contig *contig) 
 	}
 }
 
-void FRC::computeHighOutieArea(string type,unsigned int ctg, Contig *contig) {
-	unsigned int feat = contig->getHighOutieAreasZones();
+void FRC::computeHighOutieArea(string type,unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep) {
+	unsigned int feat = contig->getHighOutieAreas( windowSize, windowStep);
 	if(type.compare("PE") == 0) {
 		this->CONTIG[ctg].PE.updateHIGH_OUTIE_AREA(feat);
 	} else {
@@ -165,8 +165,8 @@ void FRC::computeHighOutieArea(string type,unsigned int ctg, Contig *contig) {
 
 }
 
-void FRC::computeCompressionArea(string type,unsigned int ctg, Contig *contig, float Zscore ) {
-	unsigned int feat = contig->getCompressionAreasZones(this->insertMean, this->insertStd, Zscore);
+void FRC::computeCompressionArea(string type,unsigned int ctg, Contig *contig, float Zscore , unsigned int windowSize, unsigned int windowStep) {
+	unsigned int feat = contig->getCompressionAreas(this->insertMean, this->insertStd, Zscore, windowSize, windowStep);
 	if(type.compare("PE") == 0) {
 		this->CONTIG[ctg].PE.updateCOMPRESSION_AREA(feat);
 	} else {
@@ -183,8 +183,8 @@ void FRC::computeCompressionArea(string type,unsigned int ctg, Contig *contig, f
 
 }
 
-void FRC::computeStrechArea(string type,unsigned int ctg, Contig *contig, float Zscore) {
-	unsigned int feat = contig->getExpansionAreasZones(this->insertMean, this->insertStd, Zscore);
+void FRC::computeStrechArea(string type,unsigned int ctg, Contig *contig, float Zscore, unsigned int windowSize, unsigned int windowStep) {
+	unsigned int feat = contig->getExpansionAreas(this->insertMean, this->insertStd, Zscore, windowSize, windowStep);
 	if(type.compare("PE") == 0) {
 		this->CONTIG[ctg].PE.updateSTRECH_AREA(feat);
 	} else {
