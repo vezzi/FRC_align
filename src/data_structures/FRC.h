@@ -17,7 +17,7 @@ using namespace std;
 #include <algorithm>
 #include <vector>
 
-#include "Features.h";
+#include "Features.h"
 
 
 class contigFeatures {
