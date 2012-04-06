@@ -353,7 +353,7 @@ int main(int argc, char *argv[]) {
     					//frc.computeHighOutieArea("PE", contig, currentContig);
 
     					if(contigSize >= libraryPE.insertMean) {
-    						frc.computeHighSpanningArea("PE", contig, currentContig, 500, 1000, 200);
+    						frc.computeHighSpanningArea("PE", contig, currentContig, 1000, 200);
 							frc.computeCompressionArea("PE", contig, currentContig, -3.0, 1000, 200);
 							frc.computeStrechArea("PE", contig, currentContig, 3.0, 1000, 200);
     					}
