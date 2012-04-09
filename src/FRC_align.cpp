@@ -246,7 +246,7 @@ int main(int argc, char *argv[]) {
     uint32_t mpMinInsert_recomputed; // recompute min and max insert on the basis of the new insert size
     uint32_t mpMaxInsert_recomputed; // the original min and max threshold are used only as a first rough approximation
 
-    unsigned int timesStdDev = 6;
+    unsigned int timesStdDev = 4;
 	if(vm.count("pe-sam")) { // in this case file is already OPEN
 		cout << "COMPUTING PE STATISTIC\n";
 		libraryPE = computeLibraryStats(fp, peMinInsert, peMaxInsert, estimatedGenomeSize);
