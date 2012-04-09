@@ -455,12 +455,12 @@ int main(int argc, char *argv[]) {
 
    					//	frc.computeHighOutieArea("MP", contig, currentContig);
 
-    					if(contigSize >= libraryMP.insertMean) {
+    					//if(contigSize >= libraryMP.insertMean) {
    							frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
    	    					frc.computeHighSpanningArea("MP", contig, currentContig, 1000, 200);
-   							frc.computeCompressionArea("MP", contig, currentContig, -4.0, 1000, 200);
-    						frc.computeStrechArea("MP", contig, currentContig, 6.0, 1000, 200);
-    					}
+   							frc.computeCompressionArea("MP", contig, currentContig, -4.0, 2000, 200);
+    						frc.computeStrechArea("MP", contig, currentContig, 6.0, 2000, 200);
+    					//}
 
     					delete currentContig; // delete hold contig
     					contigSize = head->target_len[core->tid];
@@ -488,12 +488,12 @@ int main(int argc, char *argv[]) {
   //  		frc.computeHighNormalArea("MP", contig, currentContig);
     	}
     	//	frc.computeHighOutieArea("MP", contig, currentContig);
-    	if(contigSize >= libraryMP.insertMean) {
+    	//if(contigSize >= libraryMP.insertMean) {
     		frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
     		frc.computeHighSpanningArea("MP", contig, currentContig, 1000, 200);
-    		frc.computeCompressionArea("MP", contig, currentContig, -4.0, 1000, 200);
-    		frc.computeStrechArea("MP", contig, currentContig, 6.0, 1000, 200);
-    	}
+    		frc.computeCompressionArea("MP", contig, currentContig, -4.0, 2000, 200);
+    		frc.computeStrechArea("MP", contig, currentContig, 6.0, 2000, 200);
+    	//}
     	samclose(fp); // close the file
 
     }
@@ -508,7 +508,6 @@ int main(int argc, char *argv[]) {
     	frc.printFeatures(i, featureOutFile);
     }
 
-//// attenzione il total e' ricalcolato!!!!
     frc.sortFRC();
     for(unsigned int i=0; i< contigsNumber; i++) {
     	featuresTotal += frc.getTotal(i); // update total number of feature seen so far
