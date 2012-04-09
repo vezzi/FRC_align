@@ -458,8 +458,8 @@ int main(int argc, char *argv[]) {
     			       		frc.computeHighSpanningArea("MP", contig, currentContig, 500, 200);
     			    	}
     					frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
-    			   		frc.computeCompressionArea("MP", contig, currentContig, -5.0, 2000, 200);
-    			   		frc.computeStrechArea("MP", contig, currentContig, 8.0, 2000, 200);
+    			   		frc.computeCompressionArea("MP", contig, currentContig, -5.0, 1000, 200);
+    			   		frc.computeStrechArea("MP", contig, currentContig, 8.0, 1000, 200);
 
 
     					delete currentContig; // delete hold contig
@@ -480,21 +480,23 @@ int main(int argc, char *argv[]) {
     	}
     	//UPDATE LAST CONTIG
     	if(libraryMP.C_A > 15) { // if mate pair library provides an enough high covereage
-  //  		frc.computeLowCoverageArea("MP", contig, currentContig);
-  //  		frc.computeHighCoverageArea("MP", contig, currentContig);
+    		frc.computeLowCoverageArea("MP", contig, currentContig, 500, 50);
+    		frc.computeHighCoverageArea("MP", contig, currentContig,  500, 50);
     	}
     	if(libraryMP.C_M > 12) {
-  //  		frc.computeLowNormalArea("MP", contig, currentContig);
-  //  		frc.computeHighNormalArea("MP", contig, currentContig);
+    		frc.computeLowNormalArea("MP", contig, currentContig, 500, 50);
+    		frc.computeHighNormalArea("MP", contig, currentContig, 500, 50);
     	}
+
     	//	frc.computeHighOutieArea("MP", contig, currentContig);
     	if(contigSize >= 2*libraryMP.insertMean) {
-       		frc.computeHighSpanningArea("MP", contig, currentContig, 500, 200);
+    		frc.computeHighSpanningArea("MP", contig, currentContig, 500, 200);
     	}
-		frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
-   		frc.computeCompressionArea("MP", contig, currentContig, -5.0, 2000, 200);
-   		frc.computeStrechArea("MP", contig, currentContig, 8.0, 2000, 200);
-    	//}
+    	frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
+    	frc.computeCompressionArea("MP", contig, currentContig, -5.0, 1000, 200);
+    	frc.computeStrechArea("MP", contig, currentContig, 8.0, 1000, 200);
+
+
     	samclose(fp); // close the file
 
     }
