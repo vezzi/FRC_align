@@ -458,8 +458,8 @@ int main(int argc, char *argv[]) {
     			       		frc.computeHighSpanningArea("MP", contig, currentContig, 500, 200);
     			    	}
     					frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
-    			   		frc.computeCompressionArea("MP", contig, currentContig, -5.0, 1000, 200);
-    			   		frc.computeStrechArea("MP", contig, currentContig, 8.0, 1000, 200);
+    			   		frc.computeCompressionArea("MP", contig, currentContig, -4.0, 1000, 200);
+    			   		frc.computeStrechArea("MP", contig, currentContig, 6.0, 1000, 200);
 
 
     					delete currentContig; // delete hold contig
@@ -493,8 +493,8 @@ int main(int argc, char *argv[]) {
     		frc.computeHighSpanningArea("MP", contig, currentContig, 500, 200);
     	}
     	frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
-    	frc.computeCompressionArea("MP", contig, currentContig, -5.0, 1000, 200);
-    	frc.computeStrechArea("MP", contig, currentContig, 8.0, 1000, 200);
+    	frc.computeCompressionArea("MP", contig, currentContig, -4.0, 1000, 200);
+    	frc.computeStrechArea("MP", contig, currentContig, 6.0, 1000, 200);
 
 
     	samclose(fp); // close the file
