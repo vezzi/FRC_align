@@ -445,12 +445,12 @@ int main(int argc, char *argv[]) {
     				} else {
     					//count contig features
     					if(libraryMP.C_A > 15) { // if mate pair library provides an enough high covereage
-//    						frc.computeLowCoverageArea("MP", contig, currentContig);
-//    						frc.computeHighCoverageArea("MP", contig, currentContig);
+    						frc.computeLowCoverageArea("MP", contig, currentContig, 500, 50);
+    						frc.computeHighCoverageArea("MP", contig, currentContig,  500, 50);
     					}
     					if(libraryMP.C_M > 12) {
-//   						frc.computeLowNormalArea("MP", contig, currentContig);
-//    						frc.computeHighNormalArea("MP", contig, currentContig);
+    						frc.computeLowNormalArea("MP", contig, currentContig, 500, 50);
+   							frc.computeHighNormalArea("MP", contig, currentContig, 500, 50);
     					}
 
    					//	frc.computeHighOutieArea("MP", contig, currentContig);
