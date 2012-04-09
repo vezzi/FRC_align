@@ -246,7 +246,7 @@ int main(int argc, char *argv[]) {
     uint32_t mpMinInsert_recomputed; // recompute min and max insert on the basis of the new insert size
     uint32_t mpMaxInsert_recomputed; // the original min and max threshold are used only as a first rough approximation
 
-    unsigned int timesStdDev = 4;
+    unsigned int timesStdDev = 3;
 	if(vm.count("pe-sam")) { // in this case file is already OPEN
 		cout << "COMPUTING PE STATISTIC\n";
 		libraryPE = computeLibraryStats(fp, peMinInsert, peMaxInsert, estimatedGenomeSize);
@@ -261,7 +261,7 @@ int main(int argc, char *argv[]) {
 	    cout << "\tNEW maximum allowed insert " << peMaxInsert_recomputed << "\n";
 	}
 
-	timesStdDev = 4;
+	timesStdDev = 3;
 	if(vm.count("mp-sam")) {
 		cout << "COMPUTING MP STATISTIC\n";
 		if(!vm.count("pe-sam")) { // in this case file is already OPEN
@@ -354,8 +354,8 @@ int main(int argc, char *argv[]) {
 
     					if(contigSize >= libraryPE.insertMean) {
     						frc.computeHighSpanningArea("PE", contig, currentContig, 1000, 200);
-							frc.computeCompressionArea("PE", contig, currentContig, -3.0, 1000, 200);
-							frc.computeStrechArea("PE", contig, currentContig, 3.0, 1000, 200);
+							frc.computeCompressionArea("PE", contig, currentContig, -4.0, 1000, 200);
+							frc.computeStrechArea("PE", contig, currentContig, 4.0, 1000, 200);
     					}
 
     					delete currentContig; // delete hold contig
@@ -387,8 +387,8 @@ int main(int argc, char *argv[]) {
 
 		if(contigSize >= libraryPE.insertMean) {
 			frc.computeHighSpanningArea("PE", contig, currentContig, 1000, 200);
-			frc.computeCompressionArea("PE", contig, currentContig, -3.0, 1000, 200);
-			frc.computeStrechArea("PE", contig, currentContig, 3.0, 1000, 200);
+			frc.computeCompressionArea("PE", contig, currentContig, -4.0, 1000, 200);
+			frc.computeStrechArea("PE", contig, currentContig, 4.0, 1000, 200);
 		}
 
     	delete currentContig; // delete hold contig
@@ -459,7 +459,7 @@ int main(int argc, char *argv[]) {
    							frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
    	    					frc.computeHighSpanningArea("MP", contig, currentContig, 1000, 200);
    							frc.computeCompressionArea("MP", contig, currentContig, -4.0, 1000, 200);
-    						frc.computeStrechArea("MP", contig, currentContig, 5.0, 1000, 200);
+    						frc.computeStrechArea("MP", contig, currentContig, 6.0, 1000, 200);
     					}
 
     					delete currentContig; // delete hold contig
@@ -492,7 +492,7 @@ int main(int argc, char *argv[]) {
     		frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
     		frc.computeHighSpanningArea("MP", contig, currentContig, 1000, 200);
     		frc.computeCompressionArea("MP", contig, currentContig, -4.0, 1000, 200);
-    		frc.computeStrechArea("MP", contig, currentContig, 5.0, 1000, 200);
+    		frc.computeStrechArea("MP", contig, currentContig, 6.0, 1000, 200);
     	}
     	samclose(fp); // close the file
 
