@@ -455,11 +455,11 @@ int main(int argc, char *argv[]) {
     					cout << "contig " << contig << " has mean MP cov " << coverage << "\n";
 
 
-    					if(coverage > 6) { // if mate pair library provides an enough high covereage
+    					if(coverage > 10) { // if mate pair library provides an enough high covereage
     						frc.computeLowCoverageArea("MP", contig, currentContig, 1000, 100);
     						frc.computeHighCoverageArea("MP", contig, currentContig,  1000, 100);
     					}
-    					if(coverage > 6) {
+    					if(coverage > 10) {
     						frc.computeLowNormalArea("MP", contig, currentContig, 1000, 100);
    							frc.computeHighNormalArea("MP", contig, currentContig, 1000, 100);
     					}
@@ -494,11 +494,11 @@ int main(int argc, char *argv[]) {
 		float coverage = frc.obtainCoverage(contig, currentContig);
 		cout << "contig " << contig << " has mean MP cov " << coverage << "\n";
 
-		if(coverage > 6) { // if mate pair library provides an enough high covereage
+		if(coverage > 10) { // if mate pair library provides an enough high covereage
     		frc.computeLowCoverageArea("MP", contig, currentContig, 1000, 100);
     		frc.computeHighCoverageArea("MP", contig, currentContig,  1000, 100);
     	}
-		if(coverage > 6) {
+		if(coverage > 10) {
     		frc.computeLowNormalArea("MP", contig, currentContig, 1000, 100);
     		frc.computeHighNormalArea("MP", contig, currentContig, 1000, 100);
     	}
