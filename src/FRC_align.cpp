@@ -344,10 +344,10 @@ int main(int argc, char *argv[]) {
     					currentContig =  new Contig(contigSize, peMinInsert_recomputed, peMaxInsert_recomputed);
     				} else {
 
-    					frc.computeLowCoverageArea("PE", contig, currentContig, 200, 50);
-    					frc.computeHighCoverageArea("PE", contig, currentContig, 200, 50);
-    					frc.computeLowNormalArea("PE", contig, currentContig, 200, 50);
-    					frc.computeHighNormalArea("PE", contig, currentContig, 200, 50);
+    			    	frc.computeLowCoverageArea("PE", contig, currentContig, 400, 100);
+    			    	frc.computeHighCoverageArea("PE", contig, currentContig, 400, 100);
+    			    	frc.computeLowNormalArea("PE", contig, currentContig, 400, 100);
+    			    	frc.computeHighNormalArea("PE", contig, currentContig, 400, 100);
 
     					frc.computeHighSingleArea("PE", contig, currentContig, 500, 50);
     					//frc.computeHighOutieArea("PE", contig, currentContig);
@@ -377,10 +377,10 @@ int main(int argc, char *argv[]) {
     	}
     	//UPDATE LAST CONTIG
 
-    	frc.computeLowCoverageArea("PE", contig, currentContig, 200, 50);
-    	frc.computeHighCoverageArea("PE", contig, currentContig, 200, 50);
-    	frc.computeLowNormalArea("PE", contig, currentContig, 200, 50);
-    	frc.computeHighNormalArea("PE", contig, currentContig, 200, 50);
+    	frc.computeLowCoverageArea("PE", contig, currentContig, 400, 100);
+    	frc.computeHighCoverageArea("PE", contig, currentContig, 400, 100);
+    	frc.computeLowNormalArea("PE", contig, currentContig, 400, 100);
+    	frc.computeHighNormalArea("PE", contig, currentContig, 400, 100);
 
 		frc.computeHighSingleArea("PE", contig, currentContig, 500, 50);
 		//frc.computeHighOutieArea("PE", contig, currentContig);

@@ -39,10 +39,10 @@ Contig::Contig() {
 	minInsert = 0;
 	maxInsert = 0;
 
-	lowCoverageFeat = 1/(float)2.5;
-	highCoverageFeat = 2.5;
-	lowNormalFeat = 1/(float)2.5;
-	highNormalFeat = 2.5;
+	lowCoverageFeat = 1/(float)2;
+	highCoverageFeat = 2;
+	lowNormalFeat = 1/(float)2;
+	highNormalFeat = 2;
 	highSingleFeat = 0.4;
 	highSpanningFeat = 0.6;
 	highOutieFeat = 0.3;
