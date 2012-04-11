@@ -226,6 +226,21 @@ void Contig::print() {
 }
 
 
+float Contig::getCoverage() {
+	//compute length of low coverage areas in the contig
+	//use a 1K sliding window
+
+	unsigned int totalCoverage = 0;
+	float meanCov;
+	for(unsigned int i=0; i < this->contigLength ; i++ ) {
+		totalCoverage += CONTIG[i].ReadCoverage;
+	}
+	meanCov = totalCoverage/(float)this->contigLength; // this is the "window" coverage
+	return meanCov;
+
+}
+
+
 unsigned int Contig::getLowCoverageAreas(float C_A, unsigned int windowSize, unsigned int windowStep) {
 	//compute length of low coverage areas in the contig
 	//use a 1K sliding window

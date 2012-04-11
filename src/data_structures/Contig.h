@@ -76,6 +76,7 @@ public:
 
 	void updateContig(bam1_t* b); // given an alignment it updates the contig situation
 
+	float getCoverage();
 
 	unsigned int getLowCoverageAreas(float C_A, unsigned int windowSize, unsigned int windowStep);
 	unsigned int getHighCoverageAreas(float C_A, unsigned int windowSize, unsigned int windowStep);

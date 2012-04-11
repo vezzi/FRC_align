@@ -42,6 +42,15 @@ unsigned int FRC::getContigLength(unsigned int ctg) {
 }
 
 
+void FRC::obtainCoverage(unsigned int ctg, Contig *contig) {
+
+
+	float coverage = contig->getCoverage();
+	cout << "contig " << ctg << " has mean cov " << coverage << "\n";
+
+}
+
+
 
 void FRC::computeLowCoverageArea(string type, unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep) {
 	unsigned int feat = contig->getLowCoverageAreas(C_A,windowSize, windowStep);

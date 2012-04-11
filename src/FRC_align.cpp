@@ -344,10 +344,12 @@ int main(int argc, char *argv[]) {
     					currentContig =  new Contig(contigSize, peMinInsert_recomputed, peMaxInsert_recomputed);
     				} else {
 
-    			    	frc.computeLowCoverageArea("PE", contig, currentContig, 400, 100);
-    			    	frc.computeHighCoverageArea("PE", contig, currentContig, 400, 100);
-    			    	frc.computeLowNormalArea("PE", contig, currentContig, 400, 100);
-    			    	frc.computeHighNormalArea("PE", contig, currentContig, 400, 100);
+    					frc.obtainCoverage(contig, currentContig);
+
+    			    	frc.computeLowCoverageArea("PE", contig, currentContig, 400, 50);
+    			    	frc.computeHighCoverageArea("PE", contig, currentContig, 400, 50);
+    			    	frc.computeLowNormalArea("PE", contig, currentContig, 400, 50);
+    			    	frc.computeHighNormalArea("PE", contig, currentContig, 400, 50);
 
     					frc.computeHighSingleArea("PE", contig, currentContig, 500, 50);
     					//frc.computeHighOutieArea("PE", contig, currentContig);
@@ -377,10 +379,11 @@ int main(int argc, char *argv[]) {
     	}
     	//UPDATE LAST CONTIG
 
-    	frc.computeLowCoverageArea("PE", contig, currentContig, 400, 100);
-    	frc.computeHighCoverageArea("PE", contig, currentContig, 400, 100);
-    	frc.computeLowNormalArea("PE", contig, currentContig, 400, 100);
-    	frc.computeHighNormalArea("PE", contig, currentContig, 400, 100);
+    	frc.computeLowCoverageArea("PE", contig, currentContig, 400, 50);
+    	frc.computeHighCoverageArea("PE", contig, currentContig, 400, 50);
+    	frc.computeLowNormalArea("PE", contig, currentContig, 400, 50);
+    	frc.computeHighNormalArea("PE", contig, currentContig, 400, 50);
+
 
 		frc.computeHighSingleArea("PE", contig, currentContig, 500, 50);
 		//frc.computeHighOutieArea("PE", contig, currentContig);
@@ -458,8 +461,8 @@ int main(int argc, char *argv[]) {
     			       		frc.computeHighSpanningArea("MP", contig, currentContig, 500, 200);
     			    	}
     			    	//frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
-    			   		frc.computeCompressionArea("MP", contig, currentContig, -5.0, 1000, 200);
-    			   		frc.computeStrechArea("MP", contig, currentContig, 6.0, 1000, 200);
+    			   		frc.computeCompressionArea("MP", contig, currentContig, -4.0, 1000, 200);
+    			   		frc.computeStrechArea("MP", contig, currentContig, 5.0, 1000, 200);
 
 
     					delete currentContig; // delete hold contig
@@ -493,8 +496,8 @@ int main(int argc, char *argv[]) {
     		frc.computeHighSpanningArea("MP", contig, currentContig, 500, 200);
     	}
     	frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
-    	frc.computeCompressionArea("MP", contig, currentContig, -5.0, 1000, 200);
-    	frc.computeStrechArea("MP", contig, currentContig, 8.0, 1000, 200);
+    	frc.computeCompressionArea("MP", contig, currentContig, -4.0, 1000, 200);
+    	frc.computeStrechArea("MP", contig, currentContig, 5.0, 1000, 200);
 
 
     	samclose(fp); // close the file
