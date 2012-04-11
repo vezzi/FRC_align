@@ -71,7 +71,6 @@ void FRC::computeLowCoverageArea(string type, unsigned int ctg, Contig *contig, 
 
 void FRC::computeHighCoverageArea(string type, unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep) {
 	unsigned int feat = contig->getHighCoverageAreas(this->C_A, windowSize, windowStep);
-	cout << "contig " << ctg << " has " << feat << " HIGH COVERAGE FEATS\n";
 	if(type.compare("PE") == 0) {
 		this->CONTIG[ctg].PE.updateHIGH_COVERAGE_AREA(feat);
 	} else {
@@ -84,6 +83,7 @@ void FRC::computeHighCoverageArea(string type, unsigned int ctg, Contig *contig,
 		tmp.start = contig->highCoverageAreas.at(i).first;
 		tmp.end = contig->highCoverageAreas.at(i).second;
 		this->CONTIG[ctg].SUSPICIOUS_AREAS.push_back(tmp);
+		cout << "\t" << tmp.feature << " " << tmp.start << " " << tmp.end << "\n";
 	}
 }
 
