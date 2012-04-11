@@ -344,7 +344,8 @@ int main(int argc, char *argv[]) {
     					currentContig =  new Contig(contigSize, peMinInsert_recomputed, peMaxInsert_recomputed);
     				} else {
 
-    					frc.obtainCoverage(contig, currentContig);
+    					float coverage = frc.obtainCoverage(contig, currentContig);
+    					cout << "contig " << contig << " has mean PE cov " << coverage << "\n";
 
     			    	frc.computeLowCoverageArea("PE", contig, currentContig, 400, 50);
     			    	frc.computeHighCoverageArea("PE", contig, currentContig, 400, 50);
@@ -378,6 +379,8 @@ int main(int argc, char *argv[]) {
     		}
     	}
     	//UPDATE LAST CONTIG
+		float coverage = frc.obtainCoverage(contig, currentContig);
+		cout << "contig " << contig << " has mean PE cov " << coverage << "\n";
 
     	frc.computeLowCoverageArea("PE", contig, currentContig, 400, 50);
     	frc.computeHighCoverageArea("PE", contig, currentContig, 400, 50);
@@ -447,11 +450,16 @@ int main(int argc, char *argv[]) {
     					currentContig =  new Contig(contigSize, mpMinInsert_recomputed, mpMaxInsert_recomputed);
     				} else {
     					//count contig features
-    					if(libraryMP.C_A > 15) { // if mate pair library provides an enough high covereage
+
+    					float coverage = frc.obtainCoverage(contig, currentContig);
+    					cout << "contig " << contig << " has mean MP cov " << coverage << "\n";
+
+
+    					if(coverage > 6) { // if mate pair library provides an enough high covereage
     						frc.computeLowCoverageArea("MP", contig, currentContig, 1000, 100);
     						frc.computeHighCoverageArea("MP", contig, currentContig,  1000, 100);
     					}
-    					if(libraryMP.C_M > 12) {
+    					if(coverage > 6) {
     						frc.computeLowNormalArea("MP", contig, currentContig, 1000, 100);
    							frc.computeHighNormalArea("MP", contig, currentContig, 1000, 100);
     					}
@@ -482,11 +490,15 @@ int main(int argc, char *argv[]) {
     		}
     	}
     	//UPDATE LAST CONTIG
-    	if(libraryMP.C_A > 15) { // if mate pair library provides an enough high covereage
+
+		float coverage = frc.obtainCoverage(contig, currentContig);
+		cout << "contig " << contig << " has mean MP cov " << coverage << "\n";
+
+		if(coverage > 6) { // if mate pair library provides an enough high covereage
     		frc.computeLowCoverageArea("MP", contig, currentContig, 1000, 100);
     		frc.computeHighCoverageArea("MP", contig, currentContig,  1000, 100);
     	}
-    	if(libraryMP.C_M > 12) {
+		if(coverage > 6) {
     		frc.computeLowNormalArea("MP", contig, currentContig, 1000, 100);
     		frc.computeHighNormalArea("MP", contig, currentContig, 1000, 100);
     	}

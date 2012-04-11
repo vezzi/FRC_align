@@ -91,7 +91,7 @@ public:
 	string  getID(unsigned int i);
 
 	void sortFRC();
-	void obtainCoverage(unsigned int ctg, Contig *contig);
+	float obtainCoverage(unsigned int ctg, Contig *contig);
 	void computeLowCoverageArea(string type, unsigned int ctg, Contig *contig, unsigned int WindowSize, unsigned int WindowStep);
 	void computeHighCoverageArea(string type, unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep);
 	void computeLowNormalArea(string type, unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep);

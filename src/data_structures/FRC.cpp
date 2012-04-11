@@ -42,11 +42,11 @@ unsigned int FRC::getContigLength(unsigned int ctg) {
 }
 
 
-void FRC::obtainCoverage(unsigned int ctg, Contig *contig) {
+float FRC::obtainCoverage(unsigned int ctg, Contig *contig) {
 
 
 	float coverage = contig->getCoverage();
-	cout << "contig " << ctg << " has mean cov " << coverage << "\n";
+	return coverage;
 
 }
 
@@ -83,7 +83,7 @@ void FRC::computeHighCoverageArea(string type, unsigned int ctg, Contig *contig,
 		tmp.start = contig->highCoverageAreas.at(i).first;
 		tmp.end = contig->highCoverageAreas.at(i).second;
 		this->CONTIG[ctg].SUSPICIOUS_AREAS.push_back(tmp);
-		cout << "\t" << tmp.feature << " " << tmp.start << " " << tmp.end << "\n";
+		//cout << "\t" << tmp.feature << " " << tmp.start << " " << tmp.end << "\n";
 	}
 }
 
