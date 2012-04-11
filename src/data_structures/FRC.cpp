@@ -71,6 +71,7 @@ void FRC::computeLowCoverageArea(string type, unsigned int ctg, Contig *contig, 
 
 void FRC::computeHighCoverageArea(string type, unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep) {
 	unsigned int feat = contig->getHighCoverageAreas(this->C_A, windowSize, windowStep);
+	cout << "contig " << ctg << " has " << feat << " HIGH COVERAGE FEATS\n";
 	if(type.compare("PE") == 0) {
 		this->CONTIG[ctg].PE.updateHIGH_COVERAGE_AREA(feat);
 	} else {
