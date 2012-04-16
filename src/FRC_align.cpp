@@ -357,8 +357,8 @@ int main(int argc, char *argv[]) {
 
     					//if(contigSize >= libraryPE.insertMean) {
     						frc.computeHighSpanningArea("PE", contig, currentContig, 1000, 200);
-							frc.computeCompressionArea("PE", contig, currentContig, -4.0, 2000, 200);
-							frc.computeStrechArea("PE", contig, currentContig, 4.0, 2000, 200);
+							frc.computeCompressionArea("PE", contig, currentContig, -4.0, 1000, 200);
+							frc.computeStrechArea("PE", contig, currentContig, 4.0, 1000, 200);
 							//}
 
     					delete currentContig; // delete hold contig
@@ -393,8 +393,8 @@ int main(int argc, char *argv[]) {
 
 		//if(contigSize >= libraryPE.insertMean) {
 			frc.computeHighSpanningArea("PE", contig, currentContig, 1000, 200);
-			frc.computeCompressionArea("PE", contig, currentContig, -4.0, 2000, 200);
-			frc.computeStrechArea("PE", contig, currentContig, 4.0, 2000, 200);
+			frc.computeCompressionArea("PE", contig, currentContig, -4.0, 1000, 200);
+			frc.computeStrechArea("PE", contig, currentContig, 4.0, 1000, 200);
 			//}
 
     	delete currentContig; // delete hold contig
