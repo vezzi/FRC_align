@@ -347,10 +347,10 @@ int main(int argc, char *argv[]) {
     					float coverage = frc.obtainCoverage(contig, currentContig);
     					cout << "contig " << contig << " has mean PE cov " << coverage << "\n";
 
-    			    	frc.computeLowCoverageArea("PE", contig, currentContig, 500, 50);
-    			    	frc.computeHighCoverageArea("PE", contig, currentContig, 500, 50);
-    			    	frc.computeLowNormalArea("PE", contig, currentContig, 500, 50);
-    			    	frc.computeHighNormalArea("PE", contig, currentContig, 500, 50);
+    			    	frc.computeLowCoverageArea("PE", contig, currentContig, 1000, 200);
+    			    	frc.computeHighCoverageArea("PE", contig, currentContig, 1000, 200);
+    			    	frc.computeLowNormalArea("PE", contig, currentContig, 1000, 200);
+    			    	frc.computeHighNormalArea("PE", contig, currentContig, 1000, 200);
 
     					frc.computeHighSingleArea("PE", contig, currentContig, 500, 50);
     					//frc.computeHighOutieArea("PE", contig, currentContig);
@@ -382,10 +382,10 @@ int main(int argc, char *argv[]) {
 		float coverage = frc.obtainCoverage(contig, currentContig);
 		cout << "contig " << contig << " has mean PE cov " << coverage << "\n";
 
-    	frc.computeLowCoverageArea("PE", contig, currentContig, 500, 50);
-    	frc.computeHighCoverageArea("PE", contig, currentContig, 500, 50);
-    	frc.computeLowNormalArea("PE", contig, currentContig, 500, 50);
-    	frc.computeHighNormalArea("PE", contig, currentContig, 500, 50);
+    	frc.computeLowCoverageArea("PE", contig, currentContig, 2000, 50);
+    	frc.computeHighCoverageArea("PE", contig, currentContig, 2000, 50);
+    	frc.computeLowNormalArea("PE", contig, currentContig, 2000, 50);
+    	frc.computeHighNormalArea("PE", contig, currentContig, 2000, 50);
 
 
 		frc.computeHighSingleArea("PE", contig, currentContig, 500, 50);
