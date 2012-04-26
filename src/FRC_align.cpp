@@ -358,7 +358,7 @@ int main(int argc, char *argv[]) {
     					//if(contigSize >= libraryPE.insertMean) {
     						frc.computeHighSpanningArea("PE", contig, currentContig, 1000, 200);
 							frc.computeCompressionArea("PE", contig, currentContig, -4.0, 1000, 200);
-							frc.computeStrechArea("PE", contig, currentContig, 5.0, 1000, 200);
+							frc.computeStrechArea("PE", contig, currentContig, 4.0, 1000, 200);
 							//}
 
     					delete currentContig; // delete hold contig
@@ -382,10 +382,10 @@ int main(int argc, char *argv[]) {
 		float coverage = frc.obtainCoverage(contig, currentContig);
 		cout << "contig " << contig << " has mean PE cov " << coverage << "\n";
 
-    	frc.computeLowCoverageArea("PE", contig, currentContig, 2000, 50);
-    	frc.computeHighCoverageArea("PE", contig, currentContig, 2000, 50);
-    	frc.computeLowNormalArea("PE", contig, currentContig, 2000, 50);
-    	frc.computeHighNormalArea("PE", contig, currentContig, 2000, 50);
+    	frc.computeLowCoverageArea("PE", contig, currentContig, 1000, 200);
+    	frc.computeHighCoverageArea("PE", contig, currentContig, 1000, 200);
+    	frc.computeLowNormalArea("PE", contig, currentContig, 1000, 200);
+    	frc.computeHighNormalArea("PE", contig, currentContig, 1000, 200);
 
 
 		frc.computeHighSingleArea("PE", contig, currentContig, 500, 50);
@@ -394,7 +394,7 @@ int main(int argc, char *argv[]) {
 		//if(contigSize >= libraryPE.insertMean) {
 			frc.computeHighSpanningArea("PE", contig, currentContig, 1000, 200);
 			frc.computeCompressionArea("PE", contig, currentContig, -4.0, 1000, 200);
-			frc.computeStrechArea("PE", contig, currentContig, 5.0, 1000, 200);
+			frc.computeStrechArea("PE", contig, currentContig, 4.0, 1000, 200);
 			//}
 
     	delete currentContig; // delete hold contig
