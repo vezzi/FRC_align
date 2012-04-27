@@ -291,7 +291,7 @@ string contigFeatures::getID() {
 }
 
 unsigned int contigFeatures::getTotal() {
-	TOTAL = PE.returnTotal() + MP.returnTotal();
+	//TOTAL = PE.returnTotal() + MP.returnTotal();
 	return TOTAL;
 }
 
@@ -304,7 +304,7 @@ void contigFeatures::printFeatures(ofstream &file) {
 		file << this->contigID << " " << SUSPICIOUS_AREAS[i].feature << " " << SUSPICIOUS_AREAS[i].start << " " << SUSPICIOUS_AREAS[i].end << "\n";
 		total += floor((SUSPICIOUS_AREAS[i].end - SUSPICIOUS_AREAS[i].start + 1)/(float)1000 + 0.5);
 	}
-	//this->TOTAL = total;
+	this->TOTAL = total;
 
 
 }
