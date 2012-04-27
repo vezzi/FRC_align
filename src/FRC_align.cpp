@@ -353,7 +353,7 @@ int main(int argc, char *argv[]) {
     			    	frc.computeHighNormalArea("PE", contig, currentContig, 1000, 200);
 
     					frc.computeHighSingleArea("PE", contig, currentContig, 1000, 200);
-    					//frc.computeHighOutieArea("PE", contig, currentContig, 1000, 200);
+    					frc.computeHighOutieArea("PE", contig, currentContig, 1000, 200);
 
     					//if(contigSize >= libraryPE.insertMean) {
    						frc.computeHighSpanningArea("PE", contig, currentContig, 1000, 200);
@@ -389,7 +389,7 @@ int main(int argc, char *argv[]) {
 
 
 		frc.computeHighSingleArea("PE", contig, currentContig, 1000, 200);
-		//frc.computeHighOutieArea("PE", contig, currentContig, 1000, 200);
+		frc.computeHighOutieArea("PE", contig, currentContig, 1000, 200);
 
 		//if(contigSize >= libraryPE.insertMean) {
 			frc.computeHighSpanningArea("PE", contig, currentContig, 1000, 200);

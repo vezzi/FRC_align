@@ -45,7 +45,7 @@ Contig::Contig() {
 	highNormalFeat = 3;
 	highSingleFeat = 0.4;
 	highSpanningFeat = 0.4;
-	highOutieFeat = 0.6;
+	highOutieFeat = 0.4;
 
 }
 
@@ -61,7 +61,7 @@ Contig::Contig(unsigned int contigLength, unsigned int minInsert, unsigned int m
 	highNormalFeat = 3;
 	highSingleFeat = 0.4;
 	highSpanningFeat = 0.4;
-	highOutieFeat = 0.6;
+	highOutieFeat = 0.4;
 
 }
 
@@ -851,9 +851,11 @@ unsigned int Contig::getHighOutieAreas( unsigned int windowSize, unsigned int wi
 		while(endWindow < this->contigLength) {
 			totalCoverage = 0; //reset window coverage
 			meanOutieCoverage = 0;
+			totalCoverage = 0;
+			outieCoverage = 0;
 			for(unsigned int i=startWindow; i < endWindow ; i++ ) {
 				totalCoverage += CONTIG[i].ReadCoverage ;
-				outieCoverage +=  (CONTIG[i].WronglyOriented);
+				outieCoverage += CONTIG[i].WronglyOriented;
 			}
 			meanTotalCov = totalCoverage/(float)(endWindow - startWindow); // compute window total coverage
 			meanOutieCoverage = outieCoverage/(float)(endWindow - startWindow); // compute window single read coverage
