@@ -468,7 +468,7 @@ int main(int argc, char *argv[]) {
     			    //	if(contigSize >= 2*libraryMP.insertMean) {
     			       		frc.computeHighSpanningArea("MP", contig, currentContig, 1000, 200);
     			    //	}
-    			    	//frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
+    			    	frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
     			   		frc.computeCompressionArea("MP", contig, currentContig, -4.0, 1000, 200);
     			   		frc.computeStrechArea("MP", contig, currentContig, 5.0, 1000, 200);
 
