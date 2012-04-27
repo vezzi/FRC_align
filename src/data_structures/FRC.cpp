@@ -302,7 +302,8 @@ void contigFeatures::printFeatures(ofstream &file) {
 	sort(SUSPICIOUS_AREAS.begin(), SUSPICIOUS_AREAS.end(), sortTernary);
 	for(unsigned int i=0; i < SUSPICIOUS_AREAS.size(); i++) {
 		file << this->contigID << " " << SUSPICIOUS_AREAS[i].feature << " " << SUSPICIOUS_AREAS[i].start << " " << SUSPICIOUS_AREAS[i].end << "\n";
-		total += floor((SUSPICIOUS_AREAS[i].end - SUSPICIOUS_AREAS[i].start + 1)/(float)1000 + 0.5);
+		//total += floor((SUSPICIOUS_AREAS[i].end - SUSPICIOUS_AREAS[i].start + 1)/(float)1000 + 0.5);
+		total++;
 	}
 	this->TOTAL = total;
 
