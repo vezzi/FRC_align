@@ -83,7 +83,7 @@ struct LibraryStatistics{
 	float insertStd;
 };
 
-LibraryStatistics computeLibraryStats(samfile_t *fp, unsigned int minInsert, unsigned int maxInsert, unsigned int genomeLength);
+LibraryStatistics computeLibraryStats(samfile_t *fp, unsigned int minInsert, unsigned int maxInsert, uint64_t genomeLength);
 
 
 int main(int argc, char *argv[]) {
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 	int32_t mpMinInsert = 100;
 	int32_t mpMaxInsert = 1000000;
 	unsigned int WINDOW = 1000;
-	unsigned long int estimatedGenomeSize;
+	uint64_t estimatedGenomeSize;
 
 	string outputFile = "FRC.txt";
 	string featureFile = "Features.txt";
@@ -559,7 +559,7 @@ int main(int argc, char *argv[]) {
 
 
 
-LibraryStatistics computeLibraryStats(samfile_t *fp, unsigned int minInsert, unsigned int maxInsert, unsigned int genomeLength) {
+LibraryStatistics computeLibraryStats(samfile_t *fp, unsigned int minInsert, unsigned int maxInsert, uint64_t genomeLength) {
 	LibraryStatistics library;
 	//Initialize bam entity
 	bam1_t *b = bam_init1();
