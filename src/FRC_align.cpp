@@ -378,7 +378,6 @@ int main(int argc, char *argv[]) {
     		}
     	}
     	//UPDATE LAST CONTIG
-		float coverage = frc.obtainCoverage(contig, currentContig);
 
     	frc.computeLowCoverageArea("PE", contig, currentContig, 1000, 200);
     	frc.computeHighCoverageArea("PE", contig, currentContig, 1000, 200);
@@ -449,7 +448,6 @@ int main(int argc, char *argv[]) {
     				} else {
     					//count contig features
 
-    					float coverage = frc.obtainCoverage(contig, currentContig);
 
 
     					//if(coverage > 10) { // if mate pair library provides an enough high covereage
@@ -467,8 +465,8 @@ int main(int argc, char *argv[]) {
     			       	frc.computeHighOutieArea("MP", contig, currentContig, 1000,200);
     			    //	}
     			    	frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
-    			   		frc.computeCompressionArea("MP", contig, currentContig, -4.0, 1000, 200);
-    			   		frc.computeStrechArea("MP", contig, currentContig, 4.0, 1000, 200);
+    			   		frc.computeCompressionArea("MP", contig, currentContig, -3.0, 1000, 200);
+    			   		frc.computeStrechArea("MP", contig, currentContig, 3.0, 1000, 200);
 
 
     					delete currentContig; // delete hold contig
@@ -489,7 +487,6 @@ int main(int argc, char *argv[]) {
     	}
     	//UPDATE LAST CONTIG
 
-		float coverage = frc.obtainCoverage(contig, currentContig);
 
 		//if(coverage > 10) { // if mate pair library provides an enough high covereage
 		//	frc.computeLowCoverageArea("MP", contig, currentContig, 1000, 100);
@@ -505,8 +502,8 @@ int main(int argc, char *argv[]) {
    		frc.computeHighOutieArea("MP", contig, currentContig, 1000,200);
 
     	frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
-    	frc.computeCompressionArea("MP", contig, currentContig, -4.0, 1000, 200);
-    	frc.computeStrechArea("MP", contig, currentContig, 4.0, 1000, 200);
+    	frc.computeCompressionArea("MP", contig, currentContig, -3.0, 1000, 200);
+    	frc.computeStrechArea("MP", contig, currentContig, 3.0, 1000, 200);
 
 
     	samclose(fp); // close the file
