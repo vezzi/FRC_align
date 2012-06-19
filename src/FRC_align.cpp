@@ -525,26 +525,47 @@ int main(int argc, char *argv[]) {
 
     frc.sortFRC();
     for(unsigned int i=0; i< contigsNumber; i++) {
+       cout << frc.getContigLength(i) << " "; // update total number of feature seen so far
+    }
+    cout << "\n";
+
+    for(unsigned int i=0; i< contigsNumber; i++) {
     	featuresTotal += frc.getTotal(i); // update total number of feature seen so far
     }
+
+    for(unsigned int i=0; i< contigsNumber; i++) {
+       cout << "(" << frc.getContigLength(i) << "," << frc.getID(i) << "," <<
+    		   frc.getTotal(i) << ") "; // update total number of feature seen so far
+    }
+    cout << "\n";
+
+
     cout << "total number of features " << featuresTotal << "\n";
 
     ofstream myfile;
     myfile.open (outputFile.c_str());
 //    myfile << "features coverage\n";
     float step = featuresTotal/(float)100;
+    cout << step << "\n";
     float partial=0;
-    while(partial < featuresTotal) {
-    	uint32_t contigStep = 0;
-    	uint64_t contigLengthStep = 0;
-    	uint32_t featuresStep = 0;
-    	while(featuresStep <= partial) {
-    		contigLengthStep += frc.getContigLength(contigStep); // CONTIG[contigStep].contigLength
-    		featuresStep += frc.getTotal(contigStep); // CONTIG[contigStep].TOTAL;
+    uint32_t edgeCoverage = 0;
 
+    while(partial < featuresTotal) {
+    	uint32_t featuresStep = 0;
+    	uint32_t contigStep    = 0;
+    	featuresStep += frc.getTotal(contigStep);
+    	while(featuresStep <= partial) {
     		contigStep++;
+    		featuresStep += frc.getTotal(contigStep); // CONTIG[contigStep].TOTAL
     	}
-    	float coveragePartial =  100*(contigLengthStep/(float)estimatedGenomeSize);
+
+    	edgeCoverage = 0;
+		for(unsigned int i=0; i< contigStep; i++) {
+			edgeCoverage += frc.getContigLength(i);
+		}
+    	float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
+
+
     	myfile << partial << " " << coveragePartial << "\n";
    // 	cout <<  partial << " " << coveragePartial << " " << contigStep << "\n";
     	partial += step;
