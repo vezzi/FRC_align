@@ -548,7 +548,7 @@ int main(int argc, char *argv[]) {
     float step = featuresTotal/(float)100;
     cout << step << "\n";
     float partial=0;
-    uint32_t edgeCoverage = 0;
+    uint64_t edgeCoverage = 0;
 
     while(partial < featuresTotal) {
     	uint32_t featuresStep = 0;
