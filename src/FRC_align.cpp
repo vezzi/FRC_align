@@ -570,6 +570,7 @@ int main(int argc, char *argv[]) {
    // 	cout <<  partial << " " << coveragePartial << " " << contigStep << "\n";
     	partial += step;
     }
+
     myfile.close();
 
 }
