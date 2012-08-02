@@ -49,39 +49,29 @@ BOOST_IOSTREAMS
 BOOST_PROGRAM_OPTIONS
 BOOST_THREADS
 
-# checking for BOOST library (required)
-echo "===== checking for samtools (required) ====="
-AC_MSG_CHECKING(for samtools library)
-AC_ARG_WITH([samtools], AC_HELP_STRING([--with-samtools=DIR], [Location of samtools header and library files (both in DIR) (optional)]),
-            [answer="$withval"],
-            [answer=""])
-if test x"$answer" = x; then
-  SAMTOOLS_CFLAGS=""
-  SAMTOOLS_LDFLAGS=""
-  SAMTOOLS_LIBS=""
-  AC_MSG_RESULT(disabled)
-  samtools=false
-else
-  if test x$have_zlib = xno; then
-     SAMTOOLS_CFLAGS=""
-     SAMTOOLS_LDFLAGS=""
-     SAMTOOLS_LIBS=""
-     AC_MSG_RESULT(enabled, but zlib not enabled)
-     samtools=false
-  else
-     AC_DEFINE(HAVE_SAMTOOLS,1,[Define to 1 if you have a working Samtools library.])
-     SAMTOOLS_CFLAGS="-I$withval"
-     SAMTOOLS_LDFLAGS="-L$withval"
-     SAMTOOLS_LIBS="-lbam"
-     AC_MSG_RESULT(enabled)
-     samtools=true
-  fi
+# checking for SAMTOOLS library (required)
+#AC_CHECK_LIB([bam], [bam_open], [], [samtools_not_installed=1])
+AC_CHECK_PROGS([SAMTOOLS], [samtools], [], [samtools_not_installed=1])
+if test $samtools_not_installed; then
+	echo ">>> libbam or samtools not found<<<";
+ 	AC_CHECK_LIB([curses], [main], [], [libbcurses_not_found=1])
+    if test $libbcurses_not_found; then
+    	echo "libcurses was not found. Required for SAMtools installation."
+    	exit 1;
+    fi
+    AC_CHECK_LIB([z], [main], [], [libz_not_found=1])
+    if test $libz_not_found; then
+    	echo "libz was not found. Required for SAMtools installation."
+    	exit 1;
+    fi	
+    AC_CHECK_LIB([m], [main], [], [libm_not_found=1])	
+    if test $libm_not_found; then
+   		echo "libm was not found. Required for SAMtools installation."
+   		exit 1;
+   	fi
+   	echo "SAMtools not istalled but required."
+   	exit 1;
 fi
-AC_SUBST(SAMTOOLS_CFLAGS)
-AC_SUBST(SAMTOOLS_LDFLAGS)
-AC_SUBST(SAMTOOLS_LIBS)
-AM_CONDITIONAL([SAMTOOLS], [test "x$samtools" = xtrue])
-
 
 
 # enable debug programs
