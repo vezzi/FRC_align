@@ -629,7 +629,7 @@ int main(int argc, char *argv[]) {
     outputFile = header + "HIGH_COV_PE_FRC.txt";
     printHIGH_COV_PE_FRC(outputFile, HIGH_COV_PE_features, estimatedGenomeSize, frc);
 
-    outputFile = header + "LOW_NORM_COV_FRC.txt";
+    outputFile = header + "LOW_NORM_COV_PE_FRC.txt";
     printLOW_NORM_COV_PE_FRC(outputFile, LOW_NORM_COV_PE_features, estimatedGenomeSize, frc);
 
     outputFile = header + "HIGH_NORM_COV_PE_FRC.txt";
