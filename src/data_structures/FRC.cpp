@@ -260,6 +260,56 @@ unsigned int FRC::getTotal(unsigned int ctg) {
 }
 
 
+unsigned int FRC::getLOW_COV_PE(unsigned int ctg) {
+	return this->CONTIG[ctg].getLOW_COV_PE();
+}
+unsigned int FRC::getHIGH_COV_PE(unsigned int ctg) {
+	return this->CONTIG[ctg].getHIGH_COV_PE();
+}
+unsigned int FRC::getLOW_NORM_COV_PE(unsigned int ctg) {
+	return this->CONTIG[ctg].getLOW_NORM_COV_PE();
+}
+unsigned int FRC::getHIGH_NORM_COV_PE(unsigned int ctg) {
+	return this->CONTIG[ctg].getHIGH_NORM_COV_PE();
+}
+unsigned int FRC::getHIGH_SINGLE_PE(unsigned int ctg) {
+	return this->CONTIG[ctg].getHIGH_SINGLE_PE();
+}
+unsigned int FRC::getHIGH_OUTIE_PE(unsigned int ctg) {
+	return this->CONTIG[ctg].getHIGH_OUTIE_PE();
+}
+unsigned int FRC::getHIGH_SPAN_PE(unsigned int ctg) {
+	return this->CONTIG[ctg].getHIGH_SPAN_PE();
+}
+unsigned int FRC::getCOMPR_PE(unsigned int ctg) {
+	return this->CONTIG[ctg].getCOMPR_PE();
+}
+unsigned int FRC::getSTRECH_PE(unsigned int ctg) {
+	return this->CONTIG[ctg].getSTRECH_PE();
+}
+
+unsigned int FRC::getHIGH_SINGLE_MP(unsigned int ctg) {
+	return this->CONTIG[ctg].getHIGH_SINGLE_MP();
+}
+unsigned int FRC::getHIGH_OUTIE_MP(unsigned int ctg) {
+	return this->CONTIG[ctg].getHIGH_OUTIE_MP();
+}
+unsigned int FRC::getHIGH_SPAN_MP(unsigned int ctg) {
+	return this->CONTIG[ctg].getHIGH_SPAN_MP();
+}
+unsigned int FRC::getCOMPR_MP(unsigned int ctg) {
+	return this->CONTIG[ctg].getCOMPR_MP();
+}
+unsigned int FRC::getSTRECH_MP(unsigned int ctg) {
+	return this->CONTIG[ctg].getSTRECH_MP();
+}
+
+
+
+
+
+
+/////////////////////
 
 contigFeatures::contigFeatures() {
 	contigLength = 0;
@@ -294,6 +344,67 @@ unsigned int contigFeatures::getTotal() {
 	TOTAL = PE.returnTotal() + MP.returnTotal();
 	return TOTAL;
 }
+
+unsigned int contigFeatures::getLOW_COV_PE() {
+	unsigned int features = PE.returnLOW_COV();
+	return features;
+}
+unsigned int contigFeatures::getHIGH_COV_PE() {
+	unsigned int features = PE.returnHIGH_COV();
+	return features;
+}
+unsigned int contigFeatures::getLOW_NORM_COV_PE() {
+	unsigned int features = PE.returnLOW_NORM_COV();
+	return features;
+}
+unsigned int contigFeatures::getHIGH_NORM_COV_PE() {
+	unsigned int features = PE.returnHIGH_NORM_COV();
+	return features;
+}
+unsigned int contigFeatures::getHIGH_SINGLE_PE() {
+	unsigned int features = PE.returnHIGH_SINGLE();
+	return features;
+}
+unsigned int contigFeatures::getHIGH_OUTIE_PE() {
+	unsigned int features = PE.returnHIGH_OUTIE();
+	return features;
+}
+unsigned int contigFeatures::getHIGH_SPAN_PE() {
+	unsigned int features = PE.returnHIGH_SPAN();
+	return features;
+}
+unsigned int contigFeatures::getCOMPR_PE() {
+	unsigned int features = PE.returnCOMPR();
+	return features;
+}
+unsigned int contigFeatures::getSTRECH_PE() {
+	unsigned int features = PE.returnSTRECH();
+	return features;
+}
+
+unsigned int contigFeatures::getHIGH_SINGLE_MP() {
+	unsigned int features = MP.returnHIGH_SINGLE();
+	return features;
+}
+unsigned int contigFeatures::getHIGH_OUTIE_MP() {
+	unsigned int features =  MP.returnHIGH_OUTIE();
+	return features;
+}
+unsigned int contigFeatures::getHIGH_SPAN_MP() {
+	unsigned int features = MP.returnHIGH_SPAN();
+	return features;
+}
+unsigned int contigFeatures::getCOMPR_MP() {
+	unsigned int features = MP.returnCOMPR();
+	return features;
+}
+unsigned int contigFeatures::getSTRECH_MP() {
+	unsigned int features = MP.returnSTRECH();
+	return features;
+}
+
+
+
 
 bool sortTernary(ternary t1, ternary t2) {return (t1.start < t2.start);}
 

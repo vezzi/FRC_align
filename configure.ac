@@ -51,26 +51,12 @@ BOOST_THREADS
 
 # checking for SAMTOOLS library (required)
 #AC_CHECK_LIB([bam], [bam_open], [], [samtools_not_installed=1])
-AC_CHECK_PROGS([SAMTOOLS], [samtools], [], [samtools_not_installed=1])
-if test $samtools_not_installed; then
-	echo ">>> libbam or samtools not found<<<";
- 	AC_CHECK_LIB([curses], [main], [], [libbcurses_not_found=1])
-    if test $libbcurses_not_found; then
-    	echo "libcurses was not found. Required for SAMtools installation."
-    	exit 1;
-    fi
-    AC_CHECK_LIB([z], [main], [], [libz_not_found=1])
-    if test $libz_not_found; then
-    	echo "libz was not found. Required for SAMtools installation."
-    	exit 1;
-    fi	
-    AC_CHECK_LIB([m], [main], [], [libm_not_found=1])	
-    if test $libm_not_found; then
-   		echo "libm was not found. Required for SAMtools installation."
-   		exit 1;
-   	fi
-   	echo "SAMtools not istalled but required."
-   	exit 1;
+AC_CHECK_PROG(SAMTOOLS, [samtools], 1, 0)
+if test SAMTOOLS; then
+	echo "samtools installed";
+else 
+	echo "samtools not installed";
+	exit 1;
 fi
 
 

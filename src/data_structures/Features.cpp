@@ -99,3 +99,36 @@ unsigned int Features::returnTotal() {
 			HIGH_SINGLE_AREA + HIGH_SPANNING_AREA + LOW_COVERAGE_AREA + LOW_NORMAL_AREA + STRECH_AREA;
 
 }
+
+
+unsigned int Features::returnLOW_COV() {
+	return LOW_COVERAGE_AREA;
+}
+unsigned int Features::returnHIGH_COV() {
+	return HIGH_COVERAGE_AREA;
+}
+unsigned int Features::returnLOW_NORM_COV(){
+	return LOW_NORMAL_AREA;
+}
+unsigned int Features::returnHIGH_NORM_COV(){
+	return HIGH_NORMAL_AREA;
+}
+unsigned int Features::returnHIGH_SINGLE(){
+	return HIGH_SINGLE_AREA;
+}
+unsigned int Features::returnHIGH_OUTIE(){
+	return HIGH_OUTIE_AREA;
+}
+unsigned int Features::returnHIGH_SPAN(){
+	return HIGH_SPANNING_AREA;
+}
+unsigned int Features::returnCOMPR(){
+	return COMPRESSION_AREA;
+}
+unsigned int Features::returnSTRECH(){
+	return STRECH_AREA;
+}
+
+
+
+

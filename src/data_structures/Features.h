@@ -67,6 +67,16 @@ public:
 
 	unsigned int returnTotal();
 
+	unsigned int returnLOW_COV();
+	unsigned int returnHIGH_COV();
+	unsigned int returnLOW_NORM_COV();
+	unsigned int returnHIGH_NORM_COV();
+	unsigned int returnHIGH_SINGLE();
+	unsigned int returnHIGH_OUTIE();
+	unsigned int returnHIGH_SPAN();
+	unsigned int returnCOMPR();
+	unsigned int returnSTRECH();
+
 
 
 };
