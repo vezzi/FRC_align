@@ -33,6 +33,10 @@ void FRC::sortFRC() {
 }
 
 
+unsigned int FRC::returnContigs() {
+	return this->contigs;
+}
+
 void FRC::setContigLength(unsigned int ctg, unsigned int contigLength) {
 	CONTIG[ctg].setContigLength(contigLength);
 }

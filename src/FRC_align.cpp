@@ -676,12 +676,11 @@ int main(int argc, char *argv[]) {
 void printLOW_COV_PE_FRC(string outputFile, unsigned int LOW_COV_PE_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	float step = LOW_COV_PE_features/(float)100;
-	if(step == 0) {
-		step = 100;
-	}
-	float partial=0;
+	unsigned int step = ceil(LOW_COV_PE_features/(float)100 + 0.5);
+
+	unsigned int partial=0;
 	uint64_t edgeCoverage = 0;
+
 
 	while(partial <= LOW_COV_PE_features) {
 		uint32_t featuresStep = 0;
@@ -689,7 +688,11 @@ void printLOW_COV_PE_FRC(string outputFile, unsigned int LOW_COV_PE_features, un
 		featuresStep += frc.getLOW_COV_PE(contigStep);
 		while(featuresStep <= partial) {
 			contigStep++;
-			featuresStep += frc.getLOW_COV_PE(contigStep); // CONTIG[contigStep].TOTAL
+			if(contigStep < frc.returnContigs()) {
+				featuresStep += frc.getLOW_COV_PE(contigStep); // CONTIG[contigStep].TOTAL
+			} else {// I read all the contigs, time to to stop
+				featuresStep = partial + 1;
+			}
 		}
 
 		edgeCoverage = 0;
@@ -699,6 +702,9 @@ void printLOW_COV_PE_FRC(string outputFile, unsigned int LOW_COV_PE_features, un
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(contigStep == frc.returnContigs()) {
+			partial = LOW_COV_PE_features + 1;
+		}
 	}
 
 	myfile.close();
@@ -706,12 +712,9 @@ void printLOW_COV_PE_FRC(string outputFile, unsigned int LOW_COV_PE_features, un
 void printHIGH_COV_PE_FRC(string outputFile, unsigned int HIGH_COV_PE_features, unsigned long estimatedGenomeSize, FRC frc) {
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	float step = HIGH_COV_PE_features/(float)100;
-	if(step == 0) {
-		step = 100;
-	}
+	unsigned int step = ceil(HIGH_COV_PE_features/(float)100 + 0.5);
 
-	float partial=0;
+	unsigned int partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= HIGH_COV_PE_features) {
@@ -720,7 +723,11 @@ void printHIGH_COV_PE_FRC(string outputFile, unsigned int HIGH_COV_PE_features, 
 		featuresStep += frc.getHIGH_COV_PE(contigStep);
 		while(featuresStep <= partial) {
 			contigStep++;
-			featuresStep += frc.getHIGH_COV_PE(contigStep); // CONTIG[contigStep].TOTAL
+			if(contigStep < frc.returnContigs()) {
+				featuresStep += frc.getHIGH_COV_PE(contigStep); // CONTIG[contigStep].TOTAL
+			} else {// I read all the contigs, time to to stop
+				featuresStep = partial + 1;
+			}
 		}
 
 		edgeCoverage = 0;
@@ -730,20 +737,21 @@ void printHIGH_COV_PE_FRC(string outputFile, unsigned int HIGH_COV_PE_features, 
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(contigStep == frc.returnContigs()) {
+			partial = HIGH_COV_PE_features + 1;
+		}
 	}
 
 	myfile.close();
 }
 
 void printLOW_NORM_COV_PE_FRC(string outputFile, unsigned int LOW_NORM_COV_PE_features, unsigned long estimatedGenomeSize, FRC frc) {
+
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	float step = LOW_NORM_COV_PE_features/(float)100;
-	if(step == 0) {
-		step = 100;
-	}
+	unsigned int step = ceil(LOW_NORM_COV_PE_features/(float)100 + 0.5);
 
-	float partial=0;
+	unsigned int partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= LOW_NORM_COV_PE_features) {
@@ -752,7 +760,12 @@ void printLOW_NORM_COV_PE_FRC(string outputFile, unsigned int LOW_NORM_COV_PE_fe
 		featuresStep += frc.getLOW_NORM_COV_PE(contigStep);
 		while(featuresStep <= partial) {
 			contigStep++;
-			featuresStep += frc.getLOW_NORM_COV_PE(contigStep); // CONTIG[contigStep].TOTAL
+			if(contigStep < frc.returnContigs()) {
+				featuresStep += frc.getLOW_NORM_COV_PE(contigStep); // CONTIG[contigStep].TOTAL
+			} else {// I read all the contigs, time to to stop
+				featuresStep = partial + 1;
+			}
+
 		}
 
 		edgeCoverage = 0;
@@ -762,6 +775,9 @@ void printLOW_NORM_COV_PE_FRC(string outputFile, unsigned int LOW_NORM_COV_PE_fe
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(contigStep == frc.returnContigs()) {
+			partial = LOW_NORM_COV_PE_features + 1;
+		}
 	}
 
 	myfile.close();
@@ -770,12 +786,10 @@ void printLOW_NORM_COV_PE_FRC(string outputFile, unsigned int LOW_NORM_COV_PE_fe
 void printHIGH_NORM_COV_PE_FRC(string outputFile, unsigned int HIGH_NORM_COV_PE_features, unsigned long estimatedGenomeSize, FRC frc) {
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	float step = HIGH_NORM_COV_PE_features/(float)100;
-	if(step == 0) {
-		step = 100;
-	}
+	unsigned int step = ceil(HIGH_NORM_COV_PE_features/(float)100 + 0.5);
 
-	float partial=0;
+	unsigned int partial=0;
+
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= HIGH_NORM_COV_PE_features) {
@@ -784,7 +798,12 @@ void printHIGH_NORM_COV_PE_FRC(string outputFile, unsigned int HIGH_NORM_COV_PE_
 		featuresStep += frc.getHIGH_NORM_COV_PE(contigStep);
 		while(featuresStep <= partial) {
 			contigStep++;
-			featuresStep += frc.getHIGH_NORM_COV_PE(contigStep); // CONTIG[contigStep].TOTAL
+			if(contigStep < frc.returnContigs()) {
+				featuresStep += frc.getHIGH_NORM_COV_PE(contigStep); // CONTIG[contigStep].TOTAL
+			} else {// I read all the contigs, time to to stop
+				featuresStep = partial + 1;
+			}
+
 		}
 
 		edgeCoverage = 0;
@@ -794,6 +813,9 @@ void printHIGH_NORM_COV_PE_FRC(string outputFile, unsigned int HIGH_NORM_COV_PE_
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(contigStep == frc.returnContigs()) {
+			partial = HIGH_NORM_COV_PE_features + 1;
+		}
 	}
 
 	myfile.close();
@@ -801,12 +823,9 @@ void printHIGH_NORM_COV_PE_FRC(string outputFile, unsigned int HIGH_NORM_COV_PE_
 void printHIGH_SINGLE_PE_FRC(string outputFile, unsigned int HIGH_SINGLE_PE_features, unsigned long estimatedGenomeSize, FRC frc) {
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	float step = HIGH_SINGLE_PE_features/(float)100;
-	if(step == 0) {
-		step = 100;
-	}
+	unsigned int step = ceil(HIGH_SINGLE_PE_features/(float)100 + 0.5);
 
-	float partial=0;
+	unsigned int partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= HIGH_SINGLE_PE_features) {
@@ -815,7 +834,11 @@ void printHIGH_SINGLE_PE_FRC(string outputFile, unsigned int HIGH_SINGLE_PE_feat
 		featuresStep += frc.getHIGH_SINGLE_PE(contigStep);
 		while(featuresStep <= partial) {
 			contigStep++;
-			featuresStep += frc.getHIGH_SINGLE_PE(contigStep); // CONTIG[contigStep].TOTAL
+			if(contigStep < frc.returnContigs()) {
+				featuresStep += frc.getHIGH_SINGLE_PE(contigStep); // CONTIG[contigStep].TOTAL
+			} else {// I read all the contigs, time to to stop
+				featuresStep = partial + 1;
+			}
 		}
 
 		edgeCoverage = 0;
@@ -825,6 +848,9 @@ void printHIGH_SINGLE_PE_FRC(string outputFile, unsigned int HIGH_SINGLE_PE_feat
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(contigStep == frc.returnContigs()) {
+			partial = HIGH_SINGLE_PE_features + 1;
+		}
 	}
 
 	myfile.close();
@@ -832,11 +858,9 @@ void printHIGH_SINGLE_PE_FRC(string outputFile, unsigned int HIGH_SINGLE_PE_feat
 void printHIGH_OUTIE_PE_FRC(string outputFile, unsigned int HIGH_OUTIE_PE_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	float step = HIGH_OUTIE_PE_features/(float)100;
-	if(step == 0) {
-		step = 100;
-	}
-	float partial=0;
+	unsigned int step = ceil(HIGH_OUTIE_PE_features/(float)100 + 0.5);
+
+	unsigned int partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= HIGH_OUTIE_PE_features) {
@@ -845,7 +869,11 @@ void printHIGH_OUTIE_PE_FRC(string outputFile, unsigned int HIGH_OUTIE_PE_featur
 		featuresStep += frc.getHIGH_OUTIE_PE(contigStep);
 		while(featuresStep <= partial) {
 			contigStep++;
-			featuresStep += frc.getHIGH_OUTIE_PE(contigStep); // CONTIG[contigStep].TOTAL
+			if(contigStep < frc.returnContigs()) {
+				featuresStep += frc.getHIGH_OUTIE_PE(contigStep); // CONTIG[contigStep].TOTAL
+			} else {// I read all the contigs, time to to stop
+				featuresStep = partial + 1;
+			}
 		}
 
 		edgeCoverage = 0;
@@ -855,6 +883,9 @@ void printHIGH_OUTIE_PE_FRC(string outputFile, unsigned int HIGH_OUTIE_PE_featur
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(contigStep == frc.returnContigs()) {
+			partial = HIGH_OUTIE_PE_features + 1;
+		}
 	}
 
 	myfile.close();
@@ -862,12 +893,9 @@ void printHIGH_OUTIE_PE_FRC(string outputFile, unsigned int HIGH_OUTIE_PE_featur
 void printHIGH_SPAN_PE_FRC(string outputFile, unsigned int HIGH_SPAN_PE_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	float step = HIGH_SPAN_PE_features/(float)100;
-	if(step == 0) {
-		step = 100;
-	}
+	unsigned int step = ceil(HIGH_SPAN_PE_features/(float)100 + 0.5);
 
-	float partial=0;
+	unsigned int partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= HIGH_SPAN_PE_features) {
@@ -876,7 +904,11 @@ void printHIGH_SPAN_PE_FRC(string outputFile, unsigned int HIGH_SPAN_PE_features
 		featuresStep += frc.getHIGH_SPAN_PE(contigStep);
 		while(featuresStep <= partial) {
 			contigStep++;
-			featuresStep += frc.getHIGH_SPAN_PE(contigStep); // CONTIG[contigStep].TOTAL
+			if(contigStep < frc.returnContigs()) {
+				featuresStep += frc.getHIGH_SPAN_PE(contigStep); // CONTIG[contigStep].TOTAL
+			} else {// I read all the contigs, time to to stop
+				featuresStep = partial + 1;
+			}
 		}
 
 		edgeCoverage = 0;
@@ -886,6 +918,9 @@ void printHIGH_SPAN_PE_FRC(string outputFile, unsigned int HIGH_SPAN_PE_features
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(contigStep == frc.returnContigs()) {
+			partial = HIGH_SPAN_PE_features + 1;
+		}
 	}
 
 	myfile.close();
@@ -893,12 +928,9 @@ void printHIGH_SPAN_PE_FRC(string outputFile, unsigned int HIGH_SPAN_PE_features
 void printCOMPR_PE_FRC(string outputFile, unsigned int COMPR_PE_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	float step = COMPR_PE_features/(float)100;
-	if(step == 0) {
-		step = 100;
-	}
+	unsigned int step = ceil(COMPR_PE_features/(float)100 + 0.5);
 
-	float partial=0;
+	unsigned int partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= COMPR_PE_features) {
@@ -907,7 +939,11 @@ void printCOMPR_PE_FRC(string outputFile, unsigned int COMPR_PE_features, unsign
 		featuresStep += frc.getCOMPR_PE(contigStep);
 		while(featuresStep <= partial) {
 			contigStep++;
-			featuresStep += frc.getCOMPR_PE(contigStep); // CONTIG[contigStep].TOTAL
+			if(contigStep < frc.returnContigs()) {
+				featuresStep += frc.getCOMPR_PE(contigStep); // CONTIG[contigStep].TOTAL
+			} else {// I read all the contigs, time to to stop
+				featuresStep = partial + 1;
+			}
 		}
 
 		edgeCoverage = 0;
@@ -917,6 +953,9 @@ void printCOMPR_PE_FRC(string outputFile, unsigned int COMPR_PE_features, unsign
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(contigStep == frc.returnContigs()) {
+			partial = COMPR_PE_features + 1;
+		}
 	}
 
 	myfile.close();
@@ -924,12 +963,9 @@ void printCOMPR_PE_FRC(string outputFile, unsigned int COMPR_PE_features, unsign
 void printSTRECH_PE_FRC(string outputFile, unsigned int STRECH_PE_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	float step = STRECH_PE_features/(float)100;
-	if(step == 0) {
-		step = 100;
-	}
+	unsigned int step = ceil(STRECH_PE_features/(float)100 + 0.5);
 
-	float partial=0;
+	unsigned int partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= STRECH_PE_features) {
@@ -938,7 +974,11 @@ void printSTRECH_PE_FRC(string outputFile, unsigned int STRECH_PE_features, unsi
 		featuresStep += frc.getSTRECH_PE(contigStep);
 		while(featuresStep <= partial) {
 			contigStep++;
-			featuresStep += frc.getSTRECH_PE(contigStep); // CONTIG[contigStep].TOTAL
+			if(contigStep < frc.returnContigs()) {
+				featuresStep += frc.getSTRECH_PE(contigStep); // CONTIG[contigStep].TOTAL
+			} else {// I read all the contigs, time to to stop
+				featuresStep = partial + 1;
+			}
 		}
 
 		edgeCoverage = 0;
@@ -948,6 +988,9 @@ void printSTRECH_PE_FRC(string outputFile, unsigned int STRECH_PE_features, unsi
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(contigStep == frc.returnContigs()) {
+			partial = STRECH_PE_features + 1;
+		}
 	}
 
 	myfile.close();
@@ -956,12 +999,9 @@ void printSTRECH_PE_FRC(string outputFile, unsigned int STRECH_PE_features, unsi
 void printHIGH_SINGLE_MP_FRC(string outputFile, unsigned int HIGH_SINGLE_MP_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	float step = HIGH_SINGLE_MP_features/(float)100;
-	if(step == 0) {
-		step = 100;
-	}
+	unsigned int step = ceil(HIGH_SINGLE_MP_features/(float)100 + 0.5);
 
-	float partial=0;
+	unsigned int partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= HIGH_SINGLE_MP_features) {
@@ -970,7 +1010,11 @@ void printHIGH_SINGLE_MP_FRC(string outputFile, unsigned int HIGH_SINGLE_MP_feat
 		featuresStep += frc.getHIGH_SINGLE_MP(contigStep);
 		while(featuresStep <= partial) {
 			contigStep++;
-			featuresStep += frc.getHIGH_SINGLE_MP(contigStep); // CONTIG[contigStep].TOTAL
+			if(contigStep < frc.returnContigs()) {
+				featuresStep += frc.getHIGH_SINGLE_MP(contigStep); // CONTIG[contigStep].TOTAL
+			} else {// I read all the contigs, time to to stop
+				featuresStep = partial + 1;
+			}
 		}
 
 		edgeCoverage = 0;
@@ -980,6 +1024,9 @@ void printHIGH_SINGLE_MP_FRC(string outputFile, unsigned int HIGH_SINGLE_MP_feat
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(contigStep == frc.returnContigs()) {
+			partial = HIGH_SINGLE_MP_features + 1;
+		}
 	}
 
 	myfile.close();
@@ -987,12 +1034,10 @@ void printHIGH_SINGLE_MP_FRC(string outputFile, unsigned int HIGH_SINGLE_MP_feat
 void printHIGH_OUTIE_MP_FRC(string outputFile, unsigned int HIGH_OUTIE_MP_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	float step = HIGH_OUTIE_MP_features/(float)100;
-	if(step == 0) {
-		step = 100;
-	}
+	unsigned int step = ceil(HIGH_OUTIE_MP_features/(float)100 + 0.5);
 
-	float partial=0;
+	unsigned int partial=0;
+
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= HIGH_OUTIE_MP_features) {
@@ -1001,7 +1046,12 @@ void printHIGH_OUTIE_MP_FRC(string outputFile, unsigned int HIGH_OUTIE_MP_featur
 		featuresStep += frc.getHIGH_OUTIE_MP(contigStep);
 		while(featuresStep <= partial) {
 			contigStep++;
-			featuresStep += frc.getHIGH_OUTIE_MP(contigStep); // CONTIG[contigStep].TOTAL
+			if(contigStep < frc.returnContigs()) {
+				featuresStep += frc.getHIGH_OUTIE_MP(contigStep); // CONTIG[contigStep].TOTAL
+			} else {// I read all the contigs, time to to stop
+				featuresStep = partial + 1;
+			}
+
 		}
 
 		edgeCoverage = 0;
@@ -1011,6 +1061,9 @@ void printHIGH_OUTIE_MP_FRC(string outputFile, unsigned int HIGH_OUTIE_MP_featur
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(contigStep == frc.returnContigs()) {
+			partial = HIGH_OUTIE_MP_features + 1;
+		}
 	}
 
 	myfile.close();
@@ -1018,12 +1071,9 @@ void printHIGH_OUTIE_MP_FRC(string outputFile, unsigned int HIGH_OUTIE_MP_featur
 void printHIGH_SPAN_MP_FRC(string outputFile, unsigned int HIGH_SPAN_MP_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	float step = HIGH_SPAN_MP_features/(float)100;
-	if(step == 0) {
-		step = 100;
-	}
+	unsigned int step = ceil(HIGH_SPAN_MP_features/(float)100 + 0.5);
 
-	float partial=0;
+	unsigned int partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= HIGH_SPAN_MP_features) {
@@ -1032,7 +1082,11 @@ void printHIGH_SPAN_MP_FRC(string outputFile, unsigned int HIGH_SPAN_MP_features
 		featuresStep += frc.getHIGH_SPAN_MP(contigStep);
 		while(featuresStep <= partial) {
 			contigStep++;
-			featuresStep += frc.getHIGH_SPAN_MP(contigStep); // CONTIG[contigStep].TOTAL
+			if(contigStep < frc.returnContigs()) {
+				featuresStep += frc.getHIGH_SPAN_MP(contigStep); // CONTIG[contigStep].TOTAL
+			} else {// I read all the contigs, time to to stop
+				featuresStep = partial + 1;
+			}
 		}
 
 		edgeCoverage = 0;
@@ -1042,6 +1096,9 @@ void printHIGH_SPAN_MP_FRC(string outputFile, unsigned int HIGH_SPAN_MP_features
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(contigStep == frc.returnContigs()) {
+			partial = HIGH_SPAN_MP_features + 1;
+		}
 	}
 
 	myfile.close();
@@ -1049,12 +1106,9 @@ void printHIGH_SPAN_MP_FRC(string outputFile, unsigned int HIGH_SPAN_MP_features
 void printCOMPR_MP_FRC(string outputFile, unsigned int COMPR_MP_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	float step = COMPR_MP_features/(float)100;
-	if(step == 0) {
-		step = 100;
-	}
+	unsigned int step = ceil(COMPR_MP_features/(float)100 + 0.5);
 
-	float partial=0;
+	unsigned int partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= COMPR_MP_features) {
@@ -1063,7 +1117,11 @@ void printCOMPR_MP_FRC(string outputFile, unsigned int COMPR_MP_features, unsign
 		featuresStep += frc.getCOMPR_MP(contigStep);
 		while(featuresStep <= partial) {
 			contigStep++;
-			featuresStep += frc.getCOMPR_MP(contigStep); // CONTIG[contigStep].TOTAL
+			if(contigStep < frc.returnContigs()) {
+				featuresStep += frc.getCOMPR_MP(contigStep); // CONTIG[contigStep].TOTAL
+			} else {// I read all the contigs, time to to stop
+				featuresStep = partial + 1;
+			}
 		}
 
 		edgeCoverage = 0;
@@ -1073,6 +1131,9 @@ void printCOMPR_MP_FRC(string outputFile, unsigned int COMPR_MP_features, unsign
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(contigStep == frc.returnContigs()) {
+			partial = COMPR_MP_features + 1;
+		}
 	}
 
 	myfile.close();
@@ -1080,12 +1141,10 @@ void printCOMPR_MP_FRC(string outputFile, unsigned int COMPR_MP_features, unsign
 void printSTRECH_MP_FRC(string outputFile, unsigned int STRECH_MP_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	float step = STRECH_MP_features/(float)100;
-	if(step == 0) {
-		step = 100;
-	}
+	unsigned int step = ceil(STRECH_MP_features/(float)100 + 0.5);
 
-	float partial=0;
+	unsigned int partial=0;
+
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= STRECH_MP_features) {
@@ -1094,7 +1153,11 @@ void printSTRECH_MP_FRC(string outputFile, unsigned int STRECH_MP_features, unsi
 		featuresStep += frc.getSTRECH_MP(contigStep);
 		while(featuresStep <= partial) {
 			contigStep++;
-			featuresStep += frc.getSTRECH_MP(contigStep); // CONTIG[contigStep].TOTAL
+			if(contigStep < frc.returnContigs()) {
+				featuresStep += frc.getSTRECH_MP(contigStep); // CONTIG[contigStep].TOTAL
+			} else {// I read all the contigs, time to to stop
+				featuresStep = partial + 1;
+			}
 		}
 
 		edgeCoverage = 0;
@@ -1104,6 +1167,9 @@ void printSTRECH_MP_FRC(string outputFile, unsigned int STRECH_MP_features, unsi
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(contigStep == frc.returnContigs()) {
+			partial = STRECH_MP_features + 1;
+		}
 	}
 
 	myfile.close();

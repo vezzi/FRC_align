@@ -96,6 +96,7 @@ public:
 	FRC(unsigned int contigs);
 	~FRC();
 
+	unsigned int returnContigs();
 	void setContigLength(unsigned int ctg, unsigned int contigLength);
 	unsigned int getContigLength(unsigned int ctg);
 
