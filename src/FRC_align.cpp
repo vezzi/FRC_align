@@ -594,10 +594,10 @@ int main(int argc, char *argv[]) {
 //FRCurve for all the features
     ofstream myfile;
     myfile.open (outputFile.c_str());
-    unsigned int step = ceil(featuresTotal/(float)100 + 0.5);
-   	unsigned int partial=0;
-//    float step = featuresTotal/(float)100;
-//    float partial=0;
+//    unsigned int step = ceil(featuresTotal/(float)100 + 0.5);
+//   	unsigned int partial=0;
+    float step = featuresTotal/(float)100;
+    float partial=0;
     uint64_t edgeCoverage = 0;
 
     while(partial <= featuresTotal) {
@@ -686,9 +686,9 @@ int main(int argc, char *argv[]) {
 void printLOW_COV_PE_FRC(string outputFile, unsigned int LOW_COV_PE_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	unsigned int step = ceil(LOW_COV_PE_features/(float)100 + 0.5);
-
-	unsigned int partial=0;
+	//unsigned int step = ceil(LOW_COV_PE_features/(float)100 + 0.5);
+	float step = LOW_COV_PE_features/(float)100 ;
+	float partial=0;
 	uint64_t edgeCoverage = 0;
 
 
@@ -725,9 +725,9 @@ void printLOW_COV_PE_FRC(string outputFile, unsigned int LOW_COV_PE_features, un
 void printHIGH_COV_PE_FRC(string outputFile, unsigned int HIGH_COV_PE_features, unsigned long estimatedGenomeSize, FRC frc) {
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	unsigned int step = ceil(HIGH_COV_PE_features/(float)100 + 0.5);
-
-	unsigned int partial=0;
+	//unsigned int step = ceil(HIGH_COV_PE_features/(float)100 + 0.5);
+	float step = HIGH_COV_PE_features/(float)100;
+	float partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= HIGH_COV_PE_features) {
@@ -765,9 +765,9 @@ void printLOW_NORM_COV_PE_FRC(string outputFile, unsigned int LOW_NORM_COV_PE_fe
 
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	unsigned int step = ceil(LOW_NORM_COV_PE_features/(float)100 + 0.5);
-
-	unsigned int partial=0;
+	//unsigned int step = ceil(LOW_NORM_COV_PE_features/(float)100 + 0.5);
+	float step = LOW_NORM_COV_PE_features/(float)100;
+	float partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= LOW_NORM_COV_PE_features) {
@@ -806,9 +806,9 @@ void printLOW_NORM_COV_PE_FRC(string outputFile, unsigned int LOW_NORM_COV_PE_fe
 void printHIGH_NORM_COV_PE_FRC(string outputFile, unsigned int HIGH_NORM_COV_PE_features, unsigned long estimatedGenomeSize, FRC frc) {
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	unsigned int step = ceil(HIGH_NORM_COV_PE_features/(float)100 + 0.5);
-
-	unsigned int partial=0;
+	//unsigned int step = ceil(HIGH_NORM_COV_PE_features/(float)100 + 0.5);
+	float step = HIGH_NORM_COV_PE_features/(float)100;
+	float partial=0;
 
 	uint64_t edgeCoverage = 0;
 
@@ -847,9 +847,9 @@ void printHIGH_NORM_COV_PE_FRC(string outputFile, unsigned int HIGH_NORM_COV_PE_
 void printHIGH_SINGLE_PE_FRC(string outputFile, unsigned int HIGH_SINGLE_PE_features, unsigned long estimatedGenomeSize, FRC frc) {
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	unsigned int step = ceil(HIGH_SINGLE_PE_features/(float)100 + 0.5);
-
-	unsigned int partial=0;
+	//unsigned int step = ceil(HIGH_SINGLE_PE_features/(float)100 + 0.5);
+	float step = HIGH_SINGLE_PE_features/(float)100;
+	float partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= HIGH_SINGLE_PE_features) {
@@ -886,9 +886,9 @@ void printHIGH_SINGLE_PE_FRC(string outputFile, unsigned int HIGH_SINGLE_PE_feat
 void printHIGH_OUTIE_PE_FRC(string outputFile, unsigned int HIGH_OUTIE_PE_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	unsigned int step = ceil(HIGH_OUTIE_PE_features/(float)100 + 0.5);
-
-	unsigned int partial=0;
+	//unsigned int step = ceil(HIGH_OUTIE_PE_features/(float)100 + 0.5);
+	float step = HIGH_OUTIE_PE_features/(float)100;
+	float partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= HIGH_OUTIE_PE_features) {
@@ -925,9 +925,9 @@ void printHIGH_OUTIE_PE_FRC(string outputFile, unsigned int HIGH_OUTIE_PE_featur
 void printHIGH_SPAN_PE_FRC(string outputFile, unsigned int HIGH_SPAN_PE_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	unsigned int step = ceil(HIGH_SPAN_PE_features/(float)100 + 0.5);
-
-	unsigned int partial=0;
+	//unsigned int step = ceil(HIGH_SPAN_PE_features/(float)100 + 0.5);
+	float step = HIGH_SPAN_PE_features/(float)100;
+	float partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= HIGH_SPAN_PE_features) {
@@ -964,9 +964,9 @@ void printHIGH_SPAN_PE_FRC(string outputFile, unsigned int HIGH_SPAN_PE_features
 void printCOMPR_PE_FRC(string outputFile, unsigned int COMPR_PE_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	unsigned int step = ceil(COMPR_PE_features/(float)100 + 0.5);
-
-	unsigned int partial=0;
+	//unsigned int step = ceil(COMPR_PE_features/(float)100 + 0.5);
+	float step = COMPR_PE_features/(float)100;
+	float partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= COMPR_PE_features) {
@@ -1003,9 +1003,9 @@ void printCOMPR_PE_FRC(string outputFile, unsigned int COMPR_PE_features, unsign
 void printSTRECH_PE_FRC(string outputFile, unsigned int STRECH_PE_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	unsigned int step = ceil(STRECH_PE_features/(float)100 + 0.5);
-
-	unsigned int partial=0;
+	//unsigned int step = ceil(STRECH_PE_features/(float)100 + 0.5);
+	float step = STRECH_PE_features/(float)100;
+	float  partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= STRECH_PE_features) {
@@ -1042,9 +1042,9 @@ void printSTRECH_PE_FRC(string outputFile, unsigned int STRECH_PE_features, unsi
 void printHIGH_SINGLE_MP_FRC(string outputFile, unsigned int HIGH_SINGLE_MP_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	unsigned int step = ceil(HIGH_SINGLE_MP_features/(float)100 + 0.5);
-
-	unsigned int partial=0;
+	//unsigned int step = ceil(HIGH_SINGLE_MP_features/(float)100 + 0.5);
+	float step = HIGH_SINGLE_MP_features/(float)100;
+	float  partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= HIGH_SINGLE_MP_features) {
@@ -1081,9 +1081,9 @@ void printHIGH_SINGLE_MP_FRC(string outputFile, unsigned int HIGH_SINGLE_MP_feat
 void printHIGH_OUTIE_MP_FRC(string outputFile, unsigned int HIGH_OUTIE_MP_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	unsigned int step = ceil(HIGH_OUTIE_MP_features/(float)100 + 0.5);
-
-	unsigned int partial=0;
+	//unsigned int step = ceil(HIGH_OUTIE_MP_features/(float)100 + 0.5);
+	float step = HIGH_OUTIE_MP_features/(float)100;
+	float  partial=0;
 
 	uint64_t edgeCoverage = 0;
 
@@ -1122,9 +1122,9 @@ void printHIGH_OUTIE_MP_FRC(string outputFile, unsigned int HIGH_OUTIE_MP_featur
 void printHIGH_SPAN_MP_FRC(string outputFile, unsigned int HIGH_SPAN_MP_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	unsigned int step = ceil(HIGH_SPAN_MP_features/(float)100 + 0.5);
-
-	unsigned int partial=0;
+	//unsigned int step = ceil(HIGH_SPAN_MP_features/(float)100 + 0.5);
+	float step = HIGH_SPAN_MP_features/(float)100;
+	float partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= HIGH_SPAN_MP_features) {
@@ -1161,9 +1161,9 @@ void printHIGH_SPAN_MP_FRC(string outputFile, unsigned int HIGH_SPAN_MP_features
 void printCOMPR_MP_FRC(string outputFile, unsigned int COMPR_MP_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	unsigned int step = ceil(COMPR_MP_features/(float)100 + 0.5);
-
-	unsigned int partial=0;
+	//unsigned int step = ceil(COMPR_MP_features/(float)100 + 0.5);
+	float step = COMPR_MP_features/(float)100;
+	float partial=0;
 	uint64_t edgeCoverage = 0;
 
 	while(partial <= COMPR_MP_features) {
@@ -1200,9 +1200,9 @@ void printCOMPR_MP_FRC(string outputFile, unsigned int COMPR_MP_features, unsign
 void printSTRECH_MP_FRC(string outputFile, unsigned int STRECH_MP_features, unsigned long estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
-	unsigned int step = ceil(STRECH_MP_features/(float)100 + 0.5);
-
-	unsigned int partial=0;
+	//unsigned int step = ceil(STRECH_MP_features/(float)100 + 0.5);
+	float step = STRECH_MP_features/(float)100;
+	float partial=0;
 
 	uint64_t edgeCoverage = 0;
 
