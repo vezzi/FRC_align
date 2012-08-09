@@ -621,6 +621,10 @@ int main(int argc, char *argv[]) {
     	float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
     	myfile << partial << " " << coveragePartial << "\n";
     	partial += step;
+    	if(partial > featuresTotal) {
+    		partial = featuresTotal;
+    	}
+
     	if(contigStep == frc.returnContigs()) {
     		partial = featuresTotal + 1;
     	}
@@ -708,6 +712,9 @@ void printLOW_COV_PE_FRC(string outputFile, unsigned int LOW_COV_PE_features, un
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(partial > LOW_COV_PE_features) {
+			partial = LOW_COV_PE_features;
+		}
 		if(contigStep == frc.returnContigs()) {
 			partial = LOW_COV_PE_features + 1;
 		}
@@ -743,6 +750,9 @@ void printHIGH_COV_PE_FRC(string outputFile, unsigned int HIGH_COV_PE_features, 
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(partial > HIGH_COV_PE_features) {
+			partial = HIGH_COV_PE_features;
+		}
 		if(contigStep == frc.returnContigs()) {
 			partial = HIGH_COV_PE_features + 1;
 		}
@@ -781,6 +791,10 @@ void printLOW_NORM_COV_PE_FRC(string outputFile, unsigned int LOW_NORM_COV_PE_fe
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(partial > LOW_NORM_COV_PE_features) {
+			partial = LOW_NORM_COV_PE_features;
+		}
+
 		if(contigStep == frc.returnContigs()) {
 			partial = LOW_NORM_COV_PE_features + 1;
 		}
@@ -819,6 +833,10 @@ void printHIGH_NORM_COV_PE_FRC(string outputFile, unsigned int HIGH_NORM_COV_PE_
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(partial > HIGH_NORM_COV_PE_features) {
+			partial = HIGH_NORM_COV_PE_features;
+		}
+
 		if(contigStep == frc.returnContigs()) {
 			partial = HIGH_NORM_COV_PE_features + 1;
 		}
@@ -854,6 +872,10 @@ void printHIGH_SINGLE_PE_FRC(string outputFile, unsigned int HIGH_SINGLE_PE_feat
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(partial > HIGH_SINGLE_PE_features) {
+			partial = HIGH_SINGLE_PE_features;
+		}
+
 		if(contigStep == frc.returnContigs()) {
 			partial = HIGH_SINGLE_PE_features + 1;
 		}
@@ -889,6 +911,10 @@ void printHIGH_OUTIE_PE_FRC(string outputFile, unsigned int HIGH_OUTIE_PE_featur
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(partial > HIGH_OUTIE_PE_features) {
+			partial = HIGH_OUTIE_PE_features;
+		}
+
 		if(contigStep == frc.returnContigs()) {
 			partial = HIGH_OUTIE_PE_features + 1;
 		}
@@ -924,6 +950,10 @@ void printHIGH_SPAN_PE_FRC(string outputFile, unsigned int HIGH_SPAN_PE_features
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(partial > HIGH_SPAN_PE_features) {
+			partial = HIGH_SPAN_PE_features;
+		}
+
 		if(contigStep == frc.returnContigs()) {
 			partial = HIGH_SPAN_PE_features + 1;
 		}
@@ -959,6 +989,10 @@ void printCOMPR_PE_FRC(string outputFile, unsigned int COMPR_PE_features, unsign
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(partial > COMPR_PE_features) {
+			partial = COMPR_PE_features;
+		}
+
 		if(contigStep == frc.returnContigs()) {
 			partial = COMPR_PE_features + 1;
 		}
@@ -994,6 +1028,9 @@ void printSTRECH_PE_FRC(string outputFile, unsigned int STRECH_PE_features, unsi
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(partial > STRECH_PE_features) {
+			partial = STRECH_PE_features;
+		}
 		if(contigStep == frc.returnContigs()) {
 			partial = STRECH_PE_features + 1;
 		}
@@ -1030,6 +1067,10 @@ void printHIGH_SINGLE_MP_FRC(string outputFile, unsigned int HIGH_SINGLE_MP_feat
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(partial > HIGH_SINGLE_MP_features) {
+			partial = HIGH_SINGLE_MP_features;
+		}
+
 		if(contigStep == frc.returnContigs()) {
 			partial = HIGH_SINGLE_MP_features + 1;
 		}
@@ -1067,6 +1108,10 @@ void printHIGH_OUTIE_MP_FRC(string outputFile, unsigned int HIGH_OUTIE_MP_featur
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(partial > HIGH_OUTIE_MP_features) {
+			partial = HIGH_OUTIE_MP_features;
+		}
+
 		if(contigStep == frc.returnContigs()) {
 			partial = HIGH_OUTIE_MP_features + 1;
 		}
@@ -1102,6 +1147,10 @@ void printHIGH_SPAN_MP_FRC(string outputFile, unsigned int HIGH_SPAN_MP_features
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(partial > HIGH_SPAN_MP_features) {
+			partial = HIGH_SPAN_MP_features;
+		}
+
 		if(contigStep == frc.returnContigs()) {
 			partial = HIGH_SPAN_MP_features + 1;
 		}
@@ -1137,9 +1186,13 @@ void printCOMPR_MP_FRC(string outputFile, unsigned int COMPR_MP_features, unsign
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(partial > COMPR_MP_features) {
+			partial = COMPR_MP_features;
+		}
 		if(contigStep == frc.returnContigs()) {
 			partial = COMPR_MP_features + 1;
 		}
+
 	}
 
 	myfile.close();
@@ -1173,6 +1226,10 @@ void printSTRECH_MP_FRC(string outputFile, unsigned int STRECH_MP_features, unsi
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		if(partial > STRECH_MP_features) {
+			partial = STRECH_MP_features;
+		}
+
 		if(contigStep == frc.returnContigs()) {
 			partial = STRECH_MP_features + 1;
 		}
