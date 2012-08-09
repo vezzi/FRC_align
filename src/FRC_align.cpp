@@ -594,12 +594,10 @@ int main(int argc, char *argv[]) {
 //FRCurve for all the features
     ofstream myfile;
     myfile.open (outputFile.c_str());
-    float step = featuresTotal/(float)100;
-    if(step == 0) {
-    	step = 100;
-    }
-    cout << step << "\n";
-    float partial=0;
+    unsigned int step = ceil(LOW_COV_PE_features/(float)100 + 0.5);
+   	unsigned int partial=0;
+//    float step = featuresTotal/(float)100;
+//    float partial=0;
     uint64_t edgeCoverage = 0;
 
     while(partial <= featuresTotal) {
@@ -608,7 +606,12 @@ int main(int argc, char *argv[]) {
     	featuresStep += frc.getTotal(contigStep);
     	while(featuresStep <= partial) {
     		contigStep++;
-    		featuresStep += frc.getTotal(contigStep); // CONTIG[contigStep].TOTAL
+    		if(contigStep < frc.returnContigs()) {
+    			featuresStep += frc.getTotal(contigStep); // CONTIG[contigStep].TOTAL
+    		} else {// I read all the contigs, time to to stop
+    			featuresStep = partial + 1;
+    		}
+    		//featuresStep += frc.getTotal(contigStep); // CONTIG[contigStep].TOTAL
     	}
 
     	edgeCoverage = 0;
@@ -618,6 +621,9 @@ int main(int argc, char *argv[]) {
     	float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
     	myfile << partial << " " << coveragePartial << "\n";
     	partial += step;
+    	if(contigStep == frc.returnContigs()) {
+    		partial = featuresTotal + 1;
+    	}
     }
 
     myfile.close();
