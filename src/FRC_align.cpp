@@ -594,7 +594,7 @@ int main(int argc, char *argv[]) {
 //FRCurve for all the features
     ofstream myfile;
     myfile.open (outputFile.c_str());
-    unsigned int step = ceil(LOW_COV_PE_features/(float)100 + 0.5);
+    unsigned int step = ceil(featuresTotal/(float)100 + 0.5);
    	unsigned int partial=0;
 //    float step = featuresTotal/(float)100;
 //    float partial=0;
