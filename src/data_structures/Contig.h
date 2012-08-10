@@ -82,9 +82,9 @@ public:
 	unsigned int getHighCoverageAreas(float C_A, unsigned int windowSize, unsigned int windowStep);
 	unsigned int getLowNormalAreas(float C_M, unsigned int windowSize, unsigned int windowStep);
 	unsigned int getHighNormalAreas(float C_M, unsigned int windowSize, unsigned int windowStep);
-	unsigned int getHighSingleAreas(unsigned int windowSize, unsigned int windowStep);
-	unsigned int getHighSpanningAreas(unsigned int windowSize, unsigned int windowStep);
-	unsigned int getHighOutieAreas(unsigned int windowSize, unsigned int windowStep);
+	unsigned int getHighSingleAreas(unsigned int windowSize, unsigned int windowStep, float C_A);
+	unsigned int getHighSpanningAreas(unsigned int windowSize, unsigned int windowStep, float C_A);
+	unsigned int getHighOutieAreas(unsigned int windowSize, unsigned int windowStep, float C_A);
 	unsigned int getCompressionAreas(float insertionMean, float insertionStd, float Zscore, unsigned int windowSize, unsigned int windowStep);
 	unsigned int getExpansionAreas(float insertionMean, float insertionStd, float Zscore, unsigned int windowSize, unsigned int windowStep);
 

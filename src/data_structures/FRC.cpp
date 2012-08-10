@@ -125,7 +125,7 @@ void FRC::computeHighNormalArea(string type,unsigned int ctg, Contig *contig, un
 }
 
 void FRC::computeHighSingleArea(string type,unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep) {
-	unsigned int feat = contig->getHighSingleAreas( windowSize, windowStep);
+	unsigned int feat = contig->getHighSingleAreas( windowSize, windowStep, this->C_A);
 	if(type.compare("PE") == 0) {
 		this->CONTIG[ctg].PE.updateHIGH_SINGLE_AREA(feat);
 	} else {
@@ -144,7 +144,7 @@ void FRC::computeHighSingleArea(string type,unsigned int ctg, Contig *contig, un
 }
 
 void FRC::computeHighSpanningArea(string type,unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep) {
-	unsigned int feat = contig->getHighSpanningAreas( windowSize, windowStep);
+	unsigned int feat = contig->getHighSpanningAreas( windowSize, windowStep, this->C_A);
 	if(type.compare("PE") == 0) {
 		this->CONTIG[ctg].PE.updateHIGH_SPANNING_AREA(feat);
 	} else {
@@ -162,7 +162,7 @@ void FRC::computeHighSpanningArea(string type,unsigned int ctg, Contig *contig, 
 }
 
 void FRC::computeHighOutieArea(string type,unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep) {
-	unsigned int feat = contig->getHighOutieAreas( windowSize, windowStep);
+	unsigned int feat = contig->getHighOutieAreas( windowSize, windowStep, this->C_A);
 	if(type.compare("PE") == 0) {
 		this->CONTIG[ctg].PE.updateHIGH_OUTIE_AREA(feat);
 	} else {
