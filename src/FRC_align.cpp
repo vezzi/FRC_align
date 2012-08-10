@@ -362,7 +362,7 @@ int main(int argc, char *argv[]) {
     					contig = contig2position[head->target_name[currentTid]];
     					currentContig =  new Contig(contigSize, peMinInsert_recomputed, peMaxInsert_recomputed);
     				} else {
-    					cout << "CONTIG\n";
+    					//cout << "CONTIG\n";
     					float coverage = frc.obtainCoverage(contig, currentContig);
 
 
@@ -376,8 +376,8 @@ int main(int argc, char *argv[]) {
 
     					//if(contigSize >= libraryPE.insertMean) {
    						frc.computeHighSpanningArea("PE", contig, currentContig, 1000, 200);
-						frc.computeCompressionArea("PE", contig, currentContig, -4.0, 1000, 200);
-						frc.computeStrechArea("PE", contig, currentContig, 5.0, 1000, 200);
+						frc.computeCompressionArea("PE", contig, currentContig, -5.0, 1000, 200);
+						frc.computeStrechArea("PE", contig, currentContig, 6.0, 1000, 200);
 							//}
 
     					delete currentContig; // delete hold contig
