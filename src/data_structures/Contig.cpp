@@ -1036,7 +1036,7 @@ unsigned int Contig::getExpansionAreas(float insertionMean, float insertionStd, 
 	unsigned int inserts = 0; // number of inserts
 	unsigned int features = 0;
 	float Z_stats = 0;
-	unsigned int minInsertNum = 10;
+	unsigned int minInsertNum = 5;
 	if(this->contigLength < windowSize) { // if contig less than window size, only one window
 		for(unsigned int i=0; i < this->contigLength ; i++ ) {
 			if(CONTIG[i].StratingInserts > 0) {
