@@ -1077,7 +1077,7 @@ unsigned int Contig::getExpansionAreas(float insertionMean, float insertionStd, 
 			endFeat = windowSize;
 			feat = true; // there is an open feature
 		}
-//		cout << feat << " " << startWindow << " " << Z_stats << " " << inserts << " " << spanningCoverage << "\n";
+		cout << feat << " " << startWindow << " " << Z_stats << " " << inserts << " " << spanningCoverage << "\n";
 		//now update
 		startWindow += windowStep;
 		endWindow += windowStep;
@@ -1133,7 +1133,7 @@ unsigned int Contig::getExpansionAreas(float insertionMean, float insertionStd, 
 					}
 				}
 			}
-//			cout << feat << " " << startWindow << " " << Z_stats << " " << inserts << " " << spanningCoverage << "\n";
+			cout << feat << " " << startWindow << " " << Z_stats << " " << inserts << " " << spanningCoverage << "\n";
 		}
 		//compute last window statistics
 

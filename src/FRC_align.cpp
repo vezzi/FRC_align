@@ -362,7 +362,7 @@ int main(int argc, char *argv[]) {
     					contig = contig2position[head->target_name[currentTid]];
     					currentContig =  new Contig(contigSize, peMinInsert_recomputed, peMaxInsert_recomputed);
     				} else {
-
+    					cout << "CONTIG\n";
     					float coverage = frc.obtainCoverage(contig, currentContig);
 
 
