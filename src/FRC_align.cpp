@@ -472,7 +472,7 @@ int main(int argc, char *argv[]) {
     					float coverage = frc.obtainCoverage(contig, currentContig);
 
 
-    					//cout << "CONTIG\n";
+    					 cout << "CONTIG\n";
     					//currentContig->print();
     					//if(coverage > 10) { // if mate pair library provides an enough high covereage
     					//	frc.computeLowCoverageArea("MP", contig, currentContig, 1000, 100);
@@ -488,9 +488,10 @@ int main(int argc, char *argv[]) {
     			       	frc.computeHighSpanningArea("MP", contig, currentContig, 1000, 200);
     			       	frc.computeHighOutieArea("MP", contig, currentContig, 1000,200);
     			    //	}
-    			    	frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
-    			   		frc.computeCompressionArea("MP", contig, currentContig, -4.5, 1000, 200);
-    			   		frc.computeStrechArea("MP", contig, currentContig, 4.5, 1000, 200);
+    			    	frc.computeHighSingleArea("MP", contig, currentContig, libraryMP.insertMean, 200);
+    			   		frc.computeCompressionArea("MP", contig, currentContig, -8, 1000, 200);
+    			   		//frc.computeStrechArea("MP", contig, currentContig, 4.5, 1000, 200);
+    			    	frc.computeStrechArea("MP", contig, currentContig, 8.0, libraryMP.insertMean, 200);
 
 
     					delete currentContig; // delete hold contig
@@ -527,9 +528,9 @@ int main(int argc, char *argv[]) {
    		frc.computeHighOutieArea("MP", contig, currentContig, 1000,200);
 
     	frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
-    	frc.computeCompressionArea("MP", contig, currentContig, -4.0, 1000, 200);
-    	frc.computeStrechArea("MP", contig, currentContig, 4.0, 1000, 200);
-
+    	frc.computeCompressionArea("MP", contig, currentContig, -8, libraryMP.insertMean, 200);
+    	//frc.computeStrechArea("MP", contig, currentContig, 4.5, 1000, 200);
+    	frc.computeStrechArea("MP", contig, currentContig, 8, libraryMP.insertMean, 200);
 
     	samclose(fp); // close the file
 

@@ -124,8 +124,13 @@ void Contig::updateContig(bam1_t* b) {
 	int32_t startInsert=0;
 	int32_t endInsert=0;
 	uint32_t iSize=0;
-	if(!(core->flag&BAM_FUNMAP) && !(core->flag&BAM_FDUP) && !(core->flag&BAM_FSECONDARY) && !(core->flag&BAM_FQCFAIL)) { // if read has been mapped and it is not a DUPLICATE or a SECONDARY alignment
-		alignmentLength = bam_cigar2qlen(core,cigar);
+	alignmentLength = bam_cigar2qlen(core,cigar);
+//	if(alignmentLength < 50) {
+	//			return;
+	//	}
+	if (core->flag&BAM_FUNMAP) { // if read is unmapped discard
+		    return;
+	} else 	if(!(core->flag&BAM_FUNMAP) && !(core->flag&BAM_FDUP) && !(core->flag&BAM_FSECONDARY) && !(core->flag&BAM_FQCFAIL)) { // if read has been mapped and it is not a DUPLICATE or a SECONDARY alignment
 		startRead = core->pos; // start position on the contig
 		endRead = startRead + alignmentLength ; // position where reads ends
 		updateCov(startRead, endRead, readCov); // update coverage
@@ -141,8 +146,11 @@ void Contig::updateContig(bam1_t* b) {
 				iSize = (startPaired + core->l_qseq -1) - startRead; // insert size, I consider both reads of the same length
 				startInsert = startRead;
 				endInsert = startRead + iSize;
+
+
 				if (minInsert <= iSize && iSize <= maxInsert) { //useful to compute CE stats
 					updateCov(startInsert,endInsert, insertCov); // update spanning coverage
+					//cout << startInsert << " " << startPaired << " " << endInsert << "\n";
 				}
 
 				if(!(core->flag&BAM_FREVERSE) && (core->flag&BAM_FMREVERSE) ) { //
@@ -161,6 +169,7 @@ void Contig::updateContig(bam1_t* b) {
 
 				if (minInsert <= iSize && iSize <= maxInsert) { //useful to compute CE stats
 					updateCov(startInsert,endInsert, insertCov); // update spanning coverage
+					//cout << startInsert << " " << startPaired << " " << endInsert << "\n";
 				}
 
 				if((core->flag&BAM_FREVERSE) && !(core->flag&BAM_FMREVERSE) ) { //
@@ -1035,6 +1044,7 @@ unsigned int Contig::getExpansionAreas(float insertionMean, float insertionStd, 
 	unsigned long int spanningCoverage = 0; // total insert length
 	unsigned int inserts = 0; // number of inserts
 	unsigned int features = 0;
+	float localMean;
 	float Z_stats = 0;
 	unsigned int minInsertNum = 5;
 	if(this->contigLength < windowSize) { // if contig less than window size, only one window
@@ -1045,7 +1055,7 @@ unsigned int Contig::getExpansionAreas(float insertionMean, float insertionStd, 
 			}
 		}
 		if(inserts > minInsertNum) {
-			float localMean = spanningCoverage/(float)inserts;
+			localMean = spanningCoverage/(float)inserts;
 			Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
 		} else {
 			Z_stats = 0;
@@ -1067,7 +1077,7 @@ unsigned int Contig::getExpansionAreas(float insertionMean, float insertionStd, 
 			}
 		}
 		if(inserts > minInsertNum) {
-			float localMean = spanningCoverage/(float)inserts;
+			localMean = spanningCoverage/(float)inserts;
 			Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
 		} else {
 			Z_stats = 0;
@@ -1077,7 +1087,7 @@ unsigned int Contig::getExpansionAreas(float insertionMean, float insertionStd, 
 			endFeat = windowSize;
 			feat = true; // there is an open feature
 		}
-//		cout << feat << " " << startWindow << " " << Z_stats << " " << inserts << " " << spanningCoverage << "\n";
+		cout << feat << " " << startWindow << " " << Z_stats << " " << inserts << " " << insertionMean << " " << insertionStd << " " << localMean << " " << localMean - insertionMean << "\n";
 		//now update
 		startWindow += windowStep;
 		endWindow += windowStep;
@@ -1095,7 +1105,7 @@ unsigned int Contig::getExpansionAreas(float insertionMean, float insertionStd, 
 				}
 			}
 			if(inserts > minInsertNum) {
-				float localMean = spanningCoverage/(float)inserts;
+				localMean = spanningCoverage/(float)inserts;
 				Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
 			} else {
 				Z_stats = 0;
@@ -1133,7 +1143,7 @@ unsigned int Contig::getExpansionAreas(float insertionMean, float insertionStd, 
 					}
 				}
 			}
-//			cout << feat << " " << startWindow << " " << Z_stats << " " << inserts << " " << spanningCoverage << "\n";
+			cout << feat << " " << startWindow << " " << Z_stats << " " << inserts << " " << insertionMean << " " << insertionStd << " " << localMean << " " << localMean - insertionMean << "\n";
 		}
 		//compute last window statistics
 
