@@ -149,7 +149,7 @@ void Contig::updateContig(bam1_t* b) {
 
 
 				if (minInsert <= iSize && iSize <= maxInsert) { //useful to compute CE stats
-					updateCov(startInsert,endInsert, insertCov); // update spanning coverage
+					//updateCov(startInsert,endInsert, insertCov); // update spanning coverage
 					//cout << startInsert << " " << startPaired << " " << endInsert << "\n";
 				}
 
@@ -157,6 +157,7 @@ void Contig::updateContig(bam1_t* b) {
 					//here reads are correctly oriented
 					if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert
 						updateCov(startRead, endRead, cmCov); // update good read coverage
+						updateCov(startInsert,endInsert, insertCov);
 					}
 				} else {
 					//pair is wrongly oriented
@@ -168,7 +169,7 @@ void Contig::updateContig(bam1_t* b) {
 				endInsert = startInsert + iSize;
 
 				if (minInsert <= iSize && iSize <= maxInsert) { //useful to compute CE stats
-					updateCov(startInsert,endInsert, insertCov); // update spanning coverage
+					//updateCov(startInsert,endInsert, insertCov); // update spanning coverage
 					//cout << startInsert << " " << startPaired << " " << endInsert << "\n";
 				}
 
@@ -176,6 +177,7 @@ void Contig::updateContig(bam1_t* b) {
 					//here reads are correctly oriented
 					if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert
 						updateCov(startRead, endRead, cmCov); // update good read coverage
+						updateCov(startInsert,endInsert, insertCov);
 					}
 				} else {
 					updateCov(startRead, endRead, woCov);
