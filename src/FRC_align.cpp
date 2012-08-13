@@ -86,6 +86,8 @@ struct LibraryStatistics{
 LibraryStatistics computeLibraryStats(samfile_t *fp, unsigned int minInsert, unsigned int maxInsert, uint64_t genomeLength);
 
 
+
+
 void printLOW_COV_PE_FRC(string outputFile, unsigned int HIGH_SINGLE_PE_features, unsigned long estimatedGenomeSize, FRC frc);
 void printHIGH_COV_PE_FRC(string outputFile, unsigned int HIGH_SINGLE_PE_features, unsigned long estimatedGenomeSize, FRC frc);
 void printLOW_NORM_COV_PE_FRC(string outputFile, unsigned int HIGH_SINGLE_PE_features, unsigned long estimatedGenomeSize, FRC frc);
@@ -280,6 +282,9 @@ int main(int argc, char *argv[]) {
 	    cout << "\tNEW maximum allowed insert " << peMaxInsert_recomputed << "\n";
 	}
 
+	fp = open_alignment_file(PEalignmentFile);
+
+
 	timesStdDev = 3;
 	if(vm.count("mp-sam")) {
 		cout << "COMPUTING MP STATISTIC\n";
@@ -376,7 +381,7 @@ int main(int argc, char *argv[]) {
 
     					//if(contigSize >= libraryPE.insertMean) {
    						frc.computeHighSpanningArea("PE", contig, currentContig, 1000, 200);
-						frc.computeCompressionArea("PE", contig, currentContig, -5.0, libraryPE.insertMean, 100);
+						frc.computeCompressionArea("PE", contig, currentContig, -6.0, libraryPE.insertMean, 100);
 						frc.computeStrechArea("PE", contig, currentContig, 6.0, libraryPE.insertMean, 100);
 							//}
 
@@ -484,14 +489,13 @@ int main(int argc, char *argv[]) {
     					//}
 
 
-    			    //	if(contigSize >= 2*libraryMP.insertMean) {
+
     			       	frc.computeHighSpanningArea("MP", contig, currentContig, 1000, 200);
     			       	frc.computeHighOutieArea("MP", contig, currentContig, 1000,200);
-    			    //	}
-    			    	frc.computeHighSingleArea("MP", contig, currentContig, libraryMP.insertMean, 200);
-    			   		frc.computeCompressionArea("MP", contig, currentContig, -8, 1000, 200);
-    			   		//frc.computeStrechArea("MP", contig, currentContig, 4.5, 1000, 200);
-    			    	frc.computeStrechArea("MP", contig, currentContig, 8.0, libraryMP.insertMean, 200);
+    			    	frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
+
+    			    	//frc.computeCompressionArea("MP", contig, currentContig, -8, libraryMP.insertMean, 200);
+    			    	//frc.computeStrechArea("MP", contig, currentContig, 8.0, libraryMP.insertMean, 200);
 
 
     					delete currentContig; // delete hold contig
@@ -526,11 +530,10 @@ int main(int argc, char *argv[]) {
 
    		frc.computeHighSpanningArea("MP", contig, currentContig, 1000, 200);
    		frc.computeHighOutieArea("MP", contig, currentContig, 1000,200);
-
     	frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
-    	frc.computeCompressionArea("MP", contig, currentContig, -8, libraryMP.insertMean, 200);
-    	//frc.computeStrechArea("MP", contig, currentContig, 4.5, 1000, 200);
-    	frc.computeStrechArea("MP", contig, currentContig, 8, libraryMP.insertMean, 200);
+
+    	//frc.computeCompressionArea("MP", contig, currentContig, -8, libraryMP.insertMean, 200);
+    	//frc.computeStrechArea("MP", contig, currentContig, 8.0, libraryMP.insertMean, 200);
 
     	samclose(fp); // close the file
 
@@ -1241,10 +1244,6 @@ void printSTRECH_MP_FRC(string outputFile, unsigned int STRECH_MP_features, unsi
 
 	myfile.close();
 }
-
-
-
-
 
 
 

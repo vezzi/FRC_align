@@ -125,9 +125,7 @@ void Contig::updateContig(bam1_t* b) {
 	int32_t endInsert=0;
 	uint32_t iSize=0;
 	alignmentLength = bam_cigar2qlen(core,cigar);
-//	if(alignmentLength < 50) {
-	//			return;
-	//	}
+
 	if (core->flag&BAM_FUNMAP) { // if read is unmapped discard
 		    return;
 	} else 	if(!(core->flag&BAM_FUNMAP) && !(core->flag&BAM_FDUP) && !(core->flag&BAM_FSECONDARY) && !(core->flag&BAM_FQCFAIL)) { // if read has been mapped and it is not a DUPLICATE or a SECONDARY alignment
@@ -932,6 +930,7 @@ unsigned int Contig::getCompressionAreas(float insertionMean, float insertionStd
 	unsigned int inserts = 0; // number of inserts
 	unsigned int features = 0;
 	float Z_stats;
+	float localMean;
 	unsigned int minInsertNum = 5;
 
 	if(this->contigLength < windowSize) { // if contig less than window size, only one window
@@ -942,7 +941,7 @@ unsigned int Contig::getCompressionAreas(float insertionMean, float insertionStd
 			}
 		}
 		if(inserts > minInsertNum) {
-			float localMean = spanningCoverage/(float)inserts;
+			localMean = spanningCoverage/(float)inserts;
 			Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
 		} else {
 			Z_stats = 0;
@@ -964,11 +963,14 @@ unsigned int Contig::getCompressionAreas(float insertionMean, float insertionStd
 			}
 		}
 		if(inserts > minInsertNum) {
-			float localMean = spanningCoverage/(float)inserts;
+			localMean = spanningCoverage/(float)inserts;
 			Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
 		} else {
 			Z_stats = 0;
 		}
+
+		cout << feat << " " << startWindow << " " << Z_stats << " " << inserts << " " << insertionMean << " " << insertionStd << " " << localMean << " " << localMean - insertionMean << "\n";
+
 		if( Z_stats <  Zscore ) { // this is a feature
 			startFeat = 0;
 			endFeat = windowSize;
@@ -991,11 +993,13 @@ unsigned int Contig::getCompressionAreas(float insertionMean, float insertionStd
 				}
 			}
 			if(inserts > minInsertNum) {
-				float localMean = spanningCoverage/(float)inserts;
+				localMean = spanningCoverage/(float)inserts;
 				Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
 			} else {
 				Z_stats = 0;
 			}
+
+			cout << feat << " " << startWindow << " " << Z_stats << " " << inserts << " " << insertionMean << " " << insertionStd << " " << localMean << " " << localMean - insertionMean << "\n";
 			if( Z_stats <  Zscore ) { // this is a feature
 				if(feat) { // if we are already inside a feature area
 					endFeat = endWindow; // simply extend the feature area
@@ -1089,7 +1093,7 @@ unsigned int Contig::getExpansionAreas(float insertionMean, float insertionStd, 
 			endFeat = windowSize;
 			feat = true; // there is an open feature
 		}
-		cout << feat << " " << startWindow << " " << Z_stats << " " << inserts << " " << insertionMean << " " << insertionStd << " " << localMean << " " << localMean - insertionMean << "\n";
+	//	cout << feat << " " << startWindow << " " << Z_stats << " " << inserts << " " << insertionMean << " " << insertionStd << " " << localMean << " " << localMean - insertionMean << "\n";
 		//now update
 		startWindow += windowStep;
 		endWindow += windowStep;
@@ -1145,7 +1149,7 @@ unsigned int Contig::getExpansionAreas(float insertionMean, float insertionStd, 
 					}
 				}
 			}
-			cout << feat << " " << startWindow << " " << Z_stats << " " << inserts << " " << insertionMean << " " << insertionStd << " " << localMean << " " << localMean - insertionMean << "\n";
+	//		cout << feat << " " << startWindow << " " << Z_stats << " " << inserts << " " << insertionMean << " " << insertionStd << " " << localMean << " " << localMean - insertionMean << "\n";
 		}
 		//compute last window statistics
 
