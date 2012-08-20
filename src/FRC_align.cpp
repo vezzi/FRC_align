@@ -459,7 +459,7 @@ int main(int argc, char *argv[]) {
     	samclose(fp); // close the file
     }
 
-    string PE_CEstats = "PE_CEstats.txt";
+    string PE_CEstats = header + "_CEstats_PE.txt";
     ofstream CEstats;
     CEstats.open(PE_CEstats.c_str());
 
@@ -609,7 +609,7 @@ int main(int argc, char *argv[]) {
 
 
 
-    string MP_CEstats = "MP_CEstats.txt";
+    string MP_CEstats = header + "_CEstats_MP.txt";
     CEstats.open(MP_CEstats.c_str());
 
     for ( it= frc.CEstatistics.begin() ; it != frc.CEstatistics.end(); it++ ) {
