@@ -122,6 +122,12 @@ int main(int argc, char *argv[]) {
 	unsigned int WINDOW = 1000;
 	uint64_t estimatedGenomeSize;
 
+	float CEstats_PE_min = -3.2;
+	float CEstats_PE_max = +4.5;
+
+	float CEstats_MP_min = -6.5;
+	float CEstats_MP_max = +6.1;
+
 	string outputFile = "FRC.txt";
 	string featureFile = "Features.txt";
 
@@ -140,6 +146,10 @@ int main(int argc, char *argv[]) {
 			("genome-size", po::value<unsigned long int>(), "estimated genome size (if not supplied genome size is believed to be assembly length")
 			("output",  po::value<string>(), "Header output file names (default FRC.txt and Features.txt)")
 			("assembly", po::value<string>(), "assembly file name in fasta format [FOR FUTURE USE]")
+			("CEstats-PE-min", po::value<float>(), "minimum allowed CE_stats in PE library")
+			("CEstats-PE-max", po::value<float>(), "maximum allowed CE_stats in PE library")
+			("CEstats-MP-min", po::value<float>(), "minimum allowed CE_stats in MP library")
+			("CEstats-MP-max", po::value<float>(), "maximum allowed CE_stats in MP library")
 			("pe", po::value< vector < string > >(), "paired reads, one pair after the other [FOR FUTURE USE]")
 			("mp", po::value< vector < string > >(), "mate pairs, one pair after the other [FOR FUTURE USE]")
 			;
@@ -157,6 +167,25 @@ int main(int argc, char *argv[]) {
 		DEFAULT_CHANNEL << desc << endl;
 		exit(0);
 	}
+
+//PARSE CE STATS (if present)
+	if (vm.count("CEstats-PE-min")) {
+		CEstats_PE_min = vm["CEstats-PE-min"].as<float>();
+	}
+	if (vm.count("CEstats-PE-min")) {
+		CEstats_PE_max = vm["CEstats-PE-max"].as<float>();
+	}
+	if (vm.count("CEstats-PE-min")) {
+		CEstats_MP_min = vm["CEstats-MP-min"].as<float>();
+	}
+	if (vm.count("CEstats-PE-min")) {
+		CEstats_MP_max = vm["CEstats-MP-max"].as<float>();
+	}
+
+	cout << "CEstats-PE-min " << CEstats_PE_min << "\n";
+	cout << "CEstats-PE-max " << CEstats_PE_max << "\n";
+	cout << "CEstats-MP-min " << CEstats_MP_min << "\n";
+	cout << "CEstats-MP-max " << CEstats_MP_max << "\n";
 
 // PARSE PE
 	if (!vm.count("pe-sam") && !vm.count("mp-sam")) {
@@ -267,7 +296,7 @@ int main(int argc, char *argv[]) {
     uint32_t mpMinInsert_recomputed; // recompute min and max insert on the basis of the new insert size
     uint32_t mpMaxInsert_recomputed; // the original min and max threshold are used only as a first rough approximation
 
-    unsigned int timesStdDev = 2;
+    unsigned int timesStdDev = 3;
 	if(vm.count("pe-sam")) { // in this case file is already OPEN
 		cout << "COMPUTING PE STATISTIC\n";
 		libraryPE = computeLibraryStats(fp, peMinInsert, peMaxInsert, estimatedGenomeSize);
@@ -306,6 +335,9 @@ int main(int argc, char *argv[]) {
 		cout << "\tNEW minimum allowed insert " << mpMinInsert_recomputed << "\n";
 		cout << "\tNEW maximum allowed insert " << mpMaxInsert_recomputed << "\n";
 	}
+
+
+
 
 
     //parse BAM file again to compute FRC curve
@@ -370,6 +402,7 @@ int main(int argc, char *argv[]) {
     					//cout << "CONTIG\n";
     					float coverage = frc.obtainCoverage(contig, currentContig);
 
+    					frc.computeCEstats(currentContig, libraryPE.insertMean, libraryPE.insertMean, libraryPE.insertMean, libraryPE.insertStd);
 
     			    	frc.computeLowCoverageArea("PE", contig, currentContig, 1000, 200);
     			    	frc.computeHighCoverageArea("PE", contig, currentContig, 1000, 200);
@@ -381,8 +414,8 @@ int main(int argc, char *argv[]) {
 
     					//if(contigSize >= libraryPE.insertMean) {
    						frc.computeHighSpanningArea("PE", contig, currentContig, 1000, 200);
-						frc.computeCompressionArea("PE", contig, currentContig, -6.0, libraryPE.insertMean, 100);
-						frc.computeStrechArea("PE", contig, currentContig, 6.0, libraryPE.insertMean, 100);
+						frc.computeCompressionArea("PE", contig, currentContig, CEstats_PE_min, libraryPE.insertMean, libraryPE.insertMean);
+						frc.computeStrechArea("PE", contig, currentContig, CEstats_PE_max, libraryPE.insertMean, libraryPE.insertMean);
 							//}
 
     					delete currentContig; // delete hold contig
@@ -403,7 +436,9 @@ int main(int argc, char *argv[]) {
     		}
     	}
     	//UPDATE LAST CONTIG
-		float coverage = frc.obtainCoverage(contig, currentContig);
+		//float coverage = frc.obtainCoverage(contig, currentContig);
+
+    	frc.computeCEstats(currentContig, libraryPE.insertMean, libraryPE.insertMean, libraryPE.insertMean, libraryPE.insertStd);
 
     	frc.computeLowCoverageArea("PE", contig, currentContig, 1000, 200);
     	frc.computeHighCoverageArea("PE", contig, currentContig, 1000, 200);
@@ -414,20 +449,49 @@ int main(int argc, char *argv[]) {
 		frc.computeHighSingleArea("PE", contig, currentContig, 1000, 200);
 		frc.computeHighOutieArea("PE", contig, currentContig, 1000, 200);
 
-		//if(contigSize >= libraryPE.insertMean) {
-			frc.computeHighSpanningArea("PE", contig, currentContig, 1000, 200);
-			frc.computeCompressionArea("PE", contig, currentContig, -5.0, libraryPE.insertMean, 100);
-			frc.computeStrechArea("PE", contig, currentContig, 6.0, libraryPE.insertMean, 100);
-			//}
+
+		frc.computeHighSpanningArea("PE", contig, currentContig, 1000, 200);
+		frc.computeCompressionArea("PE", contig, currentContig, CEstats_PE_min, libraryPE.insertMean, libraryPE.insertMean);
+		frc.computeStrechArea("PE", contig, currentContig, CEstats_PE_max, libraryPE.insertMean, libraryPE.insertMean);
+
 
     	delete currentContig; // delete hold contig
     	samclose(fp); // close the file
     }
 
+    string PE_CEstats = "PE_CEstats.txt";
+    ofstream CEstats;
+    CEstats.open(PE_CEstats.c_str());
+
+    map<float, unsigned int>::iterator it;
+
+    map<float, unsigned int>::iterator secondIterator;
+
+
+
+    for ( it = frc.CEstatistics.begin() ; it != frc.CEstatistics.end(); it++ ) {
+    	unsigned int total = 0;
+    	if( (*it).first < 0) {
+    		for(secondIterator = it; secondIterator != frc.CEstatistics.begin(); secondIterator --) {
+    			total += (*secondIterator).second;
+    		}
+    	} else {
+    		for(secondIterator = it; secondIterator != frc.CEstatistics.end(); secondIterator ++) {
+    			total += (*secondIterator).second;
+    		}
+    	}
+    	CEstats << (*it).first << " " << total << endl;
+ //    	CEstats << (*it).first << " " << (*it).second << endl;
+    }
+
+    CEstats.close();
+    frc.CEstatistics.clear();
+
+
+
     featuresTotal = 0;
     for(unsigned int i=0; i< contigsNumber; i++) {
     	featuresTotal += frc.getTotal(i);
-    //	featuresTotal += frc.getFeature(i, TOTAL); // update total number of feature seen so far
     }
     cout << "TOTAL number of features " << featuresTotal << "\n";
 
@@ -437,6 +501,7 @@ int main(int argc, char *argv[]) {
     contig=0;
     contigSize = 0;
     b = bam_init1();
+    int ctgForCE =1;
 
     if(vm.count("mp-sam")) {
         //set FRC parameters
@@ -477,7 +542,9 @@ int main(int argc, char *argv[]) {
     					float coverage = frc.obtainCoverage(contig, currentContig);
 
 
-    					 cout << "CONTIG\n";
+    					frc.computeCEstats(currentContig, libraryMP.insertMean, libraryMP.insertMean, libraryMP.insertMean, libraryMP.insertStd);
+
+    					//CEstats.close();
     					//currentContig->print();
     					//if(coverage > 10) { // if mate pair library provides an enough high covereage
     					//	frc.computeLowCoverageArea("MP", contig, currentContig, 1000, 100);
@@ -494,8 +561,8 @@ int main(int argc, char *argv[]) {
     			       	frc.computeHighOutieArea("MP", contig, currentContig, 1000,200);
     			    	frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
 
-    			    	//frc.computeCompressionArea("MP", contig, currentContig, -8, libraryMP.insertMean, 200);
-    			    	//frc.computeStrechArea("MP", contig, currentContig, 8.0, libraryMP.insertMean, 200);
+    			    	frc.computeCompressionArea("MP", contig, currentContig, CEstats_MP_min, libraryMP.insertMean, libraryMP.insertMean);
+    			    	frc.computeStrechArea("MP", contig, currentContig, CEstats_MP_max, libraryMP.insertMean, libraryMP.insertMean);
 
 
     					delete currentContig; // delete hold contig
@@ -517,6 +584,7 @@ int main(int argc, char *argv[]) {
     	//UPDATE LAST CONTIG
 
 		float coverage = frc.obtainCoverage(contig, currentContig);
+		frc.computeCEstats(currentContig, libraryMP.insertMean, libraryMP.insertMean, libraryMP.insertMean, libraryMP.insertStd);
 
 		//if(coverage > 10) { // if mate pair library provides an enough high covereage
 		//	frc.computeLowCoverageArea("MP", contig, currentContig, 1000, 100);
@@ -532,21 +600,53 @@ int main(int argc, char *argv[]) {
    		frc.computeHighOutieArea("MP", contig, currentContig, 1000,200);
     	frc.computeHighSingleArea("MP", contig, currentContig, 1000, 200);
 
-    	//frc.computeCompressionArea("MP", contig, currentContig, -8, libraryMP.insertMean, 200);
-    	//frc.computeStrechArea("MP", contig, currentContig, 8.0, libraryMP.insertMean, 200);
+    	frc.computeCompressionArea("MP", contig, currentContig, CEstats_MP_min, libraryMP.insertMean, libraryMP.insertMean);
+    	frc.computeStrechArea("MP", contig, currentContig, CEstats_MP_max, libraryMP.insertMean, libraryMP.insertMean);
 
     	samclose(fp); // close the file
 
     }
 
+
+
+    string MP_CEstats = "MP_CEstats.txt";
+    CEstats.open(MP_CEstats.c_str());
+
+    for ( it= frc.CEstatistics.begin() ; it != frc.CEstatistics.end(); it++ ) {
+    	unsigned int total = 0;
+    	if( (*it).first <= 0) {
+    		for(secondIterator = it; secondIterator != frc.CEstatistics.begin(); secondIterator --) {
+    			total += (*secondIterator).second;
+    		}
+        	CEstats << (*it).first << " " << total << endl;
+    	} else {
+    		for(secondIterator = it; secondIterator != frc.CEstatistics.end(); secondIterator ++) {
+    			total += (*secondIterator).second;
+    		}
+    		CEstats << (*it).first << " " << total << endl;
+    	}
+//    	CEstats << (*it).first << " " << (*it).second << endl;
+    }
+    CEstats.close();
+    frc.CEstatistics.clear();
+
     featuresTotal = 0;
     cout << "\n----------\nNow computing FRC \n------\n";
 
-
     ofstream featureOutFile;
     featureOutFile.open (featureFile.c_str());
+
+
+    ofstream GFF3_features;
+    string GFF3 = "Features.gff";
+    GFF3_features.open(GFF3.c_str());
+
+    GFF3_features << "##gff-version   3\n";
+
+
     for(unsigned int i=0; i< contigsNumber; i++) {
     	frc.printFeatures(i, featureOutFile);
+    	frc.printFeaturesGFF3(i, GFF3_features);
     }
 
     frc.sortFRC();
@@ -601,6 +701,9 @@ int main(int argc, char *argv[]) {
 //FRCurve for all the features
     ofstream myfile;
     myfile.open (outputFile.c_str());
+
+
+
 //    unsigned int step = ceil(featuresTotal/(float)100 + 0.5);
 //   	unsigned int partial=0;
     float step = featuresTotal/(float)100;

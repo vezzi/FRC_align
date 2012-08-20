@@ -55,6 +55,93 @@ float FRC::obtainCoverage(unsigned int ctg, Contig *contig) {
 }
 
 
+void FRC::computeCEstats(Contig *contig, unsigned int windowSize, unsigned int windowStep, float insertionMean, float insertionStd ) {
+
+	unsigned int contigLength = contig->getContigLength();
+	unsigned long int spanningCoverage = 0; // total insert length
+	unsigned int inserts = 0; // number of inserts
+	float localMean;
+	float Z_stats = 0;
+
+	unsigned int minInsertNum = 5;
+	if(contigLength < windowSize) { // if contig less than window size, only one window
+		for(unsigned int i=0; i < contigLength ; i++ ) {
+			if(contig->CONTIG[i].StratingInserts > 0) {
+				inserts += contig->CONTIG[i].StratingInserts;
+				spanningCoverage += contig->CONTIG[i].insertsLength;
+			}
+			//spanningCoverage += contig->CONTIG[i].InsertCoverage;
+		}
+		if(inserts > minInsertNum) {
+			localMean = spanningCoverage/(float)inserts;
+			Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
+			Z_stats = floorf(Z_stats * 10) / 10;
+			if(this->CEstatistics.count(Z_stats) == 1) {
+				this->CEstatistics[Z_stats]++;
+			} else {
+				this->CEstatistics[Z_stats] = 1;
+			}
+			//cout << Z_stats << "\n";
+
+		}
+	} else { //otherwise compute features on sliding window of 200 bp
+		unsigned int startWindow = 0;
+		unsigned int endWindow   = windowSize;
+		for(unsigned int i=startWindow; i < endWindow; i++ ) {
+			if(contig->CONTIG[i].StratingInserts > 0) {
+				inserts += contig->CONTIG[i].StratingInserts;
+				spanningCoverage += contig->CONTIG[i].insertsLength;
+			}
+			//spanningCoverage += contig->CONTIG[i].InsertCoverage;
+		}
+		if(inserts > minInsertNum) {
+			localMean = spanningCoverage/(float)inserts;
+			Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
+			Z_stats = floorf(Z_stats * 10) / 10;
+			if(this->CEstatistics.count(Z_stats) == 1) {
+				this->CEstatistics[Z_stats]++;
+			} else {
+				this->CEstatistics[Z_stats] = 1;
+			}
+			//cout << Z_stats << "\n";
+
+		}
+		startWindow += windowStep;
+		endWindow += windowStep;
+		if(endWindow > contigLength) {
+			endWindow = contigLength;
+		}
+		while(endWindow < contigLength) {
+			inserts = 0; //reset window coverage
+			spanningCoverage = 0;
+			for(unsigned int i=startWindow; i < endWindow; i++ ) {
+				if(contig->CONTIG[i].StratingInserts > 0) {
+					inserts += contig->CONTIG[i].StratingInserts;
+					spanningCoverage += contig->CONTIG[i].insertsLength;
+				}
+				//spanningCoverage += contig->CONTIG[i].InsertCoverage;
+			}
+			if(inserts > minInsertNum) {
+				localMean = spanningCoverage/(float)inserts;
+				Z_stats   = (localMean - insertionMean)/(float)(insertionStd/sqrt(inserts)); // CE statistics
+				Z_stats = floorf(Z_stats * 10) / 10;
+				if(this->CEstatistics.count(Z_stats) == 1) {
+					this->CEstatistics[Z_stats]++;
+				} else {
+					this->CEstatistics[Z_stats] = 1;
+				}
+				//cout << Z_stats << "\n";
+			}
+			startWindow += windowStep;
+			endWindow += windowStep;
+			if(endWindow > contigLength) {
+				endWindow = contigLength;
+			}
+		}
+	}
+}
+
+
 
 void FRC::computeLowCoverageArea(string type, unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep) {
 	unsigned int feat = contig->getLowCoverageAreas(C_A,windowSize, windowStep);
@@ -250,7 +337,10 @@ string  FRC::getID(unsigned int i) {
 }
 
 
+void FRC::printFeaturesGFF3(unsigned int ctg, ofstream &file) {
+	this->CONTIG[ctg].printFeaturesGFF3(file);
 
+}
 
 
 void FRC::printFeatures(unsigned int ctg, ofstream &file) {
@@ -425,8 +515,19 @@ void contigFeatures::printFeatures(ofstream &file) {
 
 }
 
+void contigFeatures::printFeaturesGFF3(ofstream &file) {
+
+	file << "##sequence-region\t" << this->contigID <<  "\t" << 1 << "\t" << this->contigLength << "\n";
+
+	sort(SUSPICIOUS_AREAS.begin(), SUSPICIOUS_AREAS.end(), sortTernary);
+	for(unsigned int i=0; i < SUSPICIOUS_AREAS.size(); i++) {
+		file << this->contigID << "\t" << "." << "\t" << SUSPICIOUS_AREAS[i].feature << "\t";
+		file << SUSPICIOUS_AREAS[i].start + 1 << "\t" <<  SUSPICIOUS_AREAS[i].end -1 << "\t";
+		file << "." << "\t" << "+" << "\t" << "." << "\t" << "Name=" << SUSPICIOUS_AREAS[i].feature << "\n";
+	}
 
 
+}
 
 
 

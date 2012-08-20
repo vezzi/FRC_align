@@ -67,6 +67,7 @@ public:
 	vector<ternary> SUSPICIOUS_AREAS;
 
 	void printFeatures(ofstream &file);
+	void printFeaturesGFF3(ofstream &file);
 
 };
 
@@ -96,6 +97,8 @@ public:
 	FRC(unsigned int contigs);
 	~FRC();
 
+	map<float, unsigned int> CEstatistics;
+
 	unsigned int returnContigs();
 	void setContigLength(unsigned int ctg, unsigned int contigLength);
 	unsigned int getContigLength(unsigned int ctg);
@@ -113,6 +116,9 @@ public:
 
 	void sortFRC();
 	float obtainCoverage(unsigned int ctg, Contig *contig);
+
+	void computeCEstats(Contig *contig, unsigned int WindowSize, unsigned int WindowStep, float mean, float std);
+
 	void computeLowCoverageArea(string type, unsigned int ctg, Contig *contig, unsigned int WindowSize, unsigned int WindowStep);
 	void computeHighCoverageArea(string type, unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep);
 	void computeLowNormalArea(string type, unsigned int ctg, Contig *contig, unsigned int windowSize, unsigned int windowStep);
@@ -143,6 +149,8 @@ public:
 
 
 	void printFeatures(unsigned int ctg, ofstream &f);
+
+	void printFeaturesGFF3(unsigned int ctg, ofstream &f);
 
 
 };

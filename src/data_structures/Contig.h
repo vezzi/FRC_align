@@ -65,11 +65,13 @@ class Contig{
 	float highSpanningFeat;
 	float highOutieFeat;
 
-	Position *CONTIG;
+
 
 	void updateCov(unsigned int strat, unsigned int end, data type);
 
 public:
+	Position *CONTIG;
+
 	Contig();
 	Contig(unsigned int contigLength, unsigned int minInsert, unsigned int maxInsert);
 	~Contig();
@@ -77,6 +79,8 @@ public:
 	void updateContig(bam1_t* b); // given an alignment it updates the contig situation
 
 	float getCoverage();
+
+	unsigned int getContigLength();
 
 	unsigned int getLowCoverageAreas(float C_A, unsigned int windowSize, unsigned int windowStep);
 	unsigned int getHighCoverageAreas(float C_A, unsigned int windowSize, unsigned int windowStep);

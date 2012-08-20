@@ -109,7 +109,9 @@ void Contig::updateCov(unsigned int start, unsigned int end, data type) {
 	}
 }
 
-
+unsigned int Contig::getContigLength() {
+	return this->contigLength;
+}
 
 
 
@@ -969,7 +971,7 @@ unsigned int Contig::getCompressionAreas(float insertionMean, float insertionStd
 			Z_stats = 0;
 		}
 
-		cout << feat << " " << startWindow << " " << Z_stats << " " << inserts << " " << insertionMean << " " << insertionStd << " " << localMean << " " << localMean - insertionMean << "\n";
+		//cout << feat << " " << startWindow << " " << Z_stats << " " << inserts << " " << insertionMean << " " << insertionStd << " " << localMean << " " << localMean - insertionMean << "\n";
 
 		if( Z_stats <  Zscore ) { // this is a feature
 			startFeat = 0;
@@ -999,7 +1001,7 @@ unsigned int Contig::getCompressionAreas(float insertionMean, float insertionStd
 				Z_stats = 0;
 			}
 
-			cout << feat << " " << startWindow << " " << Z_stats << " " << inserts << " " << insertionMean << " " << insertionStd << " " << localMean << " " << localMean - insertionMean << "\n";
+			//cout << feat << " " << startWindow << " " << Z_stats << " " << inserts << " " << insertionMean << " " << insertionStd << " " << localMean << " " << localMean - insertionMean << "\n";
 			if( Z_stats <  Zscore ) { // this is a feature
 				if(feat) { // if we are already inside a feature area
 					endFeat = endWindow; // simply extend the feature area
