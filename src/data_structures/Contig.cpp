@@ -288,6 +288,8 @@ unsigned int Contig::getLowCoverageAreas(float C_A, unsigned int windowSize, uns
 			feat = true; // there is an open feature
 		}
 
+		cout << feat << " " << startWindow << " " << meanCov << " " << lowCoverageFeat*C_A << "\n";
+
 		//now update
 		startWindow += windowStep;
 		endWindow += windowStep;
@@ -301,6 +303,7 @@ unsigned int Contig::getLowCoverageAreas(float C_A, unsigned int windowSize, uns
 				totalCoverage += CONTIG[i].ReadCoverage;
 			}
 			meanCov = totalCoverage/(float)(endWindow - startWindow); // compute window coverage
+			cout << feat << " " << startWindow << " " << meanCov << " " << lowCoverageFeat*C_A << "\n";
 			if(meanCov < lowCoverageFeat*C_A ) { // in the first window already present a feature
 				if(feat) { // if we are already inside a feature area
 					endFeat = endWindow; // simply extend the feature area
