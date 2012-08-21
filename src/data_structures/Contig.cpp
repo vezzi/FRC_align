@@ -43,7 +43,7 @@ Contig::Contig() {
 	highCoverageFeat = 2.2;
 	lowNormalFeat = 1/(float)2;
 	highNormalFeat = 2.2;
-	highSingleFeat = 0.51;
+	highSingleFeat = 0.4;
 	highSpanningFeat = 0.4;
 	highOutieFeat = 0.4;
 
@@ -60,7 +60,7 @@ Contig::Contig(unsigned int contigLength, unsigned int minInsert, unsigned int m
 	highCoverageFeat = 2.2;
 	lowNormalFeat = 1/(float)2;
 	highNormalFeat = 2.2;
-	highSingleFeat = 0.51;
+	highSingleFeat = 0.4;
 	highSpanningFeat = 0.4;
 	highOutieFeat = 0.4;
 
@@ -654,7 +654,7 @@ unsigned int Contig::getHighSingleAreas( unsigned int windowSize, unsigned int w
 		meanSingleCov = singleReadCoverage/(float)winSize; // this is the "window" single read coverage
 
 		if(meanTotalCov > 0.5 * C_A) {
-			if( meanSingleCov > highSingleFeat*meanTotalCov  and meanTotalCov > 0.5 * C_A ) { //first window's covrage
+			if( meanSingleCov > highSingleFeat*meanTotalCov  ) { //first window's covrage    and meanTotalCov > 0.5 * C_A
 				startFeat = 0;
 				endFeat = windowSize;
 				feat = true; // there is an open feature
@@ -678,7 +678,7 @@ unsigned int Contig::getHighSingleAreas( unsigned int windowSize, unsigned int w
 			}
 			meanTotalCov = totalCoverage/(float)(endWindow - startWindow); // compute window total coverage
 			meanSingleCov = singleReadCoverage/(float)(endWindow - startWindow); // compute window single read coverage
-			if( meanSingleCov > highSingleFeat*meanTotalCov and meanTotalCov > 0.5 * C_A) {
+			if( meanSingleCov > highSingleFeat*meanTotalCov ) { //and meanTotalCov > 0.5 * C_A
 				if(feat) { // if we are already inside a feature area
 					endFeat = endWindow; // simply extend the feature area
 				} else {
