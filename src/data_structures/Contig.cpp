@@ -450,15 +450,19 @@ unsigned int Contig::getLowNormalAreas(float C_M, unsigned int windowSize, unsig
 
 	//compute length of low coverage areas in the contig
 	//use a 1K sliding window
+	unsigned int totalCoverageRead = 0;
 	unsigned int totalCoverage = 0;
 	unsigned int features = 0;
-	float meanCov;
+	float meanCov, thr;
 	if(this->contigLength < windowSize) { // if contig less than window size, only one window
 		for(unsigned int i=0; i < this->contigLength ; i++ ) {
 			totalCoverage += CONTIG[i].CorrectlyMated ;
+			totalCoverageRead += CONTIG[i].ReadCoverage ;
+
 		}
 		meanCov = totalCoverage/(float)this->contigLength; // this is the "window" covrage
-		if(meanCov < lowNormalFeat*C_M and meanCov > 3 ) { // this is a feature
+		thr = totalCoverageRead/(float)this->contigLength;
+		if(meanCov < lowNormalFeat*C_M and thr > 3 ) { // this is a feature
 			pair<unsigned int , unsigned int > SS (0, this->contigLength);
 			this->lowNormalAreas.push_back(SS);
 			features = 1; // one feature found (in one window)
@@ -472,9 +476,11 @@ unsigned int Contig::getLowNormalAreas(float C_M, unsigned int windowSize, unsig
 		unsigned int winSize     = windowSize;
 		for(unsigned int i=startWindow; i < endWindow ; i++ ) {
 				totalCoverage += CONTIG[i].CorrectlyMated;
+				totalCoverageRead += CONTIG[i].ReadCoverage ;
 		}
 		meanCov = totalCoverage/(float)winSize; // first window's covrage
-		if(meanCov < lowNormalFeat*C_M and meanCov > 3) { // in the first window already present a feature
+		thr = totalCoverageRead/(float)winSize;
+		if(meanCov < lowNormalFeat*C_M and thr > 3) { // in the first window already present a feature
 			startFeat = 0;
 			endFeat = windowSize;
 			feat = true; // there is an open feature
@@ -488,11 +494,15 @@ unsigned int Contig::getLowNormalAreas(float C_M, unsigned int windowSize, unsig
 
 		while(endWindow < this->contigLength) {
 			totalCoverage = 0; //reset window coverage
+			totalCoverageRead = 0;
 			for(unsigned int i=startWindow; i < endWindow ; i++ ) {
 				totalCoverage += CONTIG[i].CorrectlyMated;
+				totalCoverageRead += CONTIG[i].ReadCoverage ;
 			}
 			meanCov = totalCoverage/(float)(endWindow - startWindow); // compute window coverage
-			if(meanCov < lowNormalFeat*C_M and meanCov > 3) { // in the first window already present a feature
+			thr = totalCoverageRead/(float)(endWindow - startWindow);
+
+			if(meanCov < lowNormalFeat*C_M and thr > 3) { // in the first window already present a feature
 				if(feat) { // if we are already inside a feature area
 					endFeat = endWindow; // simply extend the feature area
 				} else {
@@ -638,7 +648,7 @@ unsigned int Contig::getHighSingleAreas( unsigned int windowSize, unsigned int w
 		}
 		meanTotalCov = totalCoverage/(float)this->contigLength; // this is the "window" total coverage
 		meanSingleCov = singleReadCoverage/(float)this->contigLength; // this is the "window" single read coverage
-		if( meanSingleCov > highSingleFeat*meanTotalCov and meanTotalCov > 0.3 * C_A ) { // this is a feature
+		if( meanSingleCov > highSingleFeat*meanTotalCov and meanTotalCov > 2 ) { // this is a feature
 			features = 1; // one feature found (in one window)
 			pair<unsigned int , unsigned int > SS (0, this->contigLength);
 			this->highSingleAreas.push_back(SS);
@@ -657,7 +667,7 @@ unsigned int Contig::getHighSingleAreas( unsigned int windowSize, unsigned int w
 		meanSingleCov = singleReadCoverage/(float)winSize; // this is the "window" single read coverage
 
 		if(meanTotalCov > 0.5 * C_A) {
-			if( meanSingleCov > highSingleFeat*meanTotalCov  and meanTotalCov > 0.3 * C_A ) { //first window's covrage
+			if( meanSingleCov > highSingleFeat*meanTotalCov  and meanTotalCov > 2 ) { //first window's covrage
 				startFeat = 0;
 				endFeat = windowSize;
 				feat = true; // there is an open feature
@@ -681,7 +691,7 @@ unsigned int Contig::getHighSingleAreas( unsigned int windowSize, unsigned int w
 			}
 			meanTotalCov = totalCoverage/(float)(endWindow - startWindow); // compute window total coverage
 			meanSingleCov = singleReadCoverage/(float)(endWindow - startWindow); // compute window single read coverage
-			if( meanSingleCov > highSingleFeat*meanTotalCov and meanTotalCov > 0.3 * C_A) {
+			if( meanSingleCov > highSingleFeat*meanTotalCov and meanTotalCov > 2) {
 				if(feat) { // if we are already inside a feature area
 					endFeat = endWindow; // simply extend the feature area
 				} else {
@@ -741,7 +751,7 @@ unsigned int Contig::getHighSpanningAreas( unsigned int windowSize, unsigned int
 		}
 		meanTotalCov = totalCoverage/(float)this->contigLength; // this is the "window" total coverage
 		meanMatedDifferentContigCoverage = matedDifferentContigCoverage/(float)this->contigLength; // this is the "window" single read coverage
-		if( meanMatedDifferentContigCoverage > highSpanningFeat*meanTotalCov  and meanTotalCov > 0.3 * C_A ) { // this is a feature
+		if( meanMatedDifferentContigCoverage > highSpanningFeat*meanTotalCov  and meanTotalCov > 2 ) { // this is a feature
 			features = 1; // one feature found (in one window)
 			pair<unsigned int , unsigned int > SS (0, this->contigLength);
 			this->highSpanningAreas.push_back(SS);
@@ -758,7 +768,7 @@ unsigned int Contig::getHighSpanningAreas( unsigned int windowSize, unsigned int
 		}
 		meanTotalCov = totalCoverage/(float)winSize; //
 		meanMatedDifferentContigCoverage = matedDifferentContigCoverage/(float)winSize; //
-		if( meanMatedDifferentContigCoverage > highSpanningFeat*meanTotalCov  and meanTotalCov > 0.3 * C_A ) { // this is a feature
+		if( meanMatedDifferentContigCoverage > highSpanningFeat*meanTotalCov  and meanTotalCov > 2 ) { // this is a feature
 			startFeat = 0;
 			endFeat = windowSize;
 			feat = true; // there is an open feature
@@ -779,7 +789,7 @@ unsigned int Contig::getHighSpanningAreas( unsigned int windowSize, unsigned int
 			}
 			meanTotalCov = totalCoverage/(float)(endWindow - startWindow); // compute window total coverage
 			meanMatedDifferentContigCoverage = matedDifferentContigCoverage/(float)(endWindow - startWindow); // compute window single read coverage
-			if( meanMatedDifferentContigCoverage > highSpanningFeat*meanTotalCov  and meanTotalCov > 0.3 * C_A) { // this is a feature
+			if( meanMatedDifferentContigCoverage > highSpanningFeat*meanTotalCov  and meanTotalCov > 2) { // this is a feature
 				if(feat) { // if we are already inside a feature area
 					endFeat = endWindow; // simply extend the feature area
 				} else {
@@ -840,7 +850,7 @@ unsigned int Contig::getHighOutieAreas( unsigned int windowSize, unsigned int wi
 		}
 		meanTotalCov = totalCoverage/(float)this->contigLength; // this is the "window" total coverage
 		meanOutieCoverage = outieCoverage/(float)this->contigLength; // this is the "window" single read coverage
-		if( meanOutieCoverage > highOutieFeat*meanTotalCov  and meanTotalCov > 0.3 * C_A) { // this is a feature
+		if( meanOutieCoverage > highOutieFeat*meanTotalCov  and meanTotalCov > 2) { // this is a feature
 			features = 1; // one feature found (in one window)
 			pair<unsigned int , unsigned int > SS (0, this->contigLength);
 			this->highOutieAreas.push_back(SS);
@@ -857,7 +867,7 @@ unsigned int Contig::getHighOutieAreas( unsigned int windowSize, unsigned int wi
 		}
 		meanTotalCov = totalCoverage/(float)winSize; //
 		meanOutieCoverage = outieCoverage/(float)winSize; //
-		if(  meanOutieCoverage > highOutieFeat*meanTotalCov   and meanTotalCov > 0.3 * C_A) { // this is a feature
+		if(  meanOutieCoverage > highOutieFeat*meanTotalCov   and meanTotalCov > 2) { // this is a feature
 			startFeat = 0;
 			endFeat = windowSize;
 			feat = true; // there is an open feature
@@ -882,7 +892,7 @@ unsigned int Contig::getHighOutieAreas( unsigned int windowSize, unsigned int wi
 			}
 			meanTotalCov = totalCoverage/(float)(endWindow - startWindow); // compute window total coverage
 			meanOutieCoverage = outieCoverage/(float)(endWindow - startWindow); // compute window single read coverage
-			if(  meanOutieCoverage > highOutieFeat*meanTotalCov   and meanTotalCov > 0.3 * C_A) { // this is a feature
+			if(  meanOutieCoverage > highOutieFeat*meanTotalCov   and meanTotalCov > 2) { // this is a feature
 				if(feat) { // if we are already inside a feature area
 					endFeat = endWindow; // simply extend the feature area
 				} else {
