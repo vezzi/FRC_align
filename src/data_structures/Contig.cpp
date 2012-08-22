@@ -61,6 +61,15 @@ Contig::Contig() {
 	highSpanningFeat = 0.2;
 	highOutieFeat = 0.4;
 
+	//HUMAN RHODO
+	 * 	lowCoverageFeat = 1/(float)3;
+	highCoverageFeat = 1.5;
+	lowNormalFeat = 1/(float)3;
+	highNormalFeat = 1.5;
+	highSingleFeat = 0.4;
+	highSpanningFeat = 0.3;
+	highOutieFeat = 0.51;
+
 */
 	lowCoverageFeat = 1/(float)3;
 	highCoverageFeat = 1.5;
@@ -83,7 +92,7 @@ Contig::Contig(unsigned int contigLength, unsigned int minInsert, unsigned int m
 	lowNormalFeat = 1/(float)3;
 	highNormalFeat = 1.5;
 	highSingleFeat = 0.4;
-	highSpanningFeat = 0.3;
+	highSpanningFeat = 0.51;
 	highOutieFeat = 0.51;
 
 
