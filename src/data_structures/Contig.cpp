@@ -44,7 +44,7 @@ Contig::Contig() {
 	lowNormalFeat = 1/(float)3;
 	highNormalFeat = 1.3;
 	highSingleFeat = 0.4;
-	highSpanningFeat = 0.51;
+	highSpanningFeat = 0.4;
 	highOutieFeat = 0.4;
 }
 
@@ -59,7 +59,7 @@ Contig::Contig(unsigned int contigLength, unsigned int minInsert, unsigned int m
 	lowNormalFeat = 1/(float)3;
 	highNormalFeat = 1.3;
 	highSingleFeat = 0.4;
-	highSpanningFeat = 0.51;
+	highSpanningFeat = 0.4;
 	highOutieFeat = 0.4;
 
 
@@ -157,6 +157,9 @@ void Contig::updateContig(bam1_t* b) {
 					if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert
 						updateCov(startRead, endRead, cmCov); // update good read coverage
 						updateCov(startInsert,endInsert, insertCov);
+					} else {
+						//pair is wrongly oriented
+						updateCov(startRead, endRead, woCov);
 					}
 				} else {
 					//pair is wrongly oriented
@@ -177,6 +180,9 @@ void Contig::updateContig(bam1_t* b) {
 					if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert
 						updateCov(startRead, endRead, cmCov); // update good read coverage
 						updateCov(startInsert,endInsert, insertCov);
+					} else {
+						//pair is wrongly oriented
+						updateCov(startRead, endRead, woCov);
 					}
 				} else {
 					updateCov(startRead, endRead, woCov);
@@ -193,6 +199,9 @@ void Contig::updateContig(bam1_t* b) {
 					//here reads are correctly oriented
 					if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert, no need to update insert coverage
 						updateCov(startRead, endRead, cmCov); // update good read coverage
+					} else {
+						//pair is wrongly oriented
+						updateCov(startRead, endRead, woCov);
 					}
 				} else {
 					//pair is wrongly oriented
@@ -204,6 +213,9 @@ void Contig::updateContig(bam1_t* b) {
 					//here reads are correctly oriented
 					if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert, no need to update insert coverage
 						updateCov(startRead, endRead, cmCov); // update good read coverage
+					} else {
+						//pair is wrongly oriented
+						updateCov(startRead, endRead, woCov);
 					}
 				} else {
 					//pair is wrongly oriented
