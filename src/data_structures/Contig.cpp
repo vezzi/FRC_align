@@ -50,11 +50,11 @@ Contig::Contig() {
 	highSpanningFeat = 0.4;
 	highOutieFeat = 0.4;
 */
-	lowCoverageFeat = 1/(float)2;
-	highCoverageFeat = 2;
-	lowNormalFeat = 1/(float)2;
-	highNormalFeat = 2;
-	highSingleFeat = 0.51;
+	lowCoverageFeat = 1/(float)3;
+	highCoverageFeat = 1.6;
+	lowNormalFeat = 1/(float)3;
+	highNormalFeat = 1.6;
+	highSingleFeat = 0.4;
 	highSpanningFeat = 0.51;
 	highOutieFeat = 0.4;
 }
@@ -65,11 +65,11 @@ Contig::Contig(unsigned int contigLength, unsigned int minInsert, unsigned int m
 	this->maxInsert = maxInsert;
 	this->CONTIG =  new Position[contigLength];
 
-	lowCoverageFeat = 1/(float)2;
-	highCoverageFeat = 2;
-	lowNormalFeat = 1/(float)2;
-	highNormalFeat = 2;
-	highSingleFeat = 0.51;
+	lowCoverageFeat = 1/(float)3;
+	highCoverageFeat = 1.6;
+	lowNormalFeat = 1/(float)3;
+	highNormalFeat = 1.6;
+	highSingleFeat = 0.4;
 	highSpanningFeat = 0.51;
 	highOutieFeat = 0.4;
 
