@@ -40,8 +40,9 @@ Contig::Contig() {
 	maxInsert = 0;
 	MINUM_COV = 0;
 
-	///ASSEMBLATHON 1
+
 /*
+ //ASSEMBLATHON 1
 	lowCoverageFeat = 1/(float)3;
 	highCoverageFeat = 1.3;
 	lowNormalFeat = 1/(float)3;
@@ -50,13 +51,24 @@ Contig::Contig() {
 	highSpanningFeat = 0.4;
 	highOutieFeat = 0.4;
 	MINUM_COV = 2;
-*/
+
+//STAPHILOCOCCUS
 	lowCoverageFeat = 1/(float)2.2;
 	highCoverageFeat = 2;
 	lowNormalFeat = 1/(float)2.2;
 	highNormalFeat = 2;
 	highSingleFeat = 0.4;
 	highSpanningFeat = 0.2;
+	highOutieFeat = 0.4;
+
+*/
+	MINUM_COV = 2;
+	lowCoverageFeat = 1/(float)2.2;
+	highCoverageFeat = 2;
+	lowNormalFeat = 1/(float)2.2;
+	highNormalFeat = 2;
+	highSingleFeat = 0.51;
+	highSpanningFeat = 0.3;
 	highOutieFeat = 0.4;
 }
 
@@ -65,14 +77,14 @@ Contig::Contig(unsigned int contigLength, unsigned int minInsert, unsigned int m
 	this->minInsert = minInsert;
 	this->maxInsert = maxInsert;
 	this->CONTIG =  new Position[contigLength];
-	MINUM_COV = 0;
+	MINUM_COV = 2;
 
 	lowCoverageFeat = 1/(float)2.2;
 	highCoverageFeat = 2;
 	lowNormalFeat = 1/(float)2.2;
 	highNormalFeat = 2;
-	highSingleFeat = 0.4;
-	highSpanningFeat = 0.2;
+	highSingleFeat = 0.51;
+	highSpanningFeat = 0.3;
 	highOutieFeat = 0.4;
 
 
