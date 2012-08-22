@@ -52,6 +52,9 @@ public:
 #define MIN(x,y) \
   ((x) < (y)) ? (x) : (y)
 
+
+
+
 class Contig{
 	unsigned int contigLength;
 	unsigned int minInsert;
@@ -66,6 +69,8 @@ class Contig{
 	float highOutieFeat;
 
 
+
+	float MINUM_COV;
 
 	void updateCov(unsigned int strat, unsigned int end, data type);
 
