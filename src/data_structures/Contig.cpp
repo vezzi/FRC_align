@@ -76,7 +76,7 @@ Contig::Contig() {
 	lowNormalFeat = 1/(float)3;
 	highNormalFeat = 1.5;
 	highSingleFeat = 0.4;
-	highSpanningFeat = 0.3;
+	highSpanningFeat = 0.51;
 	highOutieFeat = 0.51;
 }
 
