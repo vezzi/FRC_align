@@ -38,7 +38,7 @@ Contig::Contig() {
 	contigLength = 0;
 	minInsert = 0;
 	maxInsert = 0;
-	MINUM_COV = 1;
+	MINUM_COV = 0;
 
 	///ASSEMBLATHON 1
 /*
@@ -49,14 +49,15 @@ Contig::Contig() {
 	highSingleFeat = 0.4;
 	highSpanningFeat = 0.4;
 	highOutieFeat = 0.4;
+	MINUM_COV = 2;
 */
 	lowCoverageFeat = 1/(float)2.2;
 	highCoverageFeat = 2;
 	lowNormalFeat = 1/(float)2.2;
 	highNormalFeat = 2;
-	highSingleFeat = 0.4;
-	highSpanningFeat = 0.4;
-	highOutieFeat = 0.4;
+	highSingleFeat = 0.3;
+	highSpanningFeat = 0.3;
+	highOutieFeat = 0.3;
 }
 
 Contig::Contig(unsigned int contigLength, unsigned int minInsert, unsigned int maxInsert) {
@@ -64,15 +65,15 @@ Contig::Contig(unsigned int contigLength, unsigned int minInsert, unsigned int m
 	this->minInsert = minInsert;
 	this->maxInsert = maxInsert;
 	this->CONTIG =  new Position[contigLength];
-	MINUM_COV = 1;
+	MINUM_COV = 0;
 
 	lowCoverageFeat = 1/(float)2.2;
 	highCoverageFeat = 2;
 	lowNormalFeat = 1/(float)2.2;
 	highNormalFeat = 2;
-	highSingleFeat = 0.4;
-	highSpanningFeat = 0.4;
-	highOutieFeat = 0.4;
+	highSingleFeat = 0.3;
+	highSpanningFeat = 0.3;
+	highOutieFeat = 0.3;
 
 
 }
