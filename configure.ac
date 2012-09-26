@@ -50,12 +50,12 @@ BOOST_PROGRAM_OPTIONS
 BOOST_THREADS
 
 # checking for SAMTOOLS library (required)
-#AC_CHECK_LIB([bam], [bam_open], [], [samtools_not_installed=1])
-AC_CHECK_PROG(SAMTOOLS, [samtools], 1, 0)
-if test SAMTOOLS; then
-	echo "samtools installed";
-else 
+AC_CHECK_LIB([bam], [bam_open], [], [samtools_not_installed=1])
+AC_CHECK_PROGS([SAMTOOLS], [samtools], [], [samtools_not_installed=1])
+if test $samtools_not_installed; then
 	echo "samtools not installed";
+else 
+	echo "samtools installed";
 	exit 1;
 fi
 

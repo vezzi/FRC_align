@@ -376,6 +376,11 @@ int main(int argc, char *argv[]) {
         frc.setInsertMean(libraryPE.insertMean);
         frc.setInsertStd(libraryPE.insertStd);
 
+    	unsigned int windowStepCE = libraryPE.insertMean;
+    	if(windowStepCE == 0) {
+    		windowStepCE = 1000;
+    	}
+
 
     	fp = open_alignment_file(PEalignmentFile);
     	EXIT_IF_NULL(fp);
@@ -399,10 +404,9 @@ int main(int argc, char *argv[]) {
     					contig = contig2position[head->target_name[currentTid]];
     					currentContig =  new Contig(contigSize, peMinInsert_recomputed, peMaxInsert_recomputed);
     				} else {
-    					cout << "CONTIG\n";
     					float coverage = frc.obtainCoverage(contig, currentContig);
 
-    					frc.computeCEstats(currentContig, libraryPE.insertMean, libraryPE.insertMean, libraryPE.insertMean, libraryPE.insertStd);
+    					frc.computeCEstats(currentContig, libraryPE.insertMean, windowStepCE, libraryPE.insertMean, libraryPE.insertStd);
 
     			    	frc.computeLowCoverageArea("PE", contig, currentContig, 1000, 200);
     			    	frc.computeHighCoverageArea("PE", contig, currentContig, 1000, 200);
@@ -438,22 +442,32 @@ int main(int argc, char *argv[]) {
     	//UPDATE LAST CONTIG
 		//float coverage = frc.obtainCoverage(contig, currentContig);
 
-    	frc.computeCEstats(currentContig, libraryPE.insertMean, libraryPE.insertMean, libraryPE.insertMean, libraryPE.insertStd);
 
+    	frc.computeCEstats(currentContig, libraryPE.insertMean, windowStepCE, libraryPE.insertMean, libraryPE.insertStd);
+
+    	cout << "compute LowCoverageArea\n";
     	frc.computeLowCoverageArea("PE", contig, currentContig, 1000, 200);
+    	cout << "compute HighCoverageArea\n";
     	frc.computeHighCoverageArea("PE", contig, currentContig, 1000, 200);
+    	cout << "compute LowNormalArea\n";
     	frc.computeLowNormalArea("PE", contig, currentContig, 1000, 200);
+    	cout << "compute HighNormalArea\n";
     	frc.computeHighNormalArea("PE", contig, currentContig, 1000, 200);
 
-
+    	cout << "compute HighSingleArea\n";
 		frc.computeHighSingleArea("PE", contig, currentContig, 1000, 200);
+		cout << "compute HighOutieArea\n";
 		frc.computeHighOutieArea("PE", contig, currentContig, 1000, 200);
 
-
+		cout << "compute HighSpanningArea\n";
 		frc.computeHighSpanningArea("PE", contig, currentContig, 1000, 200);
-		frc.computeCompressionArea("PE", contig, currentContig, CEstats_PE_min, libraryPE.insertMean, libraryPE.insertMean);
-		frc.computeStrechArea("PE", contig, currentContig, CEstats_PE_max, libraryPE.insertMean, libraryPE.insertMean);
 
+		cout << "compute Compressions\n";
+		frc.computeCompressionArea("PE", contig, currentContig, CEstats_PE_min, libraryPE.insertMean, windowStepCE);
+		cout << "compute Expansions\n";
+		frc.computeStrechArea("PE", contig, currentContig, CEstats_PE_max, libraryPE.insertMean, windowStepCE);
+
+		cout << "done\n";
 
     	delete currentContig; // delete hold contig
     	samclose(fp); // close the file
@@ -484,6 +498,8 @@ int main(int argc, char *argv[]) {
  //    	CEstats << (*it).first << " " << (*it).second << endl;
     }
 
+
+
     CEstats.close();
     frc.CEstatistics.clear();
 
@@ -501,7 +517,6 @@ int main(int argc, char *argv[]) {
     contig=0;
     contigSize = 0;
     b = bam_init1();
-    int ctgForCE =1;
 
     if(vm.count("mp-sam")) {
         //set FRC parameters
@@ -514,6 +529,10 @@ int main(int argc, char *argv[]) {
         frc.setInsertMean(libraryMP.insertMean);
         frc.setInsertStd(libraryMP.insertStd);
 
+        unsigned int windowStepCE = libraryMP.insertMean;
+        if(windowStepCE == 0) {
+        	windowStepCE = 1000;
+        }
 
     	fp = open_alignment_file(MPalignmentFile);
     	EXIT_IF_NULL(fp);
@@ -542,7 +561,7 @@ int main(int argc, char *argv[]) {
     					float coverage = frc.obtainCoverage(contig, currentContig);
 
 
-    					frc.computeCEstats(currentContig, libraryMP.insertMean, libraryMP.insertMean, libraryMP.insertMean, libraryMP.insertStd);
+    					frc.computeCEstats(currentContig, libraryMP.insertMean, windowStepCE, libraryMP.insertMean, libraryMP.insertStd);
 
     					//CEstats.close();
     					//currentContig->print();
@@ -584,17 +603,8 @@ int main(int argc, char *argv[]) {
     	//UPDATE LAST CONTIG
 
 		float coverage = frc.obtainCoverage(contig, currentContig);
-		frc.computeCEstats(currentContig, libraryMP.insertMean, libraryMP.insertMean, libraryMP.insertMean, libraryMP.insertStd);
 
-		//if(coverage > 10) { // if mate pair library provides an enough high covereage
-		//	frc.computeLowCoverageArea("MP", contig, currentContig, 1000, 100);
-		//	frc.computeHighCoverageArea("MP", contig, currentContig,  1000, 100);
-		//}
-		//if(coverage > 10) {
-		//	frc.computeLowNormalArea("MP", contig, currentContig, 1000, 100);
-		//	frc.computeHighNormalArea("MP", contig, currentContig, 1000, 100);
-		//}
-
+		frc.computeCEstats(currentContig, libraryMP.insertMean, windowStepCE, libraryMP.insertMean, libraryMP.insertStd);
 
    		frc.computeHighSpanningArea("MP", contig, currentContig, 1000, 200);
    		frc.computeHighOutieArea("MP", contig, currentContig, 1000,200);
@@ -1426,8 +1436,8 @@ LibraryStatistics computeLibraryStats(samfile_t *fp, unsigned int minInsert, uns
 	    		  }
 	    		  currentTid = core->tid;
 	    	  }
-
-	    	  if(!(core->flag&BAM_FUNMAP) && !(core->flag&BAM_FDUP) && !(core->flag&BAM_FSECONDARY) && !(core->flag&BAM_FQCFAIL)) { // if read has been mapped and it is not a DUPLICATE or a SECONDARY alignment
+//&& !(core->flag&BAM_FSECONDARY)
+	    	  if(!(core->flag&BAM_FUNMAP) && !(core->flag&BAM_FDUP) && !(core->flag&BAM_FQCFAIL)) { // if read has been mapped and it is not a DUPLICATE or a SECONDARY alignment
 	    		  uint32_t* cigar = bam1_cigar(b);
 	    		  ++mappedReads;
 	    		  uint32_t alignmentLength = bam_cigar2qlen(core,cigar);

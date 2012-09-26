@@ -71,10 +71,10 @@ Contig::Contig() {
 	highOutieFeat = 0.51;
 
 */
-	lowCoverageFeat = 1/(float)3;
-	highCoverageFeat = 1.5;
-	lowNormalFeat = 1/(float)3;
-	highNormalFeat = 1.5;
+	lowCoverageFeat = 1/(float)3.5;
+	highCoverageFeat = 2.5;
+	lowNormalFeat = 1/(float)3.5;
+	highNormalFeat = 2.5;
 	highSingleFeat = 0.4;
 	highSpanningFeat = 0.51;
 	highOutieFeat = 0.51;
@@ -87,13 +87,13 @@ Contig::Contig(unsigned int contigLength, unsigned int minInsert, unsigned int m
 	this->CONTIG =  new Position[contigLength];
 	MINUM_COV = 2;
 
-	lowCoverageFeat = 1/(float)3;
-	highCoverageFeat = 1.5;
-	lowNormalFeat = 1/(float)3;
-	highNormalFeat = 1.5;
-	highSingleFeat = 0.4;
-	highSpanningFeat = 0.51;
-	highOutieFeat = 0.51;
+	lowCoverageFeat = 1/(float)2;
+	highCoverageFeat = 2;
+	lowNormalFeat = 1/(float)2;
+	highNormalFeat = 2;
+	highSingleFeat = 0.41;
+	highSpanningFeat = 0.41;
+	highOutieFeat = 0.41;
 
 
 }
@@ -160,9 +160,10 @@ void Contig::updateContig(bam1_t* b) {
 	uint32_t iSize=0;
 	alignmentLength = bam_cigar2qlen(core,cigar);
 
+	//&& !(core->flag&BAM_FSECONDARY)
 	if (core->flag&BAM_FUNMAP) { // if read is unmapped discard
 		    return;
-	} else 	if(!(core->flag&BAM_FUNMAP) && !(core->flag&BAM_FDUP) && !(core->flag&BAM_FSECONDARY) && !(core->flag&BAM_FQCFAIL)) { // if read has been mapped and it is not a DUPLICATE or a SECONDARY alignment
+	} else 	if(!(core->flag&BAM_FUNMAP) && !(core->flag&BAM_FDUP)  && !(core->flag&BAM_FQCFAIL)) { // if read has been mapped and it is not a DUPLICATE or a SECONDARY alignment
 		startRead = core->pos; // start position on the contig
 		endRead = startRead + alignmentLength ; // position where reads ends
 		updateCov(startRead, endRead, readCov); // update coverage
@@ -331,7 +332,7 @@ unsigned int Contig::getLowCoverageAreas(float C_A, unsigned int windowSize, uns
 			feat = true; // there is an open feature
 		}
 
-		cout << feat << " " << startWindow << " " << meanCov << " " << lowCoverageFeat*C_A << "\n";
+		//cout << feat << " " << startWindow << " " << meanCov << " " << lowCoverageFeat*C_A << "\n";
 
 		//now update
 		startWindow += windowStep;
@@ -346,7 +347,7 @@ unsigned int Contig::getLowCoverageAreas(float C_A, unsigned int windowSize, uns
 				totalCoverage += CONTIG[i].ReadCoverage;
 			}
 			meanCov = totalCoverage/(float)(endWindow - startWindow); // compute window coverage
-			cout << feat << " " << startWindow << " " << meanCov << " " << lowCoverageFeat*C_A << "\n";
+			//cout << feat << " " << startWindow << " " << meanCov << " " << lowCoverageFeat*C_A << "\n";
 			if(meanCov < lowCoverageFeat*C_A and meanCov > MINUM_COV) { // in the first window already present a feature
 				if(feat) { // if we are already inside a feature area
 					endFeat = endWindow; // simply extend the feature area
