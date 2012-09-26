@@ -1,1 +1,13 @@
 Sample readme file for FRC_align project.
+
+INSTALLATION:
+From the FRCurve directory run:
+  cd src/samtools;
+  make;
+  cd ..
+  cd ..
+  ./configure
+  make
+  
+ 
+ 

@@ -197,7 +197,6 @@ PACKAGE_URL =
 PACKAGE_VERSION = 1.0
 PATH_SEPARATOR = :
 RANLIB = ranlib
-SAMTOOLS = samtools/
 SED = /usr/bin/sed
 SET_MAKE = 
 SHELL = /bin/sh
@@ -276,6 +275,7 @@ FRC_SOURCES = FRC_align.cpp \
 	data_structures/Reads.cpp 
 
 FRC_debug_SOURCES = $(FRC_SOURCES)
+SAMTOOLS = samtools/
 INCLUDES = -I$(SAMTOOLS) 
 FRC_CXXFLAGS = -O3 $(BOOST_CPPFLAGS)
 FRC_debug_CXXFLAGS = -O0 -g3 $(BOOST_CPPFLAGS)

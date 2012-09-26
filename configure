@@ -616,7 +616,6 @@ STATIC_ENABLED_FALSE
 STATIC_ENABLED_TRUE
 DEBUG_ENABLED_FALSE
 DEBUG_ENABLED_TRUE
-SAMTOOLS
 BOOST_THREAD_LIBS
 BOOST_THREAD_LDPATH
 BOOST_THREAD_LDFLAGS
@@ -17509,101 +17508,14 @@ CPPFLAGS=$boost_threads_save_CPPFLAGS
 
 
 # checking for SAMTOOLS library (required)
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for bam_open in -lbam" >&5
-$as_echo_n "checking for bam_open in -lbam... " >&6; }
-if ${ac_cv_lib_bam_bam_open+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lbam  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char bam_open ();
-int
-main ()
-{
-return bam_open ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_bam_bam_open=yes
-else
-  ac_cv_lib_bam_bam_open=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_bam_bam_open" >&5
-$as_echo "$ac_cv_lib_bam_bam_open" >&6; }
-if test "x$ac_cv_lib_bam_bam_open" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBBAM 1
-_ACEOF
-
-  LIBS="-lbam $LIBS"
-
-else
-  samtools_not_installed=1
-fi
-
-for ac_prog in samtools
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_SAMTOOLS+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$SAMTOOLS"; then
-  ac_cv_prog_SAMTOOLS="$SAMTOOLS" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in samtools_not_installed=1
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_SAMTOOLS="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-SAMTOOLS=$ac_cv_prog_SAMTOOLS
-if test -n "$SAMTOOLS"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $SAMTOOLS" >&5
-$as_echo "$SAMTOOLS" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$SAMTOOLS" && break
-done
-
-if test $samtools_not_installed; then
-	echo "samtools not installed";
-else
-	echo "samtools installed";
-	exit 1;
-fi
+##AC_CHECK_LIB([bam], [bam_open], [], [samtools_not_installed=1])
+###AC_CHECK_PROGS([SAMTOOLS], [samtools], [], [samtools_not_installed=1])
+##if test $samtools_not_installed; then
+###	echo "samtools not installed";
+	###AC_CONFIG_FILES([src/samtools/Makefile])
+###else
+###	echo "samtools installed";
+###fi
 
 
 # enable debug programs
