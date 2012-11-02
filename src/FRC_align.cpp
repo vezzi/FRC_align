@@ -648,7 +648,7 @@ int main(int argc, char *argv[]) {
 
 
     ofstream GFF3_features;
-    string GFF3 = "Features.gff";
+    string GFF3 = header + "Features.gff";
     GFF3_features.open(GFF3.c_str());
 
     GFF3_features << "##gff-version   3\n";
