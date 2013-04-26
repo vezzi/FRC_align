@@ -135,6 +135,7 @@ int main(int argc, char *argv[]) {
 	stringstream ss;
 	ss << package_description() << endl << endl << "Allowed options";
 	po::options_description desc(ss.str().c_str());
+
 	desc.add_options() ("help", "produce help message")
 			("pe-sam", po::value<string>(), "paired end alignment file (in sam or bam format). Expected orientation -> <-")
 			("pe-min-insert",  po::value<int>(), "paired reads minimum allowed insert size. Used in order to filter outliers. Insert size goeas from beginning of first read to end of second read")
@@ -1556,7 +1557,7 @@ LibraryStatistics computeLibraryStats(samfile_t *fp, unsigned int minInsert, uns
 	    		  } else if(core->flag&BAM_FMUNMAP) {
 		    		  // if mate read is unmapped
 	    			  singletonReads++;
-	    			  singletonReadsLength =+ bam_cigar2qlen(core,cigar);
+	    			  singletonReadsLength += bam_cigar2qlen(core,cigar);
 	    		  }
 
 
