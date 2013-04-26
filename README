@@ -1,5 +1,3 @@
-Sample readme file for FRC_align project.
-
 INSTALLATION:
 From the FRCurve directory run:
   cd src/samtools;
@@ -34,19 +32,19 @@ From the FRCurve directory run:
 		--genome-size ESTIMATED_GENOME_SIZE: estimated genome size;
 		--output OUTPUT_HEADER: output header;
 	IMPORTANT:
-		If --genome-size  is not specified assembly length is used to compute FRCurve, however in order to compare FRCurves
+		If --genome-size is not specified the assembly length is used to compute FRCurve. In order to be able to compare FRCurves
 		obtained with different tools (and hence producing slightly different assembly sizes) the same ESTIMATED_GENOME_SIZE
 		must be specified.
 		
 	OUTPUT:
 		OUTPUT_HEADER_Features.txt: human readable description of features: contig start end feature_type
 		OUTPUT_HEADER_FRC.txt: FRCurve computed with all the features (to be plotted)
-		OUTPUT_HEADER_fetureType.txt: for each featureType the specific FRCurve
+		OUTPUT_HEADER_featureType.txt: for each featureType the specific FRCurve
 		Features.gff : features description in GFF format (for visualization)
 		OUTPUT_HEADER_CEstats_PE.txt: CEvalues distribution (for CE_stats tuning)
 		OUTPUT_HEADER_CEstats_MP.txt: CEvalues distribution (for CE_stats tuning)
 		
- USAGE (advance, CE-stats tuning):
+ USAGE (advanced, CE-stats tuning):
  CE-stats are able to identify the presence of insertion and deletion events. Different insert sizes give the possibility to
  identify different events. In order to avoid too many False Positives (or too many False Negatives) a tuning phase is 
  highly recommended.
