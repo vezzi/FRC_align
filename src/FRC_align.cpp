@@ -173,13 +173,13 @@ int main(int argc, char *argv[]) {
 	if (vm.count("CEstats-PE-min")) {
 		CEstats_PE_min = vm["CEstats-PE-min"].as<float>();
 	}
-	if (vm.count("CEstats-PE-min")) {
+	if (vm.count("CEstats-PE-max")) {
 		CEstats_PE_max = vm["CEstats-PE-max"].as<float>();
 	}
-	if (vm.count("CEstats-PE-min")) {
+	if (vm.count("CEstats-MP-min")) {
 		CEstats_MP_min = vm["CEstats-MP-min"].as<float>();
 	}
-	if (vm.count("CEstats-PE-min")) {
+	if (vm.count("CEstats-MP-max")) {
 		CEstats_MP_max = vm["CEstats-MP-max"].as<float>();
 	}
 
