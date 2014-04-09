@@ -21,10 +21,18 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <string>
+#include <common.h>
+#include <sstream>
+#include <iostream>
+#include <fstream>
+
+
 #include "radix.h"
 #include "samtools/sam.h"
-#include "options/Options.h"
-
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
+using namespace std;
 
 #include "data_structures/Features.h"
 #include "data_structures/Contig.h"

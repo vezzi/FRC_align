@@ -8,12 +8,11 @@
 #ifndef CONTIG_H_
 #define CONTIG_H_
 
-using namespace std;
+
 
 
 #include "data_structures/Features.h"
 #include "samtools/sam.h"
-#include "options/Options.h"
 #include "common.h"
 
 

@@ -6,6 +6,8 @@
  */
 
 #include "Contig.h"
+#include <fstream>
+#include <iostream>
 
 ContigsFeat::ContigsFeat() {
 	this->feature=0;
@@ -40,37 +42,6 @@ Contig::Contig() {
 	maxInsert = 0;
 	MINUM_COV = 0;
 
-
-/*
- //ASSEMBLATHON 1
-	lowCoverageFeat = 1/(float)3;
-	highCoverageFeat = 1.3;
-	lowNormalFeat = 1/(float)3;
-	highNormalFeat = 1.3;
-	highSingleFeat = 0.4;
-	highSpanningFeat = 0.4;
-	highOutieFeat = 0.4;
-	MINUM_COV = 2;
-
-//STAPHILOCOCCUS
-	lowCoverageFeat = 1/(float)2.2;
-	highCoverageFeat = 2;
-	lowNormalFeat = 1/(float)2.2;
-	highNormalFeat = 2;
-	highSingleFeat = 0.4;
-	highSpanningFeat = 0.2;
-	highOutieFeat = 0.4;
-
-	//HUMAN RHODO
-	 * 	lowCoverageFeat = 1/(float)3;
-	highCoverageFeat = 1.5;
-	lowNormalFeat = 1/(float)3;
-	highNormalFeat = 1.5;
-	highSingleFeat = 0.4;
-	highSpanningFeat = 0.3;
-	highOutieFeat = 0.51;
-
-*/
 	lowCoverageFeat = 1/(float)3.5;
 	highCoverageFeat = 2.5;
 	lowNormalFeat = 1/(float)3.5;

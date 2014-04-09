@@ -6,7 +6,7 @@
  */
 
 #include "FRC.h"
-
+#include <fstream>
 
 bool sortContigs(contigFeatures i, contigFeatures j) {
 	return (i.getContigLength() > j.getContigLength());

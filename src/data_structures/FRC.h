@@ -10,12 +10,12 @@
 
 using namespace std;
 
-#include "options/Options.h"
 #include "common.h"
 #include "data_structures/Contig.h"
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <map>
 
 #include "Features.h"
 

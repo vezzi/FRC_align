@@ -19,7 +19,7 @@ AM_PROG_CC_C_O
 AC_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_SIZE_T
-AC_CHECK_HEADERS([pthread.h stdio.h math.h limits.h bzlib.h zlib.h \
+AC_CHECK_HEADERS([stdio.h math.h limits.h bzlib.h zlib.h \
 	iostream fstream string vector exception sstream],
 	[], [AC_MSG_ERROR(["Header not found"])] )
 AC_PROG_INSTALL
@@ -47,7 +47,7 @@ BOOST_STATIC()
 BOOST_REQUIRE([1.40.0])
 BOOST_IOSTREAMS
 BOOST_PROGRAM_OPTIONS
-BOOST_THREADS
+#BOOST_THREADS
 
 # checking for SAMTOOLS library (required)
 ##AC_CHECK_LIB([bam], [bam_open], [], [samtools_not_installed=1])
