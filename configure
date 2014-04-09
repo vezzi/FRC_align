@@ -17306,7 +17306,8 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 fi
 
 
-#BOOST_THREADS
+
+
 
 # checking for SAMTOOLS library (required)
 ##AC_CHECK_LIB([bam], [bam_open], [], [samtools_not_installed=1])

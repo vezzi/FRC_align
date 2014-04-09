@@ -47,7 +47,8 @@ BOOST_STATIC()
 BOOST_REQUIRE([1.40.0])
 BOOST_IOSTREAMS
 BOOST_PROGRAM_OPTIONS
-#BOOST_THREADS
+
+
 
 # checking for SAMTOOLS library (required)
 ##AC_CHECK_LIB([bam], [bam_open], [], [samtools_not_installed=1])
