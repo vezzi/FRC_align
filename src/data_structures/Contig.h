@@ -10,12 +10,13 @@
 
 
 
-
-#include "data_structures/Features.h"
-#include "samtools/sam.h"
+//#include "common.h"
+#include <vector>
+#include <fstream>
+#include <iostream>
 #include "common.h"
-
-
+#include "Features.h"
+//using namespace BamTools;
 
 
 class ContigsFeat{
@@ -27,6 +28,7 @@ public:
 	~ContigsFeat();
 
 };
+
 
 enum data {readCov, insertCov, cmCov, woCov, singCov, mdcCov};
 
@@ -56,8 +58,6 @@ public:
 
 class Contig{
 	unsigned int contigLength;
-	unsigned int minInsert;
-	unsigned int maxInsert;
 
 	float lowCoverageFeat;
 	float highCoverageFeat;
@@ -77,10 +77,10 @@ public:
 	Position *CONTIG;
 
 	Contig();
-	Contig(unsigned int contigLength, unsigned int minInsert, unsigned int maxInsert);
+	Contig(unsigned int contigLength);
 	~Contig();
 
-	void updateContig(bam1_t* b); // given an alignment it updates the contig situation
+	void updateContig(BamAlignment b, int max_insert,  bool is_mp); // given an alignment it updates the contig situation
 
 	float getCoverage();
 

@@ -7,6 +7,12 @@
 #include <cmath>
 #include <climits>
 #include <cstdlib>
+#include <sstream>
+
+#include "api/BamAux.h"
+#include "api/BamReader.h"
+#include "api/BamAlignment.h"
+
 
 #ifdef INLINE_DISABLED
 #define INLINE
@@ -15,6 +21,8 @@
 #endif
 
 
+using namespace BamTools;
+using namespace std;
 
 #define DEFAULT_CHANNEL std::cout
 #define ERROR_CHANNEL std::cerr
@@ -24,201 +32,121 @@
 #define DEFAULT_CHANNEL std::cout
 
 static inline std::string package_description() {
-	std::string line(PACKAGE_NAME);
+	std::string line("FRC");
 	line.append(" version ");
-	line.append(PACKAGE_VERSION);
+	line.append("1.2.0");
 	return line;
 }
 
-#define text_delimitator '$'
-#define masked_base 'N'
-#define match_character '.'
-#define removed_character '-'
+enum readStatus {unmapped, lowQualty, singleton, pair_wrongChrs,
+	pair_proper, pair_wrongDistance, pair_wrongOrientation};
 
-typedef std::size_t t_size; ///< Type for Vectors or similar classes
-
-//#define LONG_LENGTH
-
-#ifdef LONG_LENGTH
-	typedef long int t_length; ///< Type for TEXT
-	#define MAX_T_LENGTH LONG_MAX ///< Max value for TEXT
-	#define SA_NOT_FOUND -1
-#else
-	typedef int t_length; ///< Type for TEXT
-	#define MAX_T_LENGTH INT_MAX ///< Max value for TEXT
-	#define SA_NOT_FOUND -1
-#endif
-
-typedef unsigned short int t_char; ///< Type for char conversion
-typedef unsigned short int t_errors; ///< Type for ERRORS
-typedef t_errors t_errors_delta ;
-typedef unsigned int t_pattern_length; ///< Type for PATTERN
-typedef double t_quality; ///< Type for QUALITY VALUES
-
-typedef std::vector<short unsigned int> t_quality_vector; ///< Vector with quality values
-
-typedef std::string t_edit_string; ///< For future expansion
-
-enum t_strand { forward_strand, reverse_strand, unknown_strand }; ///< Just an enumeration of possible strands
-
-enum t_alignment { unique_alignment, multiple_alignments, alignments_not_found, quality_discarded, low_complexity, contamination, unknown_alignment };
-
-enum t_masked { masked, not_masked };
 
 enum Feature {LOW_COVERAGE_AREA, HIGH_COVERAGE_AREA, LOW_NORMAL_AREA, HIGH_NORMAL_AREA, HIGH_SINGLE_AREA, HIGH_SPANNING_AREA, HIGH_OUTIE_AREA, COMPRESSION_AREA, STRECH_AREA, TOTAL};
 
-/**
- * Conversion from strand type to char type
- */
-static inline char strand_to_char(const t_strand s) {
-	if (s == unknown_strand)
-		return '.';
-	else
-		return (s == forward_strand) ? '+' : '-';
+
+enum FeatureTypes {
+	FRC_TOTAL,
+	LOW_COV_PE,
+	HIGH_COV_PE,
+	LOW_NORM_COV_PE,
+	HIGH_NORM_COV_PE,
+	HIGH_SINGLE_PE,
+	HIGH_SPAN_PE,
+	HIGH_OUTIE_PE,
+	COMPR_PE,
+	STRECH_PE,
+	HIGH_SINGLE_MP,
+	HIGH_OUTIE_MP,
+	HIGH_SPAN_MP,
+	COMPR_MP,
+	STRECH_MP,
+};
+
+
+
+static int StringToNumber ( string Text ) {
+	stringstream ss(Text);
+	int result;
+	return ss >> result ? result : 0;
 }
 
-/**
- * Conversion from char type to strand type
- */
-static inline t_strand char_to_strand(const char c) {
-	if (c == '+' or c == 'F')
-		return forward_strand;
-	else if (c == '-' or c == 'R')
-		return reverse_strand;
-	else
-		return unknown_strand;
-}
 
-#define unique_alignment_char 'U'
-#define multiple_alignments_char 'M'
-#define alignments_not_found_char 'N'
-#define quality_discarded_char 'Q'
-#define low_complexity_char 'L'
-#define contamination_char 'C'
-#define unknown_alignment_to_char '?'
+struct LibraryStatistics{
+	float C_A;
+	float S_A;
+	float C_D;
+	float C_M;
+	float C_S;
+	float C_W;
+	float insertMean;
+	float insertStd;
+};
 
-#define unique_alignment_string "U"
-#define multiple_alignments_string "M"
-#define alignments_not_found_string "NF"
-#define quality_discarded_string "QD"
-#define low_complexity_string "LC"
-#define contamination_string "C"
-#define unknown_alignment_to_string "?"
 
-/**
- * Conversion from alignment type to char type
- */
-static inline char alignment_to_char(const t_alignment a) {
-	switch (a) {
-	case unique_alignment :		return unique_alignment_char;
-	case multiple_alignments :	return multiple_alignments_char;
-	case alignments_not_found :	return alignments_not_found_char;
-	case quality_discarded :	return quality_discarded_char;
-	case low_complexity :		return low_complexity_char;
-	case contamination :		return contamination_char;
-	case unknown_alignment :	return unknown_alignment_to_char;
+
+
+
+
+static readStatus computeReadType(BamAlignment al, uint32_t max_insert, bool is_mp) {
+	if (!al.IsMapped()) {
+		return unmapped;
 	}
-	return unknown_alignment_to_char;
-}
-
-/**
- * Conversion from char type to alignment type
- */
-static inline t_alignment char_to_alignment(char c) {
-	switch (c) {
-	case unique_alignment_char :		return unique_alignment;
-	case 'R': // backward compatibility
-	case multiple_alignments_char :		return multiple_alignments;
-	case alignments_not_found_char :	return alignments_not_found;
-	case quality_discarded_char :		return quality_discarded;
-	case low_complexity_char :			return low_complexity;
-	case contamination_char : 			return contamination;
-	default : return unknown_alignment;
+	if((al.IsDuplicate()) || (al.IsFailedQC())) {
+		return lowQualty;
 	}
-}
-
-/**
- * Conversion from alignment type to string type
- */
-static inline std::string alignment_to_string(const t_alignment a) {
-	switch (a) {
-	case unique_alignment :		return std::string(unique_alignment_string);
-	case multiple_alignments :	return std::string(multiple_alignments_string);
-	case alignments_not_found :	return std::string(alignments_not_found_string);
-	case quality_discarded :	return std::string(quality_discarded_string);
-	case low_complexity :		return std::string(low_complexity_string);
-	case contamination :		return std::string(contamination_string);
-	case unknown_alignment :	return std::string(unknown_alignment_to_string);
+	if(!(al.IsMateMapped())) {
+		return singleton;
 	}
-	return std::string(unknown_alignment_to_string);
-}
-
-static inline char reverse_complement_standalone_char(const char c) {
-	switch (c) {
-	case 'A' : return 'T';
-	case 'T' : return 'A';
-	case 'C' : return 'G';
-	case 'G' : return 'C';
-	case 'U' : return 'A';
-	case 'R' : return 'Y';
-	case 'Y' : return 'R';
-	case 'M' : return 'K';
-	case 'K' : return 'M';
-	case 'W' : return 'S';
-	case 'S' : return 'W';
-	case 'B' : return 'V';
-	case 'V' : return 'B';
-	case 'D' : return 'H';
-	case 'H' : return 'D';
-	//case 'N' : return 'N';
-	//case 'X' : return 'X';
-	default : return c;
+	if (al.IsMateMapped() && al.RefID != al.MateRefID) {
+		return pair_wrongChrs;
+	}
+	//If I am here the read must be aligned, with the pair/mate aligned on the same contig/scaffold
+	uint32_t startRead   = al.Position; // start position on the contig
+	uint32_t startPaired = al.MatePosition;
+	int iSize = al.InsertSize;
+	if (iSize < 0) { iSize = -1 * iSize;}
+	//Now check if reads belong to a proper pair: both reads aligned on the same contig at the expected distance and orientation
+	if (iSize > max_insert) {
+		return pair_wrongDistance;
+	}
+	if (! is_mp) { // I have a paired end
+		if(startRead < startPaired) { //
+			if(!(al.IsReverseStrand()) && (al.IsMateReverseStrand())) {
+				return pair_proper;
+			} else {
+				return pair_wrongOrientation;
+			}
+		} else {
+			if((al.IsReverseStrand()) && !(al.IsMateReverseStrand())) {
+				return pair_proper;
+			} else {
+				return pair_wrongOrientation;
+			}
+		}
+	} else {
+		if(startRead < startPaired) { //
+			if((al.IsReverseStrand()) && !(al.IsMateReverseStrand())) {
+				return pair_proper;
+			} else {
+				return pair_wrongOrientation;
+			}
+		} else {
+			if(!(al.IsReverseStrand()) && (al.IsMateReverseStrand())) {
+				return pair_proper;
+			} else {
+				return pair_wrongOrientation;
+			}
+		}
 	}
 }
 
-static inline std::string reverse_complement_standalone_str_length(const char *str, size_t length) {
-	std::string reverse;
-	t_size i = length;
-	while (i > 0)
-		reverse.push_back(reverse_complement_standalone_char(str[--i]));
-	return reverse;
-}
-
-static inline std::string reverse_complement_standalone_str(const char *str) {
-	return reverse_complement_standalone_str_length(str,strlen(str));
-}
-
-static inline std::string reverse_complement_standalone_str(const std::string & str) {
-	return reverse_complement_standalone_str_length(str.c_str(),str.length());
-}
 
 
-static inline std::string reverse_standalone_str_length(const char *str, size_t length) {
-	std::string reverse;
-	t_size i = length;
-	while (i > 0)
-		reverse.push_back(str[--i]);
-	return reverse;
-}
 
-static inline std::string reverse_standalone_str(const char *str) {
-	return reverse_standalone_str_length(str,strlen(str));
-}
 
-static inline std::string tolower(const std::string & old_string) {
-	std::string lower_string(old_string);
-	for (std::string::iterator iter = lower_string.begin(); iter != lower_string.end(); iter++) {
-		*iter = tolower(*iter);
-	}
-	return lower_string;
-}
 
-static inline std::string toupper(const std::string & old_string){
-	std::string upper_string(old_string);
-	for (std::string::iterator iter = upper_string.begin(); iter != upper_string.end(); iter++) {
-		*iter = toupper(*iter);
-	}
-	return upper_string;
-}
+
+
 
 #endif /*TYPES_H_*/

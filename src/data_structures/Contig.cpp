@@ -5,9 +5,10 @@
  *      Author: vezzi
  */
 
+
 #include "Contig.h"
-#include <fstream>
-#include <iostream>
+
+
 
 ContigsFeat::ContigsFeat() {
 	this->feature=0;
@@ -38,8 +39,6 @@ Position::~Position() {
 
 Contig::Contig() {
 	contigLength = 0;
-	minInsert = 0;
-	maxInsert = 0;
 	MINUM_COV = 0;
 
 	lowCoverageFeat = 1/(float)3.5;
@@ -51,10 +50,8 @@ Contig::Contig() {
 	highOutieFeat = 0.51;
 }
 
-Contig::Contig(unsigned int contigLength, unsigned int minInsert, unsigned int maxInsert) {
+Contig::Contig(unsigned int contigLength) {
 	this->contigLength = contigLength;
-	this->minInsert = minInsert;
-	this->maxInsert = maxInsert;
 	this->CONTIG =  new Position[contigLength];
 	MINUM_COV = 2;
 
@@ -77,10 +74,6 @@ Contig::~Contig() {
 
 
 void Contig::updateCov(unsigned int start, unsigned int end, data type) {
-	if(start < 0) {
-		cout << "hoops, start less than 0 when updating CONTIG\n";
-		start = 0;
-	}
 	if(end > this->contigLength) {
 //		cout << "hoops, end longer than contig length when updating CONTIG " << type << "\n";
 //		cout << "\tcontig length " << this->contigLength << " starting point " << start << " ending point " << end << "\n";
@@ -119,121 +112,46 @@ unsigned int Contig::getContigLength() {
 
 
 
-void Contig::updateContig(bam1_t* b) {
-	const bam1_core_t* core =  &b->core;
-	uint32_t* cigar = bam1_cigar(b);
-	int32_t alignmentLength = 0;
-	int32_t startRead=0;
-	int32_t endRead=0;
-	int32_t startPaired=0;
-	int32_t startInsert=0;
-	int32_t endInsert=0;
-	uint32_t iSize=0;
-	alignmentLength = bam_cigar2qlen(core,cigar);
-
-	//&& !(core->flag&BAM_FSECONDARY)
-	if (core->flag&BAM_FUNMAP) { // if read is unmapped discard
-		    return;
-	} else 	if(!(core->flag&BAM_FUNMAP) && !(core->flag&BAM_FDUP)  && !(core->flag&BAM_FQCFAIL)) { // if read has been mapped and it is not a DUPLICATE or a SECONDARY alignment
-		startRead = core->pos; // start position on the contig
-		endRead = startRead + alignmentLength ; // position where reads ends
+void Contig::updateContig(BamAlignment b, int max_nsert, bool is_mp) {
+	readStatus read_status 	= computeReadType(b, max_nsert, is_mp);
+	uint32_t readLength     = b.Length;
+	uint32_t iSize 			= abs(b.InsertSize);
+	uint32_t startRead 		= b.Position;
+	uint32_t endRead 		= startRead + readLength ; // position where reads ends
+	uint32_t startMateRead  = b.MatePosition;
+	if (read_status == unmapped or read_status == lowQualty) {
+		return;
+	}
+	if (read_status != unmapped and read_status != lowQualty) { //if the read is aligned and is not duplicated or low quality use it in cov computation
 		updateCov(startRead, endRead, readCov); // update coverage
-
-		iSize = abs(core->isize);
-
-		if ((core->flag&BAM_FREAD1) //First in pair
-				&& !(core->flag&BAM_FMUNMAP) /*Mate is also mapped!*/
-				&& (core->tid == core->mtid) /*Mate on the same chromosome*/
-		) {
-			startPaired = core->mpos;
-			if(startRead < startPaired) {
-				iSize = (startPaired + core->l_qseq -1) - startRead; // insert size, I consider both reads of the same length
-				startInsert = startRead;
-				endInsert = startRead + iSize;
-
-
-				if (minInsert <= iSize && iSize <= maxInsert) { //useful to compute CE stats
-					//updateCov(startInsert,endInsert, insertCov); // update spanning coverage
-					//cout << startInsert << " " << startPaired << " " << endInsert << "\n";
-				}
-
-				if(!(core->flag&BAM_FREVERSE) && (core->flag&BAM_FMREVERSE) ) { //
-					//here reads are correctly oriented
-					if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert
-						updateCov(startRead, endRead, cmCov); // update good read coverage
-						updateCov(startInsert,endInsert, insertCov);
-					} else {
-						//pair is wrongly oriented
-						updateCov(startRead, endRead, woCov);
-					}
-				} else {
-					//pair is wrongly oriented
-					updateCov(startRead, endRead, woCov);
-				}
-			} else {
-				iSize = (startRead + alignmentLength - 1) - startPaired;
-				startInsert = startPaired;
-				endInsert = startInsert + iSize;
-
-				if (minInsert <= iSize && iSize <= maxInsert) { //useful to compute CE stats
-					//updateCov(startInsert,endInsert, insertCov); // update spanning coverage
-					//cout << startInsert << " " << startPaired << " " << endInsert << "\n";
-				}
-
-				if((core->flag&BAM_FREVERSE) && !(core->flag&BAM_FMREVERSE) ) { //
-					//here reads are correctly oriented
-					if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert
-						updateCov(startRead, endRead, cmCov); // update good read coverage
-						updateCov(startInsert,endInsert, insertCov);
-					} else {
-						//pair is wrongly oriented
-						updateCov(startRead, endRead, woCov);
-					}
-				} else {
-					updateCov(startRead, endRead, woCov);
-				}
-			}
-		} else  if ((core->flag&BAM_FREAD2) //Second in pair
-				&& !(core->flag&BAM_FMUNMAP) /*Mate is also mapped!*/
-				&& (core->tid == core->mtid) /*Mate on the same chromosome*/
-		) {
-			startPaired = core->mpos;
-			if(startRead > startPaired) {
-				iSize = (startRead + alignmentLength -1) - startPaired;
-				if((core->flag&BAM_FREVERSE) && !(core->flag&BAM_FMREVERSE) ) { //
-					//here reads are correctly oriented
-					if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert, no need to update insert coverage
-						updateCov(startRead, endRead, cmCov); // update good read coverage
-					} else {
-						//pair is wrongly oriented
-						updateCov(startRead, endRead, woCov);
-					}
-				} else {
-					//pair is wrongly oriented
-					updateCov(startRead, endRead, woCov);
-				}
-			} else {
-				iSize = (startPaired + core->l_qseq -1) - startRead;
-				if(!(core->flag&BAM_FREVERSE) && (core->flag&BAM_FMREVERSE) ) { //
-					//here reads are correctly oriented
-					if (minInsert <= iSize && iSize <= maxInsert) { //this is a right insert, no need to update insert coverage
-						updateCov(startRead, endRead, cmCov); // update good read coverage
-					} else {
-						//pair is wrongly oriented
-						updateCov(startRead, endRead, woCov);
-					}
-				} else {
-					//pair is wrongly oriented
-					updateCov(startRead, endRead, woCov);
-				}
-			}
-		} else if (core->tid != core->mtid && !(core->flag&BAM_FMUNMAP)) {
-			//Count inter-chrom pairs
-			updateCov(startRead, endRead, mdcCov);
-		} else if(core->flag&BAM_FMUNMAP) {
-			// if mate read is unmapped
-			updateCov(startRead, endRead, singCov);
+	}
+	if (b.IsFirstMate() && read_status == pair_proper) {
+		int iSize = abs(b.InsertSize);
+		if(startRead < startMateRead) {
+			updateCov(startRead, startRead + iSize, insertCov);
+		} else {
+			updateCov(startMateRead, startMateRead + iSize, insertCov);
 		}
+	}
+	switch (read_status) {
+	case singleton:
+		updateCov(startRead, endRead, singCov);
+		break;
+	case pair_wrongChrs:
+		updateCov(startRead, endRead, mdcCov);
+		break;
+	case pair_wrongDistance:
+		updateCov(startRead, endRead, woCov); //
+		break;
+	case pair_wrongOrientation:
+		updateCov(startRead, endRead, woCov);
+		break;
+	case pair_proper:
+		updateCov(startRead, endRead, cmCov);
+		break;
+	default:
+		cout << read_status << " --> This should never be printed\n";
+		break;
 
 	}
 }

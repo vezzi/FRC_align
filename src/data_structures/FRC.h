@@ -8,16 +8,16 @@
 #ifndef FRC_H_
 #define FRC_H_
 
-using namespace std;
 
-#include "common.h"
-#include "data_structures/Contig.h"
+
 #include <iostream>
 #include <algorithm>
 #include <vector>
 #include <map>
 
-#include "Features.h"
+//#include "common.h"
+//#include "Features.h"
+#include "Contig.h"
 
 
 class contigFeatures {
@@ -61,9 +61,6 @@ public:
 	unsigned int getCOMPR_MP();
 	unsigned int getSTRECH_MP();
 
-
-
-
 	vector<ternary> SUSPICIOUS_AREAS;
 
 	void printFeatures(ofstream &file);
@@ -84,7 +81,7 @@ class FRC {
     float C_M; // coverage induced by correctly aligned pairs
     float C_W; // coverage induced by wrongly mated pairs
     float C_S; // coverage induced by singletons
-    float C_C; // coverage induced by reads with mate on a diferent contif
+    float C_D; // coverage induced by reads with mate on a diferent contif
     float Expansion;
     float Compression;
 
@@ -108,7 +105,7 @@ public:
 	void setC_M(float C_M);
 	void setC_W(float C_W);
 	void setC_S(float C_S);
-	void setC_C(float C_C);
+	void setC_D(float C_D);
 	void setInsertMean(float insertMean);
 	void setInsertStd(float insertStd);
 	void setID(unsigned int i, string ID);

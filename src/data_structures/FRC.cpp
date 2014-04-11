@@ -318,8 +318,8 @@ void FRC::setC_W(float C_W) {
 void FRC::setC_S(float C_S) {
 	this->C_S = C_S;
 }
-void FRC::setC_C(float C_C) {
-	this->C_C = C_C;
+void FRC::setC_D(float C_D) {
+	this->C_D = C_D;
 }
 void FRC::setInsertMean(float insertMean) {
 	this->insertMean = insertMean;

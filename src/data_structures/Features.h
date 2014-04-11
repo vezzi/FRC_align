@@ -8,8 +8,10 @@
 #ifndef FEATURES_H_
 #define FEATURES_H_
 
-#include "common.h"
+//#include "common.h"
+#include <string>
 using namespace std;
+
 
 struct ternary{
 	string feature;
