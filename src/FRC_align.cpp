@@ -468,11 +468,12 @@ void printFRCurve(string outputFile, int totalFeatNum, FeatureTypes type, uint64
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
-		if(partial > totalFeatNum) {
-			partial = totalFeatNum;
+
+		if(partial >= totalFeatNum) {
+			partial = totalFeatNum + 1;
 		}
 
-		if(contigStep == frc.returnContigs()) {
+		if(contigStep >= frc.returnContigs()) {
 			partial = totalFeatNum + 1;
 		}
 	}
