@@ -1,12 +1,11 @@
 INSTALLATION:
 From the FRCurve directory run:
-  cd src/samtools;
-  make;
-  cd ..
-  cd ..
-  ./configure
+  mkdir build
+  cd build
+  cmake ..
   make
-  
+
+You will find the binaries in the main directory under bin  
  
  USAGE (basic, no CE-stats tuning):
 1- Assemble your data (n PE libraries and m MP libraries) with your favorite tools.
