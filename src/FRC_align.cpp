@@ -127,7 +127,6 @@ int main(int argc, char *argv[]) {
 	if (vm.count("mp-max-insert")) {
 		max_mp_insert = vm["mp-max-insert"].as<int>();
 	}
-	cout << "test\n";
 	if(vm.count("pe-sam")){
 		cout << "pe-sam file name is " << PEalignmentFile << endl;
 	}
@@ -251,7 +250,7 @@ int main(int argc, char *argv[]) {
 	//NOW MP
 	if(vm.count("mp-sam")) {
 		cout << "computing FRC for MP library\n";
-		computeFRC(frc, MPalignmentFile, libraryMP, max_mp_insert, false, CEstats_MP_min , CEstats_MP_max);
+		computeFRC(frc, MPalignmentFile, libraryMP, max_mp_insert, true, CEstats_MP_min , CEstats_MP_max);
 		string MP_CEstats = header + "_CEstats_MP.txt";
 		ofstream CEstats;
 		CEstats.open(MP_CEstats.c_str());
@@ -514,7 +513,6 @@ void computeFRC(FRC & frc, string bamFileName, LibraryStatistics library,int max
 					contig =  new Contig(contigSize);
 				} else {
 					float coverage = frc.obtainCoverage(currentContig, contig);
-					cout << coverage << "\n";
 					frc.computeCEstats(contig, library.insertMean, windowStepCE, library.insertMean, library.insertStd);
 					if(is_mp) {
 						//frc.computeLowCoverageArea("MP", currentContig, contig, 1000, 200);
