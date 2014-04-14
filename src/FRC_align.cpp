@@ -49,10 +49,10 @@ int main(int argc, char *argv[]) {
 	uint32_t max_pe_insert = 5000;
 	uint32_t max_mp_insert = 20000;
 	uint64_t estimatedGenomeSize;
-	float CEstats_PE_min = -4;
-	float CEstats_PE_max = +4;
-	float CEstats_MP_min = -6;
-	float CEstats_MP_max = +6;
+	float CEstats_PE_min = -5;
+	float CEstats_PE_max = +5;
+	float CEstats_MP_min = -7;
+	float CEstats_MP_max = +7;
 	string outputFile = "FRC.txt";
 	string featureFile = "Features.txt";
 
@@ -513,8 +513,8 @@ void computeFRC(FRC & frc, string bamFileName, LibraryStatistics library,int max
 					contig =  new Contig(contigSize);
 				} else {
 					float coverage = frc.obtainCoverage(currentContig, contig);
-					//frc.computeCEstats(contig, library.insertMean, windowStepCE, library.insertMean, library.insertStd);
-					frc.computeCEstats(contig, 1000, 200, library.insertMean, library.insertStd);
+					frc.computeCEstats(contig, library.insertMean, windowStepCE, library.insertMean, library.insertStd);
+					//frc.computeCEstats(contig, 1000, 200, library.insertMean, library.insertStd);
 					if(is_mp) {
 						//frc.computeLowCoverageArea("MP", currentContig, contig, 1000, 200);
 						//frc.computeHighCoverageArea("MP", currentContig, contig, 1000, 200);
