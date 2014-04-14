@@ -84,7 +84,7 @@ void FRC::computeCEstats(Contig *contig, unsigned int windowSize, unsigned int w
 			//cout << Z_stats << "\n";
 
 		}
-	} else { //otherwise compute features on sliding window of 200 bp
+	} else { //otherwise compute features on sliding window
 		unsigned int startWindow = 0;
 		unsigned int endWindow   = windowSize;
 		for(unsigned int i=startWindow; i < endWindow; i++ ) {

@@ -513,7 +513,8 @@ void computeFRC(FRC & frc, string bamFileName, LibraryStatistics library,int max
 					contig =  new Contig(contigSize);
 				} else {
 					float coverage = frc.obtainCoverage(currentContig, contig);
-					frc.computeCEstats(contig, library.insertMean, windowStepCE, library.insertMean, library.insertStd);
+					//frc.computeCEstats(contig, library.insertMean, windowStepCE, library.insertMean, library.insertStd);
+					frc.computeCEstats(contig, 1000, 200, library.insertMean, library.insertStd);
 					if(is_mp) {
 						//frc.computeLowCoverageArea("MP", currentContig, contig, 1000, 200);
 						//frc.computeHighCoverageArea("MP", currentContig, contig, 1000, 200);
