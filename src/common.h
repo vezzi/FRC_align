@@ -2,7 +2,8 @@
 #define TYPES_H_
 
 #include <string>
-#include <vector>
+#include <algorithm>    // std::sort
+#include <vector>       // std::vector
 #include <cstring>
 #include <cmath>
 #include <climits>
