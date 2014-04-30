@@ -27,16 +27,30 @@ file(GLOB FRC_FILES
     ${PROJECT_SOURCE_DIR}/src/data_structures/Contig.cpp
     ${PROJECT_SOURCE_DIR}/src/data_structures/Features.cpp
     ${PROJECT_SOURCE_DIR}/src/data_structures/FRC.cpp
+)
+
+# sorgenti da compilare
+file(GLOB FIND_TRANS_FILES
+    ${PROJECT_SOURCE_DIR}/src/FindTranslocations.cpp
+    ${PROJECT_SOURCE_DIR}/src/data_structures/Translocations.cpp
     ${PROJECT_SOURCE_DIR}/src/common.h
 )
+
 
 add_subdirectory(lib)
 
 # FRC executable
 add_executable(FRC ${FRC_FILES})
-
 target_link_libraries(FRC ${ZLIB_LIBRARIES})
 target_link_libraries(FRC  BamTools)
 target_link_libraries(FRC ${Boost_LIBRARIES})
+
+
+
+# Find_translocations executable
+add_executable(FindTranslocations ${FIND_TRANS_FILES})
+target_link_libraries(FindTranslocations ${ZLIB_LIBRARIES})
+target_link_libraries(FindTranslocations  BamTools)
+target_link_libraries(FindTranslocations ${Boost_LIBRARIES})
 
 

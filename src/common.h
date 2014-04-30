@@ -92,7 +92,7 @@ static readStatus computeReadType(BamAlignment al, uint32_t max_insert, bool is_
 	if (!al.IsMapped()) {
 		return unmapped;
 	}
-	if((al.IsDuplicate()) || (al.IsFailedQC())) {
+	if((al.IsDuplicate()) || (al.IsFailedQC()) || (!al.IsPrimaryAlignment())) {
 		return lowQualty;
 	}
 	if(!(al.IsMateMapped())) {
@@ -141,6 +141,153 @@ static readStatus computeReadType(BamAlignment al, uint32_t max_insert, bool is_
 	}
 }
 
+
+
+static LibraryStatistics computeLibraryStats(string bamFileName, uint64_t genomeLength, uint32_t max_insert, bool is_mp) {
+	BamReader bamFile;
+	bamFile.Open(bamFileName);
+	LibraryStatistics library;
+
+	//All var declarations
+	uint32_t reads 		 	  = 0;
+	uint32_t unmappedReads 	  = 0;
+	uint32_t lowQualityReads  = 0;
+	uint32_t mappedReads 	  = 0;
+	uint64_t mappedReadsLength= 0;
+
+	uint64_t insertsLength = 0; // total inserts length
+	float insertMean;
+	float insertStd;
+	// mated reads (not necessary correctly mated)
+	uint32_t matedReads 	  = 0;        // reads that align on a contig with the mate
+	uint64_t matedReadsLength = 0;  // total length of mated reads
+	// wrongly distance
+	uint32_t wrongDistanceReads 		= 0;  // number of paired reads too far away
+	uint64_t wrongDistanceReadsLength   = 0; // length  of paired reads too far away
+	// wrongly oriented reads
+	uint32_t wronglyOrientedReads 		= 0;       // number of wrongly oriented reads
+	uint64_t wronglyOrientedReadsLength = 0; // length of wrongly oriented reads
+	// singletons
+	uint32_t singletonReads 	  = 0; // number of singleton reads
+	uint64_t singletonReadsLength = 0;     // total length of singleton reads
+	// mates on different contigs
+	uint32_t matedDifferentContig 		= 0; // number of contig placed in a different contig
+	uint64_t matedDifferentContigLength = 0; // total number of reads placed in different contigs
+
+	float C_A = 0; // total read coverage
+	float S_A = 0; // total span coverage
+	float C_M = 0; // coverage induced by proper pairs (same contig and correct orientation)
+	float C_W = 0; // coverage induced by wrongly mated pairs
+	float C_S = 0; // coverage induced by singletons
+	float C_D = 0; // coverage induced by reads with mate on a different contigs
+
+	// compute mean and std on the fly
+	float Mk = 0;
+	float Qk = 0;
+	uint32_t counterK = 1;
+	//Keep header for further reference
+	int32_t currentTid = -1;
+	int32_t iSize;
+
+	BamAlignment al;
+	while ( bamFile.GetNextAlignmentCore(al) ) {
+		reads ++;
+		readStatus read_status = computeReadType(al, max_insert, is_mp);
+		if (read_status != unmapped and read_status != lowQualty) {
+			mappedReads ++;
+			mappedReadsLength += al.Length;
+		}
+
+		if (al.IsFirstMate() && read_status == pair_proper) {
+			iSize = abs(al.InsertSize);
+			if(counterK == 1) {
+				Mk = iSize;
+				Qk = 0;
+				counterK++;
+			} else {
+				float oldMk = Mk;
+				float oldQk = Qk;
+				Mk = oldMk + (iSize - oldMk)/counterK;
+				Qk = oldQk + (counterK-1)*(iSize - oldMk)*(iSize - oldMk)/(float)counterK;
+				counterK++;
+			}
+			insertsLength += iSize;
+		}
+
+		switch (read_status) {
+		  case unmapped:
+			  unmappedReads ++;
+		     break;
+		  case lowQualty:
+			  lowQualityReads ++;
+		     break;
+		  case singleton:
+			  singletonReads ++;
+			  singletonReadsLength += al.Length ;
+			  break;;
+		  case pair_wrongChrs:
+			  matedDifferentContig ++;
+			  matedDifferentContigLength += al.Length ;
+			  break;
+		  case pair_proper:
+			  matedReads ++;
+			  matedReadsLength += al.Length ;
+			  break;
+		  case pair_wrongDistance:
+			  wrongDistanceReads ++;
+			  wrongDistanceReadsLength += al.Length ;
+			  break;
+		  case pair_wrongOrientation:
+			  wronglyOrientedReads ++;
+			  wronglyOrientedReadsLength += al.Length ;
+			  break;
+		  default:
+		     cout << "This should never be printed\n";
+		     break;
+		}
+
+	}
+
+
+
+	cout << "LIBRARY STATISTICS\n";
+	cout << "\t total reads number "	<< reads << "\n";
+	cout << "\t total mapped reads " 	<< mappedReads << "\n";
+	cout << "\t total unmapped reads " 	<< unmappedReads << "\n";
+	cout << "\t proper pairs " 			<< matedReads << "\n";
+	cout << "\t wrong distance "		<< wrongDistanceReads << "\n";
+	cout << "\t zero quality reads " 	<< lowQualityReads << "\n";
+	cout << "\t wrongly oriented "		<< wronglyOrientedReads << "\n";
+	cout << "\t wrongly contig "		<< matedDifferentContig << "\n";
+	cout << "\t singletons " 			<< singletonReads << "\n";
+
+	uint32_t total = matedReads + wrongDistanceReads +  wronglyOrientedReads +  matedDifferentContig + singletonReads  ;
+	cout << "\ttotal " << total << "\n";
+	cout << "\tCoverage statistics\n";
+
+	library.C_A = C_A = mappedReadsLength/(float)genomeLength;
+	library.S_A = S_A = insertsLength/(float)genomeLength;
+	library.C_M = C_M = matedReadsLength/(float)genomeLength;
+	library.C_W = C_W = wronglyOrientedReadsLength/(float)genomeLength;
+	library.C_S = C_S = singletonReadsLength/(float)genomeLength;
+	library.C_D = C_D = matedDifferentContigLength/(float)genomeLength;
+	library.insertMean = insertMean = Mk;
+	Qk = sqrt(Qk/counterK);
+	library.insertStd = insertStd = Qk;
+
+	cout << "\tC_A = " << C_A << endl;
+	cout << "\tS_A = " << S_A << endl;
+	cout << "\tC_M = " << C_M << endl;
+	cout << "\tC_W = " << C_W << endl;
+	cout << "\tC_S = " << C_S << endl;
+	cout << "\tC_D = " << C_D << endl;
+	cout << "\tMean Insert length = " << Mk << endl;
+	cout << "\tStd Insert length = " << Qk << endl;
+	cout << "----------\n";
+
+	bamFile.Close();
+	return library;
+}
 
 
 
