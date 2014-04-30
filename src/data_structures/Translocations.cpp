@@ -104,9 +104,10 @@ void Translocations::compressConnections(uint32_t chr1, uint32_t chr2) {
 void Translocations::initTrans(SamHeader head) {
 	uint32_t contigsNumber = 0;
 	SamSequenceDictionary sequences  = head.Sequences;
+
 	for(SamSequenceIterator sequence = sequences.Begin() ; sequence != sequences.End(); ++sequence) {
-		this->contig2position[sequence->Name]      = contigsNumber; // keep track of contig name and position in order to avoid problems when processing two libraries
-		this->position2contig[contigsNumber] = contig2position[sequence->Name];
+		this->contig2position[sequence->Name] = contigsNumber; // keep track of contig name and position in order to avoid problems when processing two libraries
+		this->position2contig[contigsNumber]  = sequence->Name;
 		contigsNumber++;
 	}
 }
