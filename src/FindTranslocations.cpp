@@ -199,8 +199,6 @@ void findTranslocations(string bamFileName, int32_t min_insert,  int32_t max_ins
 	bamFile.Open(bamFileName);
 	//Information from the header is needed to initialize the data structure
 	SamHeader head = bamFile.GetHeader();
-	map<string,unsigned int> contig2position;
-	map<unsigned int,string> position2contig;
 	uint32_t contigsNumber =  head.Sequences.Size();
 	// now create Translocation DB
 	Translocations *Trans;
@@ -208,6 +206,13 @@ void findTranslocations(string bamFileName, int32_t min_insert,  int32_t max_ins
 	Trans->initTrans(head);
 
 
+	uint32_t cc = 0;
+	SamSequenceDictionary sequences  = head.Sequences;
+	map<unsigned int,string> position2contig;
+	for(SamSequenceIterator sequence = sequences.Begin() ; sequence != sequences.End(); ++sequence) {
+		position2contig[cc]  = sequence->Name;
+		cc++;
+	}
 
 	//Initialize bam entity
 	vector<BamAlignment> currentReads;
@@ -235,11 +240,11 @@ void findTranslocations(string bamFileName, int32_t min_insert,  int32_t max_ins
 					if(read_1_status == pair_wrongChrs) { //read on different contigs
 						// possible trans-location event found
 						uint32_t startRead_1 			= read_1.Position;
-						uint32_t chromosomeRead_1		= read_1.MateRefID;
+						uint32_t chromosomeRead_1		= read_1.RefID;
 						uint16_t qualityAligRead_1		= read_1.MapQuality;
 
 						uint32_t startRead_2 			= read_2.Position;
-						uint32_t chromosomeRead_2		= read_2.MateRefID;
+						uint32_t chromosomeRead_2		= read_2.RefID;
 						uint16_t qualityAligRead_2		= read_2.MapQuality;
 
 						if(qualityAligRead_1 >= minimum_mapping_quality and qualityAligRead_2 >= minimum_mapping_quality) {
@@ -259,7 +264,6 @@ void findTranslocations(string bamFileName, int32_t min_insert,  int32_t max_ins
 				}
 
 			}
-			//TODO: do stuff here
 			currentReads.clear();
 			if(computeReadType(alignment, max_insert, outtie) != lowQualty) {
 				currentReads.push_back(alignment);

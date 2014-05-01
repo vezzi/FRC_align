@@ -184,13 +184,13 @@ void Translocations::findEvents(ofstream & OutputFileDescriptor, uint32_t chr1, 
 					//and (coverage1 >= minCov and coverage1 <= maxCov) and (coverage2 >= minCov and coverage2 <= maxCov)
 					if( pairsInWindow > 0.9 * newLink.supportingPairs and (coverage1 >= minCov and coverage1 <= maxCov) and (coverage2 >= minCov and coverage2 <= maxCov)) {
 						search = false;
-						OutputFileDescriptor << position2contig[chr1] << "\t" << newLink.chr1_start  << "\t" << newLink.chr1_end               << "\t" << newLink.supportingPairs << "\t" << coverage1 << "\t";
+						OutputFileDescriptor << position2contig[chr1] << "\t" << newLink.chr1_start  << "\t" << newLink.chr1_end   << "\t" << newLink.supportingPairs << "\t" << coverage1 << "\t";
 						OutputFileDescriptor << position2contig[chr2] << "\t" << startAt             << "\t" << LinksToChr2[nextPair-1].second << "\t"  << pairsInWindow          << "\t" << coverage2 <<"\n";
 
-						cout << "(" << position2contig[chr1] << " , " << position2contig[chr2] << " ) (" << chr1 << " , " << chr2 << ") (" << newLink.chr1_start << " , " << newLink.chr1_end << ")";
-						cout << " (" << startAt << " , " << LinksToChr2[nextPair-1].second << ") ";
-						cout << " (" << coverage1 << " , " << coverage2 << ")" ;
-						cout << " (" << newLink.supportingPairs << " , " << pairsInWindow << ")" << "\n";
+						//cout << "(" << position2contig[chr1] << " , " << position2contig[chr2] << " ) (" << chr1 << " , " << chr2 << ") (" << newLink.chr1_start << " , " << newLink.chr1_end << ")";
+						//cout << " (" << startAt << " , " << LinksToChr2[nextPair-1].second << ") ";
+						//cout << " (" << coverage1 << " , " << coverage2 << ")" ;
+						//cout << " (" << newLink.supportingPairs << " , " << pairsInWindow << ")" << "\n";
 
 					} else {
 						currentPair ++;
