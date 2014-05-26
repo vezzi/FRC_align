@@ -33,10 +33,11 @@ FRCbam
       <li>use PE library with largest read coverage (i.e., vertical coverage) and MP with largest spanning coverage (i.e., horizontal coverage)</li>
     </ol>
   </li>
-  <li>Run FRCurve for each assembly: FRC --pe-sam A_tool1_PE_lib.bam --pe-min-insert MIN_PE_INS --pe-max-insert MAX_PE_INS -mp-sam A_tool1_MP_lib.bam  --mp-min-insert MIN_MP_INS --mp-max-insert MAX_MP_INS 
-		--genome-size ESTIMATED_GENOME_SIZE --output OUTPUT_HEADER
+  <li>Run FRCurve for each assembly: 
+ ```FRC --pe-sam A_tool1_PE_lib.bam --pe-min-insert MIN_PE_INS --pe-max-insert MAX_PE_INS -mp-sam A_tool1_MP_lib.bam  --mp-min-insert MIN_MP_INS --mp-max-insert MAX_MP_INS 
+		--genome-size ESTIMATED_GENOME_SIZE --output OUTPUT_HEADER```
 	<ol>
-      <li>--pe-sam A_tool1_PE_lib.bam: sorted bam file obtained aligning PE library against assembly obtained with tool A;</li>
+      <li>```--pe-sam``` A_tool1_PE_lib.bam: sorted bam file obtained aligning PE library against assembly obtained with tool A;</li>
       <li></li>
       <li></li>
       <li></li>
