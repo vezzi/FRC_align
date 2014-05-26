@@ -2,10 +2,10 @@ INSTALLATION
 ==============
 
 From the FRCurve directory run:
-	- mkdir build
-	- cd build
-	- cmake ..
-	- make
+- mkdir build
+- cd build
+- cmake ..
+- make
 
 You will find the binaries in the main directory under bin  
 
