@@ -62,7 +62,8 @@ OUTPUT:
 * ```OUTPUT_HEADER_CEstats_PE.txt```: CEvalues distribution (for CE_stats tuning)
 * ```OUTPUT_HEADER_CEstats_MP.txt```: CEvalues distribution (for CE_stats tuning)
 		
-** USAGE: advanced, CE-stats tuning**
+**USAGE: advanced, CE-stats tuning**
+
 CE-stats are able to identify the presence of insertion and deletion events. Different insert sizes give the possibility to
 identify different events. In order to avoid too many False Positives (or too many False Negatives) a tuning phase is 
 highly recommended.
