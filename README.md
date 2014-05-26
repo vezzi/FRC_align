@@ -7,8 +7,8 @@ From the FRCurve directory run:
 - cmake ..
 - make
 
-You will find the binaries in the main directory under bin  
-
+You will find the binaries in the main directory under bin. In case of problems the majority of the times there is a problem
+with the local installation of boost.
 
 
 DESCRIPTION
@@ -17,26 +17,46 @@ DESCRIPTION
  suspicious genomics regions. The tools have been already successfully applied in several de novo and resequencing projects.
  
  This package contains two tools:
-	1. FRCbam: tool to compute Feature Response Curves in order to validate and rank assemblies and assemblers
-	2. FindTranslocations: tool to identify  chromosomal rearrangements using Mate Pairs
+1. FRCbam: tool to compute Feature Response Curves in order to validate and rank assemblies and assemblers
+2. FindTranslocations: tool to identify  chromosomal rearrangements using Mate Pairs
  
 FRCbam
 --------------
  USAGE (basic, no CE-stats tuning):
-	1. Assemble your data (n PE libraries and m MP libraries) with your favorite tools.
-   Let us call the assemblies A_tool1, A_tool2, etc.
-	2. Align one PE library and one MP library against each of your assemblies (e.g., A_tool1)
-		2a. Use the same parameters;
-		2c. PE library is mandatory, MP library is highly recommended
-		2d. sort and index the generated bam files by coordinate. We will call them A_tool1_PE_lib.bam and A_tool1_MP_lib.bam
-		2e. use PE library with largest read coverage (i.e., vertical coverage) and MP with largest spanning coverage (i.e., horizontal coverage)
-	3. Run FRCurve for each assembly:
-	FRC --pe-sam A_tool1_PE_lib.bam --pe-min-insert MIN_PE_INS --pe-max-insert MAX_PE_INS  \\
-		--mp-sam A_tool1_MP_lib.bam  --mp-min-insert MIN_MP_INS --mp-max-insert MAX_MP_INS \\
+<ol>
+  <li>Assemble your data (n PE libraries and m MP libraries) with your favorite tools. Let us call the assemblies A_tool1, A_tool2, etc.</li>
+  <li>Align one PE library and one MP library against each of your assemblies (e.g., A_tool1)       
+    <ol>
+      <li>Use the same parameters</li>
+      <li>PE library is mandatory, MP library is highly recommended</li>
+      <li>sort and index the generated bam files by coordinate. We will call them A_tool1_PE_lib.bam and A_tool1_MP_lib.bam</li>
+      <li>use PE library with largest read coverage (i.e., vertical coverage) and MP with largest spanning coverage (i.e., horizontal coverage)</li>
+    </ol>
+  </li>
+  <li>Run FRCurve for each assembly: FRC --pe-sam A_tool1_PE_lib.bam --pe-min-insert MIN_PE_INS --pe-max-insert MAX_PE_INS -mp-sam A_tool1_MP_lib.bam  --mp-min-insert MIN_MP_INS --mp-max-insert MAX_MP_INS 
 		--genome-size ESTIMATED_GENOME_SIZE --output OUTPUT_HEADER
+	<ol>
+      <li>--pe-sam A_tool1_PE_lib.bam: sorted bam file obtained aligning PE library against assembly obtained with tool A;</li>
+      <li></li>
+      <li></li>
+      <li></li>
+    </ol>
+	<\li>
+  <li></li>
+</ol>
+
+
+1. 
+2. 
+2a. ;
+		2c. 
+		2d. 
+		2e. 
+	3. 
+	
 	
 	where:
-		--pe-sam A_tool1_PE_lib.bam: sorted bam file obtained aligning PE library against assembly obtained with tool A;
+		
 		--pe-min-insert MIN_PE_INS : estimated min insert length
 		--pe-max-insert MAX_PE_INS : estimated max insert length
 		--mp-sam A_tool1_MP_lib.bam: sorted bam file obtained aligning MP library against assembly obtained with tool A;
