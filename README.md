@@ -35,19 +35,21 @@ FRCbam
 3.Run FRCurve for each assembly: 
 ```FRC --pe-sam A_tool1_PE_lib.bam --pe-min-insert MIN_PE_INS --pe-max-insert MAX_PE_INS -mp-sam A_tool1_MP_lib.bam  --mp-min-insert MIN_MP_INS --mp-max-insert MAX_MP_INS 
 		--genome-size ESTIMATED_GENOME_SIZE --output OUTPUT_HEADER```
+
 where:
-  * ```--pe-sam``` A_tool1_PE_lib.bam```: sorted bam file obtained aligning PE library against assembly obtained with tool A;
-  * ```--pe-min-insert MIN_PE_INS```: estimated min insert length
-  * ```--pe-max-insert MAX_PE_INS``` : estimated max insert length
-  * ```--mp-sam A_tool1_MP_lib.bam```: sorted bam file obtained aligning MP library against assembly obtained with tool A;
-  * ```--mp-min-insert MIN_MP_INS``` : estimated min insert length
-  * ```--mp-max-insert MAX_MP_INS``` : estimated max insert length
-  * ```--genome-size ESTIMATED_GENOME_SIZE```: estimated genome size;
-  * ```--output OUTPUT_HEADER```: output header;
+
+* ```--pe-sam``` A_tool1_PE_lib.bam```: sorted bam file obtained aligning PE library against assembly obtained with tool A;
+* ```--pe-min-insert MIN_PE_INS```: estimated min insert length
+* ```--pe-max-insert MAX_PE_INS``` : estimated max insert length
+* ```--mp-sam A_tool1_MP_lib.bam```: sorted bam file obtained aligning MP library against assembly obtained with tool A;
+* ```--mp-min-insert MIN_MP_INS``` : estimated min insert length
+* ```--mp-max-insert MAX_MP_INS``` : estimated max insert length
+* ```--genome-size ESTIMATED_GENOME_SIZE```: estimated genome size;
+* ```--output OUTPUT_HEADER```: output header;
 	
 **IMPORTANT**:
-If --genome-size is not specified the assembly length is used to compute FRCurve. In order to be able to compare FRCurves
-obtained with different tools (and hence producing slightly different assembly sizes) the same ESTIMATED_GENOME_SIZE
+If ```--genome-size``` is not specified the assembly length is used to compute FRCurve. In order to be able to compare FRCurves
+obtained with different tools (and hence producing slightly different assembly sizes) the same ```ESTIMATED_GENOME_SIZE```
 must be specified.
 		
 OUTPUT:
