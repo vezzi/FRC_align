@@ -237,7 +237,7 @@ void findTranslocations(string bamFileName, int32_t min_insert,  int32_t max_ins
 				if( (read_1.IsFirstMate() and read_2.IsSecondMate()) or (read_1.IsSecondMate() and read_2.IsFirstMate()) ) {
 					// This should not be needed but I want to be sure to work always with read1 and read2
 					readStatus read_1_status = computeReadType(read_1, max_insert, outtie); //there is no difference between working with the first or second reads
-					if(read_1_status == pair_wrongChrs) { //read on different contigs
+					if(read_1_status == pair_wrongChrs or read_1_status == pair_wrongDistance) { //read on different contigs or too far away
 						// possible trans-location event found
 						uint32_t startRead_1 			= read_1.Position;
 						uint32_t chromosomeRead_1		= read_1.RefID;
@@ -286,36 +286,17 @@ void findTranslocations(string bamFileName, int32_t min_insert,  int32_t max_ins
 			Trans->findEvents(outputFileDescriptor, i,j, minimumSupportingPairs, minCov, maxCov, windowSize, windowStep);
 		}
 	}
+	outputFileDescriptor.close();
+
+
+	fileName = outputFileHeader + "_deletions.bed";
+	outputFileDescriptor.open (fileName.c_str());
+	for (uint32_t i = 0; i<= Trans->chromosomesNum; i++) {
+		Trans->findEvents(outputFileDescriptor, i,i, minimumSupportingPairs, minCov, maxCov, windowSize, windowStep);
+	}
+	outputFileDescriptor.close();
 
 	/*
-		} else if (currentPair == pair_Deletion) {
-				// possible deletion event found
-				int32_t startRead_1 			= core_read1->pos; // start position on the chromosome
-				int32_t chromosomeRead_1		= core_read1->tid;
-				int32_t qualityAligRead_1		= core_read1->qual;
-
-				int32_t startRead_2 			= core_read2->pos; // start position on the chromosome
-				int32_t chromosomeRead_2		= core_read2->tid;
-				int32_t qualityAligRead_2		= core_read2->qual;
-
-				if(qualityAligRead_1 >= 20 and qualityAligRead_2 >= 20) {
-					//if(chromosomeRead_1 == 13  ) { //and startRead_1 >= 16700000 and startRead_1 < 16850000
-					//	int32_t difference = startRead_2 -  startRead_1;
-					//	cout << chromosomeRead_1 << "\t" << startRead_1 << " --- " <<  chromosomeRead_2 << "\t" << startRead_2 << " --- " << difference <<"\n";
-					//}
-					if(startRead_1 < startRead_2) {
-						Trans->insertConnection(chromosomeRead_1,startRead_1, chromosomeRead_2,startRead_2);
-					} else {
-						Trans->insertConnection(chromosomeRead_2,startRead_2, chromosomeRead_1,startRead_1);
-					}
-				}
-			}
-		}
-	}
-
-
-
-
 
 	ofstream outputDeletionFile;
 	outputDeletionFile.open ("output_deletions.bed");
@@ -330,70 +311,4 @@ void findTranslocations(string bamFileName, int32_t min_insert,  int32_t max_ins
 	*/
 }
 
-
-
-
-/*
-pairStatus checkPair(const bam1_core_t *core_read1, const bam1_core_t *core_read2, int32_t MinInsert, int32_t MaxInsert) {
-	//uint32_t read1_startingPos = core_read1->mpos;
-	if( (core_read1->flag&BAM_FDUP) || (core_read1->flag&BAM_FQCFAIL) || (core_read2->flag&BAM_FDUP) || (core_read2->flag&BAM_FQCFAIL)) {// both reads are mapped but at least one is an optical duplicat or fails vendor quality specifications
-		return pair_wrongOptDup;
-	} else if(core_read1->tid != core_read2->tid) { // read mapped on different chromosomes (the one I am interested in)
-		return pair_wrongChrs;
-	}
-	// if it is neither an optical duplicate nor a pair aligned on different chromosomes
-	int32_t read1_insertSize  = core_read1->isize;
-	if(read1_insertSize < 0) {
-		 read1_insertSize = -1*(read1_insertSize);
-	}
-
-	int32_t read2_insertSize  = core_read2->isize;
-	if(read2_insertSize < 0) {
-		read2_insertSize = -1*(read2_insertSize);
-	}
-
-	bool read1_forw; // true for forward and false otherwise
-	if(!(core_read1->flag&BAM_FREVERSE)) {
-		read1_forw = true;
-	} else {
-		read1_forw = false;
-	}
-	bool read1_isFirst;
-	if(core_read1->flag&BAM_FREAD1) { // if this is the first read in the pair
-		read1_isFirst = true;
-	} else {
-		read1_isFirst = false;
-	}
-
-	bool read2_forw; // true for forward and false otherwise
-	if(!(core_read2->flag&BAM_FREVERSE)) {
-		read2_forw = true;
-	} else {
-		read2_forw = false;
-	}
-	bool read2_isFirst;
-	if(core_read2->flag&BAM_FREAD1) { // if this is the first read in the pair
-		read2_isFirst = true;
-	} else {
-		read2_isFirst = false;
-	}
-
-
-
-	//if(read1_forw == read2_forw) {
-	//	return pair_wrongOrientation;
-	//} else
-	if (read1_insertSize >= MinInsert and read1_insertSize <= MaxInsert) {
-		return pair_Proper;
-	} else if (read1_insertSize > MaxInsert) {
-		return pair_Deletion;
-	}
-	return pair_Proper;
-
-
-
-
-}
-
-*/
 
