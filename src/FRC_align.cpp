@@ -32,7 +32,6 @@ namespace po = boost::program_options;
 
 
 #include "data_structures/Features.h"
-//#include "data_structures/Contig.h"
 #include "data_structures/FRC.h"
 
 #include "common.h"
