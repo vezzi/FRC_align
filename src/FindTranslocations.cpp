@@ -152,6 +152,17 @@ int main(int argc, char *argv[]) {
 
 
 	SamHeader head = bamFile.GetHeader();
+	if (head.HasSortOrder()) {
+		string sortOrder = head.SortOrder;
+		if (sortOrder.compare("queryname") != 0) {
+			cout << "sort order is " << sortOrder << ": please sort the bam file by queryname\n";
+			return 1;
+		}
+		cout << sortOrder << "\n";
+	} else {
+		cout << "BAM file has no @HD SO:<SortOrder> attribute: it is not possible to determine the sort order\n";
+		return 1;
+	}
 	map<string,unsigned int> contig2position;
 	map<unsigned int,string> position2contig;
 
