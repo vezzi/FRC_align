@@ -248,16 +248,17 @@ void findTranslocations(string bamFileName, int32_t min_insert,  int32_t max_ins
 				if( (read_1.IsFirstMate() and read_2.IsSecondMate()) or (read_1.IsSecondMate() and read_2.IsFirstMate()) ) {
 					// This should not be needed but I want to be sure to work always with read1 and read2
 					readStatus read_1_status = computeReadType(read_1, max_insert, outtie); //there is no difference between working with the first or second reads
-					if(read_1_status == pair_wrongChrs or read_1_status == pair_wrongDistance) { //read on different contigs or too far away
-						// possible trans-location event found
-						uint32_t startRead_1 			= read_1.Position;
-						uint32_t chromosomeRead_1		= read_1.RefID;
-						uint16_t qualityAligRead_1		= read_1.MapQuality;
 
-						uint32_t startRead_2 			= read_2.Position;
-						uint32_t chromosomeRead_2		= read_2.RefID;
-						uint16_t qualityAligRead_2		= read_2.MapQuality;
+					uint32_t startRead_1 			= read_1.Position;
+					uint32_t chromosomeRead_1		= read_1.RefID;
+					uint16_t qualityAligRead_1		= read_1.MapQuality;
 
+					uint32_t startRead_2 			= read_2.Position;
+					uint32_t chromosomeRead_2		= read_2.RefID;
+					uint16_t qualityAligRead_2		= read_2.MapQuality;
+
+					// check if possible translocation event found
+					if(read_1_status == pair_wrongChrs ) { //read on different contigs
 						if(qualityAligRead_1 >= minimum_mapping_quality and qualityAligRead_2 >= minimum_mapping_quality) {
 							if(chromosomeRead_1 < chromosomeRead_2) {
 								Trans->insertConnection(chromosomeRead_1,startRead_1, chromosomeRead_2,startRead_2);
@@ -266,6 +267,27 @@ void findTranslocations(string bamFileName, int32_t min_insert,  int32_t max_ins
 							}
 						}
 					} else if (read_1_status == pair_wrongDistance) { // reads are too far away
+						/*DEBUGGING CODE
+						 *
+						int areaToCheckStart =  16203630;
+						int areaToCheckEnd   =  16211601;
+						if ((startRead_1 >= areaToCheckStart and startRead_1 <= areaToCheckEnd) or (startRead_2 >= areaToCheckStart and startRead_2 <= areaToCheckEnd)) {
+							if(startRead_1 < startRead_2) {
+								cout << chromosomeRead_1 << " " << startRead_1 << " " << startRead_2 << " " <<  qualityAligRead_1 << " , " << qualityAligRead_2 << "\n";
+							} else {
+								cout << chromosomeRead_1 << " " << startRead_2 << " " << startRead_1  << " " <<  qualityAligRead_2 << " , " <<  qualityAligRead_1<< "\n";
+							}
+						}
+						 */
+
+						if(qualityAligRead_1 >= minimum_mapping_quality and qualityAligRead_2 >= minimum_mapping_quality) {
+							if(startRead_1 < startRead_2) {
+								Trans->insertConnection(chromosomeRead_1,startRead_1, chromosomeRead_2,startRead_2);
+							} else {
+								Trans->insertConnection(chromosomeRead_2,startRead_2, chromosomeRead_1,startRead_1);
+							}
+						}
+
 
 					}
 				} else {
@@ -290,7 +312,7 @@ void findTranslocations(string bamFileName, int32_t min_insert,  int32_t max_ins
 	ofstream outputFileDescriptor;
 	string fileName = outputFileHeader + "_transloacations.bed";
 	outputFileDescriptor.open (fileName.c_str());
-	float minCov = coverage/10;
+	float minCov = coverage/15;
 	float maxCov = coverage*10;
 	for (uint32_t i = 0; i<= Trans->chromosomesNum; i++) {
 		for(uint32_t j = i +1; j<= Trans->chromosomesNum; j++) {
