@@ -71,7 +71,6 @@ bool sortLinks(Link i, Link  j) {
 
 
 
-
 void Translocations::findEvents(ofstream & OutputFileDescriptor, uint32_t chr1, uint32_t chr2, uint32_t minimumPairs, float minCov, float maxCov, uint32_t windowSize, uint32_t windowStep) {
 
 	vector<Link> temporaryVector;

@@ -128,9 +128,11 @@ int main(int argc, char *argv[]) {
 		minimumSupportingPairs = vm["minimum-supporting-pairs"].as<unsigned int>();
 		}
 
-
-
-
+//   mean   stddev  cov  readlen soft len1 len2 d
+//	3000  , 1500,   50    100      0  3000 7000 0
+// sizeA   sizeB  gap  insert_mean   insert_stddev   coverage  readLength)
+// 3000, 7000, 0, 3000, 1500, 50, 100
+//	cout << "test of ExpectedLinks (566.726420673) "<< ExpectedLinks(3000, 7000, 0, 3000, 1500, 50, 100) << "\n";
 
 	if(vm.count("sam")){
 		cout << "sam file name is " << alignmentFile << endl;
