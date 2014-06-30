@@ -128,6 +128,9 @@ public:
 
 	unsigned int getTotal(unsigned int ctg);
 
+
+	unsigned int getFeatures(FeatureTypes type, int contig);
+
 	unsigned int getLOW_COV_PE(unsigned int ctg);
 	unsigned int getHIGH_COV_PE(unsigned int ctg);
 	unsigned int getLOW_NORM_COV_PE(unsigned int ctg);
