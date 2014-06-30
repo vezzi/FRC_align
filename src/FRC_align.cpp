@@ -455,6 +455,10 @@ void printFRCurve(string outputFile, int totalFeatNum, FeatureTypes type, uint64
 		uint32_t featuresStep = 0;
 		uint32_t contigStep    = 0;
 		featuresStep += frc.getFeatures(type, contigStep);
+		time_t t = time(0);   // get time now
+		struct tm * now = localtime( & t );
+		cout << "While starts here --> " << asctime(now)  << endl;
+
 		while(featuresStep <= partial) {
 			contigStep++;
 			if(contigStep < frc.returnContigs()) {
@@ -463,6 +467,10 @@ void printFRCurve(string outputFile, int totalFeatNum, FeatureTypes type, uint64
 				featuresStep = partial + 1; // I read all the contigs, time to to stop
 			}
 		}
+		t = time(0);   // get time now
+		now = localtime( & t );
+		cout << "featuresStep Done --> " << asctime(now)  << endl;
+
 		edgeCoverage = 0;
 		for(unsigned int i=0; i< contigStep; i++) {
 			edgeCoverage += frc.getContigLength(i);
@@ -471,10 +479,10 @@ void printFRCurve(string outputFile, int totalFeatNum, FeatureTypes type, uint64
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
 
-		time_t t = time(0);   // get time now
-		struct tm * now = localtime( & t );
-		cout << asctime(now) << "  " << partial << " " << coveragePartial << endl;
-		cout << ".";
+		t = time(0);   // get time now
+		now = localtime( & t );
+		cout << "coveragePartial Done --> " << asctime(now) << "  " << partial << " " << coveragePartial << endl;
+
 
 		if(partial >= totalFeatNum) {
 			partial = totalFeatNum + 1;
