@@ -435,13 +435,12 @@ int getFeatures(FRC frc, FeatureTypes type, int contig) {
 	}
 }
 
-#include <ctime>
 
 void printFRCurve(string outputFile, int totalFeatNum, FeatureTypes type, uint64_t estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
 
-	cout << "now computing " << returnFeatureName(type) << " ";
+	cout << "now computing " << returnFeatureName(type) << "\t";
 	if (totalFeatNum == 0 ) {
 		myfile << "0 100\n";
 		cout << "No features of this kind: DONE\n";
@@ -455,9 +454,6 @@ void printFRCurve(string outputFile, int totalFeatNum, FeatureTypes type, uint64
 		uint32_t featuresStep = 0;
 		uint32_t contigStep    = 0;
 		featuresStep += frc.getFeatures(type, contigStep);
-		time_t t = time(0);   // get time now
-		struct tm * now = localtime( & t );
-		cout << "While starts here --> " << asctime(now)  << endl;
 
 		while(featuresStep <= partial) {
 			contigStep++;
@@ -467,9 +463,6 @@ void printFRCurve(string outputFile, int totalFeatNum, FeatureTypes type, uint64
 				featuresStep = partial + 1; // I read all the contigs, time to to stop
 			}
 		}
-		t = time(0);   // get time now
-		now = localtime( & t );
-		cout << "featuresStep Done --> " << asctime(now)  << endl;
 
 		edgeCoverage = 0;
 		for(unsigned int i=0; i< contigStep; i++) {
@@ -478,11 +471,7 @@ void printFRCurve(string outputFile, int totalFeatNum, FeatureTypes type, uint64
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
-
-		t = time(0);   // get time now
-		now = localtime( & t );
-		cout << "coveragePartial Done --> " << asctime(now) << "  " << partial << " " << coveragePartial << endl;
-
+		cout << ".";
 
 		if(partial >= totalFeatNum) {
 			partial = totalFeatNum + 1;
