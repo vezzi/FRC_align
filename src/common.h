@@ -183,7 +183,6 @@ static float ExpectedLinks(uint32_t sizeA, uint32_t sizeB, uint32_t gap, float i
 }
 
 
-
 static LibraryStatistics computeLibraryStats(string bamFileName, uint64_t genomeLength, uint32_t max_insert, bool is_mp) {
 	BamReader bamFile;
 	bamFile.Open(bamFileName);

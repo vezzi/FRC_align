@@ -13,15 +13,18 @@
 #include <iostream>
 #include <fstream>
 
-//#include "common.h"
-#include "data_structures/Translocations.h"
+//#include "data_structures/Translocations.h"
+#include "data_structures/Translocation.h"
 #include  <boost/program_options.hpp>
 namespace po = boost::program_options;
 
 
-void findTranslocations(string file, int32_t min_insert,  int32_t max_insert, bool outtie, uint64_t genomeSize,
-		uint16_t minimum_mapping_quality, uint32_t windowSize , uint32_t windowStep, uint32_t minimumSupportingPairs, float coverage,
-		string outputFileHeader);
+//void findTranslocations(string file, int32_t min_insert,  int32_t max_insert, bool outtie, uint64_t genomeSize,
+//		uint16_t minimum_mapping_quality, uint32_t windowSize , uint32_t windowStep, uint32_t minimumSupportingPairs, float coverage,
+//		string outputFileHeader);
+
+void findTranslocationsOnTheFly(string bamFileName, int32_t min_insert,  int32_t max_insert, bool outtie, uint16_t minimum_mapping_quality,
+		uint32_t windowSize , uint32_t windowStep, uint32_t minimumSupportingPairs, float coverage, float meanInsertSize, float StdInsertSize, string outputFileHeader);
 
 int main(int argc, char *argv[]) {
 	//MAIN VARIABLE
@@ -156,8 +159,8 @@ int main(int argc, char *argv[]) {
 	SamHeader head = bamFile.GetHeader();
 	if (head.HasSortOrder()) {
 		string sortOrder = head.SortOrder;
-		if (sortOrder.compare("queryname") != 0) {
-			cout << "sort order is " << sortOrder << ": please sort the bam file by queryname\n";
+		if (sortOrder.compare("coordinate") != 0) {
+			cout << "sort order is " << sortOrder << ": please sort the bam file by coordinate\n";
 			return 1;
 		}
 		cout << sortOrder << "\n";
@@ -183,167 +186,107 @@ int main(int argc, char *argv[]) {
 
 	LibraryStatistics library;
 	library = computeLibraryStats(alignmentFile, genomeLength, max_insert, outtie);
-
-	float coverage = library.C_A;
-	findTranslocations(alignmentFile, min_insert, max_insert, outtie, genomeLength,
-			minimum_mapping_quality, windowSize, windowStep, minimumSupportingPairs, coverage, outputFileHeader);
-	// now find translocations
-	/*
-	 *
-	 fp = open_alignment_file(alignmentFile);
-	EXIT_IF_NULL(fp);
-	head = fp->header; // sam header
-	findTranslocations(outputFileDescriptor, fp,MinInsert, MaxInsert, estimatedGenomeSize);
-	samclose(fp); // close the file
-	*/
+	//constants refer to P488_101
+	float coverage   = 2.41713;//library.C_A; //
+	float meanInsert = 3159.82; //library.insertMean; //
+	float insertStd  = 1573.74; //library.insertStd; //
+	findTranslocationsOnTheFly(alignmentFile, min_insert, max_insert, outtie, minimum_mapping_quality,
+			windowSize, windowStep, minimumSupportingPairs, coverage, meanInsert, insertStd, outputFileHeader);
+//	findTranslocations(alignmentFile, min_insert, max_insert, outtie, genomeLength,
+//			minimum_mapping_quality, windowSize, windowStep, minimumSupportingPairs, coverage, outputFileHeader);
 
 }
 
 
-
-
-
-
-void findTranslocations(string bamFileName, int32_t min_insert,  int32_t max_insert, bool outtie, uint64_t genomeSize,
-		uint16_t minimum_mapping_quality, uint32_t windowSize , uint32_t windowStep, uint32_t minimumSupportingPairs,
-		float coverage, string outputFileHeader) {
+void findTranslocationsOnTheFly(string bamFileName, int32_t min_insert,  int32_t max_insert, bool outtie, uint16_t minimum_mapping_quality,
+		uint32_t windowSize , uint32_t windowStep, uint32_t minimumSupportingPairs, float meanCoverage, float meanInsertSize, float StdInsertSize, string outputFileHeader) {
 	//open the bam file
 	BamReader bamFile;
 	bamFile.Open(bamFileName);
 	//Information from the header is needed to initialize the data structure
 	SamHeader head = bamFile.GetHeader();
-	uint32_t contigsNumber =  head.Sequences.Size();
-	// now create Translocation DB
-	Translocations *Trans;
-	Trans = new Translocations(contigsNumber);
-	Trans->initTrans(head);
+	// now create Translocation on the fly
+	Window *window;
 
-
-	uint32_t cc = 0;
-	SamSequenceDictionary sequences  = head.Sequences;
-	map<unsigned int,string> position2contig;
-	for(SamSequenceIterator sequence = sequences.Begin() ; sequence != sequences.End(); ++sequence) {
-		position2contig[cc]  = sequence->Name;
-		cc++;
-	}
+	window = new Window(windowSize, windowStep, max_insert, minimum_mapping_quality,
+		outtie,  meanInsertSize,  StdInsertSize,  minimumSupportingPairs,
+		 meanCoverage,  outputFileHeader);
+	window->initTrans(head);
 
 	//Initialize bam entity
-	vector<BamAlignment> currentReads;
-	BamAlignment alignment;
-	bamFile.GetNextAlignment(alignment);
-	if(computeReadType(alignment, max_insert, outtie)!= lowQualty) {
-		currentReads.push_back(alignment);
-	}
-	string read = alignment.Name;
+	BamAlignment currentRead;
+
+
+	//bamFile.GetNextAlignment(currentRead);
+	//window->resetWindow(currentRead.Position, currentRead.RefID);
+	//window->insertRead(currentRead);
+
+	//open file descriptor for variations
+	/*
+	ofstream interChrVariations;
+	string inter_chr_events = outputFileHeader + "_inter_chr_events.tab";
+	interChrVariations.open (inter_chr_events.c_str());
+
+	ofstream intraChrVariations;
+	string intra_chr_events = outputFileHeader + "_intra_chr_events.tab";
+	intraChrVariations.open (intra_chr_events.c_str());
+	*/
 	//now start to iterate over the bam file
-	while ( bamFile.GetNextAlignment(alignment) ) {
-		string currentRead = alignment.Name;
-		if (currentRead.compare(read) != 0) { // new read under consideration
-			if(currentReads.size() > 2) {
-				cout << "Error, there should not be read with more than two entries\n";
-				cout << currentReads.size() << " " << read << "\n";
-				return;
-			}
-			if(currentReads.size() == 2) {
-				BamAlignment read_1 = currentReads[0];
-				BamAlignment read_2 = currentReads[1];
-				if( (read_1.IsFirstMate() and read_2.IsSecondMate()) or (read_1.IsSecondMate() and read_2.IsFirstMate()) ) {
-					// This should not be needed but I want to be sure to work always with read1 and read2
-					readStatus read_1_status = computeReadType(read_1, max_insert, outtie); //there is no difference between working with the first or second reads
-
-					uint32_t startRead_1 			= read_1.Position;
-					uint32_t chromosomeRead_1		= read_1.RefID;
-					uint16_t qualityAligRead_1		= read_1.MapQuality;
-
-					uint32_t startRead_2 			= read_2.Position;
-					uint32_t chromosomeRead_2		= read_2.RefID;
-					uint16_t qualityAligRead_2		= read_2.MapQuality;
-
-					// check if possible translocation event found
-					if(read_1_status == pair_wrongChrs ) { //read on different contigs
-						if(qualityAligRead_1 >= minimum_mapping_quality and qualityAligRead_2 >= minimum_mapping_quality) {
-							if(chromosomeRead_1 < chromosomeRead_2) {
-								Trans->insertConnection(chromosomeRead_1,startRead_1, chromosomeRead_2,startRead_2);
-							} else {
-								Trans->insertConnection(chromosomeRead_2,startRead_2, chromosomeRead_1,startRead_1);
-							}
-						}
-					} else if (read_1_status == pair_wrongDistance) { // reads are too far away
-						/*DEBUGGING CODE
-						 *
-						int areaToCheckStart =  16203630;
-						int areaToCheckEnd   =  16211601;
-						if ((startRead_1 >= areaToCheckStart and startRead_1 <= areaToCheckEnd) or (startRead_2 >= areaToCheckStart and startRead_2 <= areaToCheckEnd)) {
-							if(startRead_1 < startRead_2) {
-								cout << chromosomeRead_1 << " " << startRead_1 << " " << startRead_2 << " " <<  qualityAligRead_1 << " , " << qualityAligRead_2 << "\n";
-							} else {
-								cout << chromosomeRead_1 << " " << startRead_2 << " " << startRead_1  << " " <<  qualityAligRead_2 << " , " <<  qualityAligRead_1<< "\n";
-							}
-						}
-						 */
-
-						if(qualityAligRead_1 >= minimum_mapping_quality and qualityAligRead_2 >= minimum_mapping_quality) {
-							if(startRead_1 < startRead_2) {
-								Trans->insertConnection(chromosomeRead_1,startRead_1, chromosomeRead_2,startRead_2);
-							} else {
-								Trans->insertConnection(chromosomeRead_2,startRead_2, chromosomeRead_1,startRead_1);
-							}
-						}
-
-
+	int counter = 0;
+	while ( bamFile.GetNextAlignment(currentRead) ) {
+		window->insertRead(currentRead);
+	}
+	if(window->windowOpen) {
+		window->computeVariations();
+	}
+	window->interChrVariations.close();
+	window->intraChrVariations.close();
+/*
+		if (window->chr != currentRead.RefID ) {
+			//I need to check the buffer
+			float coverage  = window->computeCoverage();
+			bool found_inter = window->computeInterChr(interChrVariations, minimum_mapping_quality, meanInsertSize, StdInsertSize, minimumSupportingPairs, meanCoverage);
+			bool found_intra = window->computeIntraChr(intraChrVariations, minimum_mapping_quality, meanInsertSize, StdInsertSize, minimumSupportingPairs, meanCoverage);
+			//empty it, and eventually insert the first read
+			window->resetWindow(currentRead.Position, currentRead.RefID);
+			window->insertRead(currentRead);
+		} else if (currentRead.Position <= window->currentWindowEnd) {
+			window->insertRead(currentRead);
+		} else {
+			//otherwise it means that I reached the window limit I need to check if there is a intra/inter event
+			counter ++;
+			float coverage   = window->computeCoverage();
+			if (coverage > 20 * meanCoverage) {
+				window->resetWindow(currentRead.Position, currentRead.RefID);
+			} else {
+				bool found_inter = window->computeInterChr(interChrVariations, minimum_mapping_quality, meanInsertSize, StdInsertSize, minimumSupportingPairs, meanCoverage);
+				bool found_intra = window->computeIntraChr(intraChrVariations, minimum_mapping_quality, meanInsertSize, StdInsertSize, minimumSupportingPairs, meanCoverage);
+				if(window->currentWindowStart >= 10120711 and window->currentWindowStart <= 10125417 ) {
+					cout << "in the window "  << window->intraTranslocationEvents.size() << "\n";
+					for(vector<BamAlignment>::iterator it = window->intraTranslocationEvents.begin(); it != window->intraTranslocationEvents.end(); ++it) {
+						cout << it->Position << " " << window->position2contig[it->MateRefID] <<  " " << it->MatePosition << "\n";
 					}
-				} else {
-					cout << "Error, both reads are either first or second read in pair, this cannot be possible probably some error in the way alignment has been performed\n";
-					cout << currentReads.size() << " " << read << "\n";
-					return;
+					cout << "\n";
 				}
 
+
+				//and I need to reset the three buffers
+				if( !(found_inter || found_intra)) {
+					window->goToNextWindow(); // in this case I need to add test the next location
+				} else {
+					window->resetWindow(currentRead.Position, currentRead.RefID); // otherwise jump to next window
+					//cout << counter <<  " ";
+					//cout << currentRead.Position << " " << window->currentWindowStart << " " << window->currentWindowEnd
+					//		<< " " << window->currentWindow.size() << "\n";
+				}
 			}
-			currentReads.clear();
-			if(computeReadType(alignment, max_insert, outtie) != lowQualty) {
-				currentReads.push_back(alignment);
-			}
-			read = currentRead;
-		} else {
-			if(computeReadType(alignment, max_insert, outtie) != lowQualty) {
-				currentReads.push_back(alignment);
-			}
+			window->insertRead(currentRead);
 		}
 	}
-
-	ofstream outputFileDescriptor;
-	string fileName = outputFileHeader + "_transloacations.bed";
-	outputFileDescriptor.open (fileName.c_str());
-	float minCov = coverage/15;
-	float maxCov = coverage*10;
-	for (uint32_t i = 0; i<= Trans->chromosomesNum; i++) {
-		for(uint32_t j = i +1; j<= Trans->chromosomesNum; j++) {
-			Trans->findEvents(outputFileDescriptor, i,j, minimumSupportingPairs, minCov, maxCov, windowSize, windowStep);
-		}
-	}
-	outputFileDescriptor.close();
-
-
-	fileName = outputFileHeader + "_deletions.bed";
-	outputFileDescriptor.open (fileName.c_str());
-	for (uint32_t i = 0; i<= Trans->chromosomesNum; i++) {
-		Trans->findEvents(outputFileDescriptor, i,i, minimumSupportingPairs, minCov, maxCov, windowSize, windowStep);
-	}
-	outputFileDescriptor.close();
-
-	/*
-
-	ofstream outputDeletionFile;
-	outputDeletionFile.open ("output_deletions.bed");
-	minimumNumberOfSupportingPairs = 2;
-	minCov = 0;
-	maxCov = 100;
-	windowSize = 8000;
-	windowStep = 1000;
-	for (uint32_t i = 0; i<= Trans->chromosomesNum; i++) {
-		Trans->findEvents(outputDeletionFile, i, i, minimumNumberOfSupportingPairs, minCov, maxCov, windowSize, windowStep);
-	}
-	*/
+	float coverage = window->computeCoverage();
+	bool found_inter = window->computeInterChr(interChrVariations, minimum_mapping_quality, meanInsertSize, StdInsertSize, minimumSupportingPairs, meanCoverage);
+	bool found_intra = window->computeIntraChr(intraChrVariations, minimum_mapping_quality, meanInsertSize, StdInsertSize, minimumSupportingPairs, meanCoverage);
+*/
 }
 
 

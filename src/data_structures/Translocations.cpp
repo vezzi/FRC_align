@@ -70,6 +70,19 @@ bool sortLinks(Link i, Link  j) {
 }
 
 
+float computeCoverage(vector<BamAlignment> currentWindow, int32_t windowSize) {
+	float totalReadSizeOnWindow = 0;
+}
+
+//void Translocations::findEvent() {
+	//taking as input the three vectors I need to build a temporary Trans data structure in order
+//	map<uint32_t, map<uint32_t, vector<Link> > > CurrentConnections;
+
+	//compute windowA coverage
+	//
+//}
+
+
 
 void Translocations::findEvents(ofstream & OutputFileDescriptor, uint32_t chr1, uint32_t chr2, uint32_t minimumPairs, float minCov, float maxCov, uint32_t windowSize, uint32_t windowStep) {
 
@@ -133,14 +146,14 @@ void Translocations::findEvents(ofstream & OutputFileDescriptor, uint32_t chr1, 
 					//	cout <<  position2contig[chr1] << "\t" << newLink.chr1_start  << "\t" << newLink.chr1_end   << "\t" << newLink.supportingPairs << "\t" << coverage1 << "\t";
 					//	cout <<  position2contig[chr2] << "\t" << startAt             << "\t" << LinksToChr2[nextPair-1].second << "\t"  << pairsInWindow          << "\t" << coverage2 <<"\n";
 					//}
-
 					//minimumPars or  0.9 * newLink.supportingPairs and (coverage1 >= minCov and coverage1 <= maxCov) and (coverage2 >= minCov and coverage2 <= maxCov)
-					if( pairsInWindow >=  0.9 * newLink.supportingPairs and (coverage1 >= minCov and coverage1 <= maxCov) and (coverage2 >= minCov and coverage2 <= maxCov) ) {
+					if(  pairsInWindow >= minimumPairs ) {
 						foundHit = true;
 						currentPair = nextPair + 1;
 						OutputFileDescriptor << position2contig[chr1] << "\t" << newLink.chr1_start  << "\t" << newLink.chr1_end   << "\t" << newLink.supportingPairs << "\t" << coverage1 << "\t";
 						OutputFileDescriptor << position2contig[chr2] << "\t" << startAt             << "\t" << LinksToChr2[nextPair-1].second << "\t"  << pairsInWindow          << "\t" << coverage2 <<"\n";
 
+						OutputFileDescriptor << ExpectedLinks(windowLength, secondClusterLength, 0, (float)2834, (float)1662, coverage1, 100) << "\n";
 						//cout << "(" << position2contig[chr1] << " , " << position2contig[chr2] << " ) (" << chr1 << " , " << chr2 << ") (" << newLink.chr1_start << " , " << newLink.chr1_end << ")";
 						//cout << " (" << startAt << " , " << LinksToChr2[nextPair-1].second << ") ";
 						//cout << " (" << coverage1 << " , " << coverage2 << ")" ;

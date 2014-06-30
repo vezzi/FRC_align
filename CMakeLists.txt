@@ -32,7 +32,7 @@ file(GLOB FRC_FILES
 # sorgenti da compilare
 file(GLOB FIND_TRANS_FILES
     ${PROJECT_SOURCE_DIR}/src/FindTranslocations.cpp
-    ${PROJECT_SOURCE_DIR}/src/data_structures/Translocations.cpp
+    ${PROJECT_SOURCE_DIR}/src/data_structures/Translocation.cpp
     ${PROJECT_SOURCE_DIR}/src/common.h
 )
 

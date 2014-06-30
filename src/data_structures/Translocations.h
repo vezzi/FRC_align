@@ -22,6 +22,7 @@ public:
 };
 
 
+
 class Translocations {
 public:
 	uint32_t chromosomesNum;
@@ -38,9 +39,6 @@ public:
 
 	void compressConnections(uint32_t chr1, uint32_t chr2);
 	void findEvents(ofstream & OutputFileDescriptor, uint32_t chr1, uint32_t chr2, uint32_t minimumPairs, float minCov, float maxCov, uint32_t windowSize, uint32_t windowStep);
-
-	int ExpectedLinks(uint32_t sizeA, uint32_t sizeB, uint32_t expectedDistance, float mean_insert, float mean_stddev, float coverage, uint32_t readLength);
-
 
 };
 
