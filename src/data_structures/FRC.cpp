@@ -354,6 +354,59 @@ unsigned int FRC::getTotal(unsigned int ctg) {
 }
 
 
+unsigned int FRC::getFeatures(FeatureTypes type, int contig) {
+	switch (type) {
+		 case FRC_TOTAL:
+			 return getTotal(contig);
+			 break;
+		 case LOW_COV_PE:
+			 return getLOW_COV_PE(contig);
+			 break;
+		 case HIGH_COV_PE:
+			 return getHIGH_COV_PE(contig);
+			 break;
+		 case LOW_NORM_COV_PE:
+			 return getLOW_NORM_COV_PE(contig);
+			 break;
+		 case HIGH_NORM_COV_PE:
+			 return getHIGH_NORM_COV_PE(contig);
+			 break;
+		 case HIGH_SINGLE_PE:
+			 return getHIGH_SINGLE_PE(contig);
+			 break;
+		 case HIGH_SPAN_PE:
+			 return getHIGH_SPAN_PE(contig);
+			 break;
+		 case HIGH_OUTIE_PE:
+			 return getHIGH_OUTIE_PE(contig);
+			 break;
+		 case COMPR_PE:
+			 return getCOMPR_PE(contig);
+			 break;
+		 case STRECH_PE:
+			 return getSTRECH_PE(contig);
+			 break;
+		 case HIGH_SINGLE_MP:
+			 return getHIGH_SINGLE_MP(contig);
+			 break;
+		 case HIGH_OUTIE_MP:
+			 return getHIGH_OUTIE_MP(contig);
+			 break;
+		 case HIGH_SPAN_MP:
+			 return getHIGH_SPAN_MP(contig);
+			 break;
+		 case COMPR_MP:
+			 return getCOMPR_MP(contig);
+			 break;
+		 case STRECH_MP:
+			 return getSTRECH_MP(contig);
+			 break;
+		 default:
+			 cout << "THis whould never happen\n";
+	}
+}
+
+
 unsigned int FRC::getLOW_COV_PE(unsigned int ctg) {
 	return this->CONTIG[ctg].getLOW_COV_PE();
 }

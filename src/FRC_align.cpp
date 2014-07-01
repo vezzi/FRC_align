@@ -435,12 +435,15 @@ int getFeatures(FRC frc, FeatureTypes type, int contig) {
 	}
 }
 
+
 void printFRCurve(string outputFile, int totalFeatNum, FeatureTypes type, uint64_t estimatedGenomeSize, FRC frc){
 	ofstream myfile;
 	myfile.open (outputFile.c_str());
 
+	cout << "now computing " << returnFeatureName(type) << "\t";
 	if (totalFeatNum == 0 ) {
 		myfile << "0 100\n";
+		cout << "No features of this kind: DONE\n";
 		return;
 	}
 	float step = totalFeatNum/(float)100;
@@ -450,15 +453,17 @@ void printFRCurve(string outputFile, int totalFeatNum, FeatureTypes type, uint64
 	while(partial <= totalFeatNum) {
 		uint32_t featuresStep = 0;
 		uint32_t contigStep    = 0;
-		featuresStep += getFeatures(frc, type, contigStep);
+		featuresStep += frc.getFeatures(type, contigStep);
+
 		while(featuresStep <= partial) {
 			contigStep++;
 			if(contigStep < frc.returnContigs()) {
-				featuresStep +=  getFeatures(frc, type, contigStep);
+				featuresStep +=  frc.getFeatures(type, contigStep);
 			} else {
 				featuresStep = partial + 1; // I read all the contigs, time to to stop
 			}
 		}
+
 		edgeCoverage = 0;
 		for(unsigned int i=0; i< contigStep; i++) {
 			edgeCoverage += frc.getContigLength(i);
@@ -466,6 +471,7 @@ void printFRCurve(string outputFile, int totalFeatNum, FeatureTypes type, uint64
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
+		cout << ".";
 
 		if(partial >= totalFeatNum) {
 			partial = totalFeatNum + 1;
@@ -475,7 +481,7 @@ void printFRCurve(string outputFile, int totalFeatNum, FeatureTypes type, uint64
 			partial = totalFeatNum + 1;
 		}
 	}
-
+	cout << "\n";
 	myfile.close();
 
 }
