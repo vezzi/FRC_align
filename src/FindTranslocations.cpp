@@ -187,9 +187,9 @@ int main(int argc, char *argv[]) {
 	LibraryStatistics library;
 	library = computeLibraryStats(alignmentFile, genomeLength, max_insert, outtie);
 	//constants refer to P488_101
-	float coverage   = 2.41713;//library.C_A; //
-	float meanInsert = 3159.82; //library.insertMean; //
-	float insertStd  = 1573.74; //library.insertStd; //
+	float coverage   = library.C_A; //2.41713;//
+	float meanInsert = library.insertMean; //3159.82; //
+	float insertStd  = library.insertStd; //1573.74; //
 	findTranslocationsOnTheFly(alignmentFile, min_insert, max_insert, outtie, minimum_mapping_quality,
 			windowSize, windowStep, minimumSupportingPairs, coverage, meanInsert, insertStd, outputFileHeader);
 //	findTranslocations(alignmentFile, min_insert, max_insert, outtie, genomeLength,
@@ -215,22 +215,6 @@ void findTranslocationsOnTheFly(string bamFileName, int32_t min_insert,  int32_t
 
 	//Initialize bam entity
 	BamAlignment currentRead;
-
-
-	//bamFile.GetNextAlignment(currentRead);
-	//window->resetWindow(currentRead.Position, currentRead.RefID);
-	//window->insertRead(currentRead);
-
-	//open file descriptor for variations
-	/*
-	ofstream interChrVariations;
-	string inter_chr_events = outputFileHeader + "_inter_chr_events.tab";
-	interChrVariations.open (inter_chr_events.c_str());
-
-	ofstream intraChrVariations;
-	string intra_chr_events = outputFileHeader + "_intra_chr_events.tab";
-	intraChrVariations.open (intra_chr_events.c_str());
-	*/
 	//now start to iterate over the bam file
 	int counter = 0;
 	while ( bamFile.GetNextAlignment(currentRead) ) {
@@ -241,52 +225,7 @@ void findTranslocationsOnTheFly(string bamFileName, int32_t min_insert,  int32_t
 	}
 	window->interChrVariations.close();
 	window->intraChrVariations.close();
-/*
-		if (window->chr != currentRead.RefID ) {
-			//I need to check the buffer
-			float coverage  = window->computeCoverage();
-			bool found_inter = window->computeInterChr(interChrVariations, minimum_mapping_quality, meanInsertSize, StdInsertSize, minimumSupportingPairs, meanCoverage);
-			bool found_intra = window->computeIntraChr(intraChrVariations, minimum_mapping_quality, meanInsertSize, StdInsertSize, minimumSupportingPairs, meanCoverage);
-			//empty it, and eventually insert the first read
-			window->resetWindow(currentRead.Position, currentRead.RefID);
-			window->insertRead(currentRead);
-		} else if (currentRead.Position <= window->currentWindowEnd) {
-			window->insertRead(currentRead);
-		} else {
-			//otherwise it means that I reached the window limit I need to check if there is a intra/inter event
-			counter ++;
-			float coverage   = window->computeCoverage();
-			if (coverage > 20 * meanCoverage) {
-				window->resetWindow(currentRead.Position, currentRead.RefID);
-			} else {
-				bool found_inter = window->computeInterChr(interChrVariations, minimum_mapping_quality, meanInsertSize, StdInsertSize, minimumSupportingPairs, meanCoverage);
-				bool found_intra = window->computeIntraChr(intraChrVariations, minimum_mapping_quality, meanInsertSize, StdInsertSize, minimumSupportingPairs, meanCoverage);
-				if(window->currentWindowStart >= 10120711 and window->currentWindowStart <= 10125417 ) {
-					cout << "in the window "  << window->intraTranslocationEvents.size() << "\n";
-					for(vector<BamAlignment>::iterator it = window->intraTranslocationEvents.begin(); it != window->intraTranslocationEvents.end(); ++it) {
-						cout << it->Position << " " << window->position2contig[it->MateRefID] <<  " " << it->MatePosition << "\n";
-					}
-					cout << "\n";
-				}
 
-
-				//and I need to reset the three buffers
-				if( !(found_inter || found_intra)) {
-					window->goToNextWindow(); // in this case I need to add test the next location
-				} else {
-					window->resetWindow(currentRead.Position, currentRead.RefID); // otherwise jump to next window
-					//cout << counter <<  " ";
-					//cout << currentRead.Position << " " << window->currentWindowStart << " " << window->currentWindowEnd
-					//		<< " " << window->currentWindow.size() << "\n";
-				}
-			}
-			window->insertRead(currentRead);
-		}
-	}
-	float coverage = window->computeCoverage();
-	bool found_inter = window->computeInterChr(interChrVariations, minimum_mapping_quality, meanInsertSize, StdInsertSize, minimumSupportingPairs, meanCoverage);
-	bool found_intra = window->computeIntraChr(intraChrVariations, minimum_mapping_quality, meanInsertSize, StdInsertSize, minimumSupportingPairs, meanCoverage);
-*/
 }
 
 
