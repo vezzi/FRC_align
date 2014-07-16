@@ -58,7 +58,7 @@ public:
 			float meanCoverage, string outputFileHeader); // constructor
 	void initTrans(SamHeader head);				   // initialise the contig to position array
 	void insertRead(BamAlignment alignment);	   // inserts a new read
-	void goToNextWindow();						   // moves to next window
+	void goToNextWindow(int position);						   // moves to next window
 	void resetWindow(int position, uint32_t chr);			       // resets window when moving to next chr
 
 	float computeCoverage(); // computes coverage of the area memorised in the area

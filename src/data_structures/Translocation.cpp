@@ -65,9 +65,9 @@ void Window::initTrans(SamHeader head) {
 void Window::insertRead(BamAlignment alignment) {
 
 	readStatus alignmentStatus = computeReadType(alignment, this->max_insert, this->outtie);
-	if(alignmentStatus == unmapped or alignmentStatus == lowQualty ) {
-		return; // in case the alignment is of no use discard it
-	}
+	//if(alignmentStatus == unmapped or alignmentStatus == lowQualty ) {
+	//	return; // in case the alignment is of no use discard it
+	//}
 	//TODO: maybe do not count singletons
 
 	if(this->chr == -1) { // first read being inserted I need to initialize the window object
@@ -89,13 +89,16 @@ void Window::insertRead(BamAlignment alignment) {
 			if(varFound) {
 				this->resetWindow(alignment.Position, alignment.RefID);
 			} else {
-				this->goToNextWindow();
+				this->goToNextWindow(alignment.Position);
+				if (this->currentWindowEnd < alignment.Position) {
+					cout << "attenzione!!! "<<  this->currentWindowEnd  << " " << alignment.Position << "\n";
+				}
 			}
 		}
 	}
 
 	if(alignmentStatus == pair_wrongChrs or alignmentStatus ==  pair_wrongDistance) {
-		if(alignment.RefID < alignment.MateRefID or alignment.Position < alignment.MatePosition) {  // insert only "forward" variations
+		if(alignment.RefID < alignment.MateRefID or (alignment.RefID == alignment.MateRefID and alignment.Position < alignment.MatePosition)) {  // insert only "forward" variations
 			if(! this->windowOpen) { //I found a candidate but I need to open the window for it
 				this->resetWindow(alignment.Position, alignment.RefID);
 				this->windowOpen = true; //and set the window to open
@@ -105,7 +108,9 @@ void Window::insertRead(BamAlignment alignment) {
 	}
 	// it is a read that can be used to compute coverage
 	if(this->windowOpen) { //If currently I am building a window
-		this->alignmentsOnWindow.push_back(alignment);
+		if(alignmentStatus != unmapped and alignmentStatus != lowQualty ) {
+			this->alignmentsOnWindow.push_back(alignment);
+		}
 	}
 
 
@@ -115,9 +120,10 @@ void Window::insertRead(BamAlignment alignment) {
 bool Window::computeVariations() {
 	//by construction I have only forward links, i.e., from chr_i to chr_j with i<j
 	this->computeCoverage();
-	//if(this->coverage > this->meanCoverage*4) {
-	//	return true; // in this way I can reset it!!!! NOT PROPER WAY TO DO IT
-	//}
+	if( this->coverage > 5*this->meanCoverage ) {
+		return false;
+	}
+
 	bool found = false;
 	Translocations *Trans;
 	Trans = new Translocations();
@@ -180,10 +186,12 @@ bool Window::computeVariations() {
 
 }
 
-void Window::goToNextWindow() {
+void Window::goToNextWindow(int nextAlignmentPosition) {
 	//the window is open if I am here!!!
 	int nextMinimumWindowStart = currentWindowStart + windowStep;
-//TODO try the same trick
+	while(nextMinimumWindowStart + this->windowSize < nextAlignmentPosition) {
+			nextMinimumWindowStart += windowStep; // this is needed in order to avoid cases in which my next read is far away from my window end
+	}
 
 	while(TranslocationEvents.size() > 0 && TranslocationEvents.begin()->Position <  nextMinimumWindowStart) {
 			TranslocationEvents.erase(TranslocationEvents.begin());
