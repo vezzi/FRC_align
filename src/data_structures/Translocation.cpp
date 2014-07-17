@@ -13,9 +13,14 @@ bool sortPairs(pair<uint32_t, uint32_t> i, pair<uint32_t, uint32_t>  j) {
 	return (i.first < j.first);
 }
 
-bool sortLinks(Link i, Link  j) {
+bool sortLinksChr2(Link i, Link  j) {
 	return (i.chr2_start < j.chr2_start);
 }
+
+bool sortLinksChr1(Link i, Link  j) {
+	return (i.chr1_start < j.chr1_start);
+}
+
 
 
 
@@ -37,8 +42,10 @@ Window::Window(int windowSize, int windowStep, int max_insert, uint16_t minimum_
 	this->outputFileHeader   = outputFileHeader;
 	string inter_chr_events = outputFileHeader + "_inter_chr_events.tab";
 	this->interChrVariations.open(inter_chr_events.c_str());
+	this->interChrVariations << "chrA\tstartOnA\tendOnA\tchrB\tstartOnB\tendOnB\tLinksFromWindow\tLinksToChrB\tLinksInCurrentEvent\tCoverageOnChrA\tExpectedLinks<<RatioEL_LiCE\n";
 	string intra_chr_events = outputFileHeader + "_intra_chr_events.tab";
 	this->intraChrVariations.open(intra_chr_events.c_str());
+	this->intraChrVariations << "chrA\tstartOnA\tendOnA\tchrB\tstartOnB\tendOnB\tLinksFromWindow\tLinksToChrB\tLinksInCurrentEvent\tCoverageOnChrA\tExpectedLinks<<RatioEL_LiCE\n";
 
 	this->coverage          	= 0;
 	this->currentWindowStart	= 0;
@@ -120,9 +127,9 @@ void Window::insertRead(BamAlignment alignment) {
 bool Window::computeVariations() {
 	//by construction I have only forward links, i.e., from chr_i to chr_j with i<j
 	this->computeCoverage();
-	if( this->coverage > 5*this->meanCoverage ) {
-		return false;
-	}
+	//if( this->coverage > 5*this->meanCoverage ) {
+	//	return false;
+	//}
 
 	bool found = false;
 	Translocations *Trans;
@@ -137,43 +144,53 @@ bool Window::computeVariations() {
 		//un-fortunatly I do not have mapping quality of read_2
 		if(qualityAligRead_1 >= minimum_mapping_quality) {
 			linksFromWindow ++;
-			Trans->insertConnection(chromosomeRead_2,startRead_2);
+			Trans->insertConnection(startRead_1, chromosomeRead_2,startRead_2);
 		}
 	}
 
 	for (map<uint32_t, vector<Link> > ::iterator it1=Trans->Connections.begin(); it1!= Trans->Connections.end(); ++it1) {
 		int chr2 = it1->first;
 		vector<Link>  LinksToChr2 = it1->second;
-		int supportingPairs = LinksToChr2.size(); // number of links between chr1 and chr2
-		sort(LinksToChr2.begin(), LinksToChr2.end(), sortLinks);
+		int numLinksToChr2 = LinksToChr2.size(); // number of links between chr1 and chr2 in this window (of WindowLength)
+		sort(LinksToChr2.begin(), LinksToChr2.end(), sortLinksChr2); // sort all links by chr2 position
 		uint32_t currentPair = 0;
-		while(currentPair < LinksToChr2.size()) {
+		while(currentPair < numLinksToChr2) {
+			vector<Link>  LinksFormingCurrentWindow; // this vector stores only current links. Mailnly used to compute real window size
+			LinksFormingCurrentWindow.push_back(LinksToChr2[currentPair]); // memorize current link
 			uint32_t startAt = LinksToChr2[currentPair].chr2_start;
-			uint32_t stopAt  = LinksToChr2[currentPair].chr2_start + (windowSize + std_insert*10);
-			uint32_t pairsInWindow = 1; // number of links forming a bridge between two windows
+			uint32_t stopAt  = LinksToChr2[currentPair].chr2_start + (windowSize + std_insert*10); // tollarance window
+			uint32_t pairsFormingLink = 1; // number of links forming a bridge between two windows
 			uint32_t nextPair = currentPair + 1;
 			while(nextPair < LinksToChr2.size() and LinksToChr2[nextPair].chr2_start < stopAt ) {
-				pairsInWindow ++;
+				LinksFormingCurrentWindow.push_back(LinksToChr2[nextPair]);
+				pairsFormingLink ++;
 				nextPair ++;
 			}
-			uint32_t secondWindowLength = LinksToChr2[nextPair-1].chr2_start - startAt;
+			uint32_t secondWindowLength = LinksToChr2[nextPair-1].chr2_start - startAt + 1 ; // windoSize (real) on second chr
+			sort(LinksFormingCurrentWindow.begin(), LinksFormingCurrentWindow.end(), sortLinksChr1); // sort all links by chr1 position
+			uint32_t realFirstWindowStart = LinksFormingCurrentWindow[0].chr1_start;
+			uint32_t realFirstWindowEnd   = LinksFormingCurrentWindow[LinksFormingCurrentWindow.size() -1].chr1_start;
+			uint32_t firstWindowLength  =  realFirstWindowEnd - realFirstWindowStart +1; // real window size on chr1
+			//TODO: need to compute coverage only on window effective size
+			float coverageRealFirstWindow = this->computeCoverage(realFirstWindowStart, realFirstWindowEnd);
 			//ExpectedLinks(uint32_t sizeA, uint32_t sizeB, uint32_t gap, float insert_mean, float insert_stddev, float coverage, uint32_t readLength)
-			float expectedLinksInWindow = ExpectedLinks(this->windowSize, secondWindowLength, 0, mean_insert, std_insert, this->coverage, 100);
-
-			float coverage1 =  (float)(supportingPairs*100)/(float)(windowSize);
-			float coverage2 =  (float)(pairsInWindow*100)/(float)(secondWindowLength);
-			//&& (this->coverage/meanCoverage < 3) && (coverage1/meanCoverage > 0.2)
-			if( pairsInWindow >= minimumPairs and pairsInWindow/(float)linksFromWindow >= 0.2) { //ration between coverage
+			//float expectedLinksInWindow = ExpectedLinks(this->windowSize, secondWindowLength, 0, mean_insert, std_insert, this->coverage, 100);
+			float expectedLinksInWindow = ExpectedLinks(firstWindowLength, secondWindowLength, 0, mean_insert, std_insert, coverageRealFirstWindow, 100);
+			//and pairsFormingLink/(float)linksFromWindow >= 0.2
+			if( pairsFormingLink >= minimumPairs  and coverageRealFirstWindow < 5*this->meanCoverage) { //ration between coverage
 				found = true;
 				currentPair = nextPair + 1;
 				if(this->chr == chr2) {
-					intraChrVariations << position2contig[this->chr] << "\t" << this->currentWindowStart  << "\t" << this->currentWindowEnd              << "\t"   << supportingPairs  << "\t";
-					intraChrVariations << position2contig[chr2]      << "\t" <<            startAt        << "\t" << LinksToChr2[nextPair-1].chr2_start  << "\t"   <<  pairsInWindow   <<"\t";
-					intraChrVariations << expectedLinksInWindow      << "\t" << this->coverage            << "\t" << linksFromWindow << "\n";
+					intraChrVariations << position2contig[this->chr]  << "\t" <<     realFirstWindowStart   << "\t" <<       realFirstWindowEnd               << "\t"  ;
+					intraChrVariations << position2contig[chr2]       << "\t" <<         startAt            << "\t" <<    LinksToChr2[nextPair-1].chr2_start  << "\t"  ;
+					intraChrVariations <<      linksFromWindow        << "\t" <<        numLinksToChr2      << "\t" <<          pairsFormingLink              << "\t";
+					intraChrVariations <<     coverageRealFirstWindow << "\t" <<      expectedLinksInWindow << "\t" << pairsFormingLink/expectedLinksInWindow << "\n";
+
 				} else {
-					interChrVariations << position2contig[this->chr] << "\t" << this->currentWindowStart  << "\t" << this->currentWindowEnd              << "\t"   << supportingPairs  << "\t";
-					interChrVariations << position2contig[chr2]      << "\t" <<            startAt        << "\t" << LinksToChr2[nextPair-1].chr2_start  << "\t"   <<  pairsInWindow   <<"\t";
-					interChrVariations << expectedLinksInWindow      << "\t" << this->coverage            << "\t" << linksFromWindow << "\n";
+					interChrVariations << position2contig[this->chr]  << "\t" <<     realFirstWindowStart   << "\t" <<       realFirstWindowEnd               << "\t"  ;
+					interChrVariations << position2contig[chr2]       << "\t" <<         startAt            << "\t" <<    LinksToChr2[nextPair-1].chr2_start  << "\t"  ;
+					interChrVariations <<     linksFromWindow        << "\t" <<        numLinksToChr2      << "\t" <<          pairsFormingLink              << "\t";
+					interChrVariations <<     coverageRealFirstWindow << "\t" <<      expectedLinksInWindow << "\t" << pairsFormingLink/expectedLinksInWindow << "\n";
 				}
 
 			} else {
@@ -228,6 +245,17 @@ void Window::resetWindow(int position, uint32_t chr) {
 }
 
 
+float Window::computeCoverage(uint32_t start, uint32_t end) {
+	float totalReadSizeOnWindow = 0;
+	for(list<BamAlignment>::iterator it = alignmentsOnWindow.begin(); it != alignmentsOnWindow.end(); ++it) {
+		if(it->Position >= start and it->Position <= end) {
+			totalReadSizeOnWindow += it->Length;
+		}
+	}
+	return totalReadSizeOnWindow/(float)(end -start + 1);
+}
+
+
 float Window::computeCoverage() {
 	float totalReadSizeOnWindow = 0;
 	for(list<BamAlignment>::iterator it = alignmentsOnWindow.begin(); it != alignmentsOnWindow.end(); ++it) {
@@ -247,6 +275,15 @@ void Translocations::insertConnection(uint32_t chr2, uint32_t pos2) {
 	Connections[chr2].push_back(connection);
 }
 
+
+void Translocations::insertConnection(uint32_t pos1, uint32_t chr2, uint32_t pos2) {
+	Link connection;
+	connection.chr1_start = pos1;
+	connection.chr2_start = pos2;
+	connection.chr2_end = pos2 + 100;
+	connection.supportingPairs = 1;
+	Connections[chr2].push_back(connection);
+}
 
 
 
