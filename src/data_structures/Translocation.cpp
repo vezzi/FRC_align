@@ -42,10 +42,10 @@ Window::Window(int windowSize, int windowStep, int max_insert, uint16_t minimum_
 	this->outputFileHeader   = outputFileHeader;
 	string inter_chr_events = outputFileHeader + "_inter_chr_events.tab";
 	this->interChrVariations.open(inter_chr_events.c_str());
-	this->interChrVariations << "chrA\tstartOnA\tendOnA\tchrB\tstartOnB\tendOnB\tLinksFromWindow\tLinksToChrB\tLinksInCurrentEvent\tCoverageOnChrA\tExpectedLinks<<RatioEL_LiCE\n";
+	this->interChrVariations << "chrA\tstartOnA\tendOnA\tchrB\tstartOnB\tendOnB\tLinksFromWindow\tLinksToChrB\tLinksInCurrentEvent\tCoverageOnChrA\tExpectedLinks\tRatioEL_LiCE\tEstDist\n";
 	string intra_chr_events = outputFileHeader + "_intra_chr_events.tab";
 	this->intraChrVariations.open(intra_chr_events.c_str());
-	this->intraChrVariations << "chrA\tstartOnA\tendOnA\tchrB\tstartOnB\tendOnB\tLinksFromWindow\tLinksToChrB\tLinksInCurrentEvent\tCoverageOnChrA\tExpectedLinks<<RatioEL_LiCE\n";
+	this->intraChrVariations << "chrA\tstartOnA\tendOnA\tchrB\tstartOnB\tendOnB\tLinksFromWindow\tLinksToChrB\tLinksInCurrentEvent\tCoverageOnChrA\tExpectedLinks\tRatioEL_LiCE\tEstDist\n";
 
 	this->coverage          	= 0;
 	this->currentWindowStart	= 0;
@@ -157,40 +157,59 @@ bool Window::computeVariations() {
 		while(currentPair < numLinksToChr2) {
 			vector<Link>  LinksFormingCurrentWindow; // this vector stores only current links. Mailnly used to compute real window size
 			LinksFormingCurrentWindow.push_back(LinksToChr2[currentPair]); // memorize current link
-			uint32_t startAt = LinksToChr2[currentPair].chr2_start;
-			uint32_t stopAt  = LinksToChr2[currentPair].chr2_start + (windowSize + std_insert*10); // tollarance window
+			uint32_t startSecondWindow    = LinksToChr2[currentPair].chr2_start;
+			uint32_t stopSecondWindowMax  = LinksToChr2[currentPair].chr2_start + (windowSize + std_insert*10); // tollarance window
 			uint32_t pairsFormingLink = 1; // number of links forming a bridge between two windows
 			uint32_t nextPair = currentPair + 1;
-			while(nextPair < LinksToChr2.size() and LinksToChr2[nextPair].chr2_start < stopAt ) {
+			while(nextPair < LinksToChr2.size() and LinksToChr2[nextPair].chr2_start < stopSecondWindowMax ) {
 				LinksFormingCurrentWindow.push_back(LinksToChr2[nextPair]);
 				pairsFormingLink ++;
 				nextPair ++;
 			}
-			uint32_t secondWindowLength = LinksToChr2[nextPair-1].chr2_start - startAt + 1 ; // windoSize (real) on second chr
+			uint32_t stopSecondWindow =  LinksToChr2[nextPair-1].chr2_start;
+			int32_t secondWindowLength = stopSecondWindow - startSecondWindow + 1 ; // windoSize (real) on second chr
 			sort(LinksFormingCurrentWindow.begin(), LinksFormingCurrentWindow.end(), sortLinksChr1); // sort all links by chr1 position
 			uint32_t realFirstWindowStart = LinksFormingCurrentWindow[0].chr1_start;
 			uint32_t realFirstWindowEnd   = LinksFormingCurrentWindow[LinksFormingCurrentWindow.size() -1].chr1_start;
-			uint32_t firstWindowLength  =  realFirstWindowEnd - realFirstWindowStart +1; // real window size on chr1
-			//TODO: need to compute coverage only on window effective size
+			int32_t firstWindowLength  =  realFirstWindowEnd - realFirstWindowStart +1; // real window size on chr1
+			//compute the coverage
 			float coverageRealFirstWindow = this->computeCoverage(realFirstWindowStart, realFirstWindowEnd);
 			//ExpectedLinks(uint32_t sizeA, uint32_t sizeB, uint32_t gap, float insert_mean, float insert_stddev, float coverage, uint32_t readLength)
-			//float expectedLinksInWindow = ExpectedLinks(this->windowSize, secondWindowLength, 0, mean_insert, std_insert, this->coverage, 100);
-			float expectedLinksInWindow = ExpectedLinks(firstWindowLength, secondWindowLength, 0, mean_insert, std_insert, coverageRealFirstWindow, 100);
-			//and pairsFormingLink/(float)linksFromWindow >= 0.2
-			if( pairsFormingLink >= minimumPairs  and coverageRealFirstWindow < 5*this->meanCoverage) { //ration between coverage
+
+			//INTORDUCE A LIMIT TO WINDOWSIZE 1000
+			if(firstWindowLength > 1000 and secondWindowLength > 1000 and
+					pairsFormingLink >= minimumPairs  and coverageRealFirstWindow < 5*this->meanCoverage) { //ration between coverage
+
+				//TODO: compute expected distance between the two windows
+				int32_t estimated_distance = 0;
+				for(int k=0; k< LinksFormingCurrentWindow.size(); k++) {
+					int32_t minimal_distance = firstWindowLength - (LinksFormingCurrentWindow[k].chr1_start - realFirstWindowStart) +
+						(LinksFormingCurrentWindow[k].chr2_start - startSecondWindow +1);
+					estimated_distance +=  minimal_distance ;
+				}
+				float estimated_minimal_insert = estimated_distance/LinksFormingCurrentWindow.size();
+				float estimatedDistance = 1;
+				if(estimated_minimal_insert > firstWindowLength) {
+					estimatedDistance = estimated_minimal_insert - firstWindowLength;
+				}
+
+				float expectedLinksInWindow = ExpectedLinks(firstWindowLength, secondWindowLength, estimatedDistance, mean_insert, std_insert, coverageRealFirstWindow, 100);
+
 				found = true;
 				currentPair = nextPair + 1;
 				if(this->chr == chr2) {
 					intraChrVariations << position2contig[this->chr]  << "\t" <<     realFirstWindowStart   << "\t" <<       realFirstWindowEnd               << "\t"  ;
-					intraChrVariations << position2contig[chr2]       << "\t" <<         startAt            << "\t" <<    LinksToChr2[nextPair-1].chr2_start  << "\t"  ;
+					intraChrVariations << position2contig[chr2]       << "\t" <<         startSecondWindow  << "\t" <<        stopSecondWindow                << "\t"  ;
 					intraChrVariations <<      linksFromWindow        << "\t" <<        numLinksToChr2      << "\t" <<          pairsFormingLink              << "\t";
-					intraChrVariations <<     coverageRealFirstWindow << "\t" <<      expectedLinksInWindow << "\t" << pairsFormingLink/expectedLinksInWindow << "\n";
+					intraChrVariations <<     coverageRealFirstWindow << "\t" <<      expectedLinksInWindow << "\t" << pairsFormingLink/expectedLinksInWindow <<
+							"\t" << estimatedDistance << "\n";
 
 				} else {
 					interChrVariations << position2contig[this->chr]  << "\t" <<     realFirstWindowStart   << "\t" <<       realFirstWindowEnd               << "\t"  ;
-					interChrVariations << position2contig[chr2]       << "\t" <<         startAt            << "\t" <<    LinksToChr2[nextPair-1].chr2_start  << "\t"  ;
+					interChrVariations << position2contig[chr2]       << "\t" <<         startSecondWindow  << "\t" <<         stopSecondWindow               << "\t"  ;
 					interChrVariations <<     linksFromWindow        << "\t" <<        numLinksToChr2      << "\t" <<          pairsFormingLink              << "\t";
-					interChrVariations <<     coverageRealFirstWindow << "\t" <<      expectedLinksInWindow << "\t" << pairsFormingLink/expectedLinksInWindow << "\n";
+					interChrVariations <<     coverageRealFirstWindow << "\t" <<      expectedLinksInWindow << "\t" << pairsFormingLink/expectedLinksInWindow <<
+							"\t" << estimatedDistance << "\n";
 				}
 
 			} else {
