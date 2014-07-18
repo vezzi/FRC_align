@@ -201,15 +201,15 @@ bool Window::computeVariations() {
 					intraChrVariations << position2contig[this->chr]  << "\t" <<     realFirstWindowStart   << "\t" <<       realFirstWindowEnd               << "\t"  ;
 					intraChrVariations << position2contig[chr2]       << "\t" <<         startSecondWindow  << "\t" <<        stopSecondWindow                << "\t"  ;
 					intraChrVariations <<      linksFromWindow        << "\t" <<        numLinksToChr2      << "\t" <<          pairsFormingLink              << "\t";
-					intraChrVariations <<     coverageRealFirstWindow << "\t" <<      expectedLinksInWindow << "\t" << pairsFormingLink/expectedLinksInWindow <<
-							"\t" << estimatedDistance << "\n";
+					intraChrVariations <<     coverageRealFirstWindow << "\n" ;
+					//expectedLinksInWindow << "\t" << pairsFormingLink/expectedLinksInWindow << "\t" << estimatedDistance << "\n";
 
 				} else {
 					interChrVariations << position2contig[this->chr]  << "\t" <<     realFirstWindowStart   << "\t" <<       realFirstWindowEnd               << "\t"  ;
 					interChrVariations << position2contig[chr2]       << "\t" <<         startSecondWindow  << "\t" <<         stopSecondWindow               << "\t"  ;
 					interChrVariations <<     linksFromWindow        << "\t" <<        numLinksToChr2      << "\t" <<          pairsFormingLink              << "\t";
-					interChrVariations <<     coverageRealFirstWindow << "\t" <<      expectedLinksInWindow << "\t" << pairsFormingLink/expectedLinksInWindow <<
-							"\t" << estimatedDistance << "\n";
+					intraChrVariations <<     coverageRealFirstWindow << "\n" ;
+					//expectedLinksInWindow << "\t" << pairsFormingLink/expectedLinksInWindow << "\t" << estimatedDistance << "\n";
 				}
 
 			} else {
