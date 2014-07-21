@@ -208,7 +208,7 @@ bool Window::computeVariations() {
 					interChrVariations << position2contig[this->chr]  << "\t" <<     realFirstWindowStart   << "\t" <<       realFirstWindowEnd               << "\t"  ;
 					interChrVariations << position2contig[chr2]       << "\t" <<         startSecondWindow  << "\t" <<         stopSecondWindow               << "\t"  ;
 					interChrVariations <<     linksFromWindow        << "\t" <<        numLinksToChr2      << "\t" <<          pairsFormingLink              << "\t";
-					intraChrVariations <<     coverageRealFirstWindow << "\n" ;
+					interChrVariations <<     coverageRealFirstWindow << "\n" ;
 					//expectedLinksInWindow << "\t" << pairsFormingLink/expectedLinksInWindow << "\t" << estimatedDistance << "\n";
 				}
 
