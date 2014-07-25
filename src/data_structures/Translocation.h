@@ -74,6 +74,8 @@ public:
 	uint32_t chr2_start;
 	uint32_t chr2_end;
 	uint32_t supportingPairs;
+	bool	ischr1_rev;
+	bool	ischr2_rev;
 };
 
 class Translocations {
@@ -81,7 +83,7 @@ public:
 	map<uint32_t, vector<Link> > Connections ;
 	Translocations();
 	void insertConnection(uint32_t chr2, uint32_t pos2  );
-	void insertConnection(uint32_t chr1_start, uint32_t chr2, uint32_t pos2  );
+	void insertConnection(uint32_t chr1_start, uint32_t chr2, uint32_t pos2 ,  bool reversed1, bool reversed2 );
 
 
 //	void findEvents(ofstream & OutputFileDescriptor, uint32_t chr1, uint32_t chr2, uint32_t minimumPairs, float minCov, float maxCov, uint32_t windowSize, uint32_t windowStep);

@@ -187,15 +187,15 @@ int main(int argc, char *argv[]) {
 	LibraryStatistics library;
 	library = computeLibraryStats(alignmentFile, genomeLength, max_insert, outtie);
 	//constants refer to P488_101
-
-	float coverage   = library.C_A;
-	float meanInsert = library.insertMean;
-	float insertStd  = library.insertStd;
 	/*
 	float coverage   = 2.41713;
 	float meanInsert = 3159.82;
 	float insertStd  = 1573.74;
 	*/
+	float coverage   = library.C_A;
+	float meanInsert = library.insertMean;
+	float insertStd  = library.insertStd;
+
 
 	findTranslocationsOnTheFly(alignmentFile, min_insert, max_insert, outtie, minimum_mapping_quality,
 			windowSize, windowStep, minimumSupportingPairs, coverage, meanInsert, insertStd, outputFileHeader);

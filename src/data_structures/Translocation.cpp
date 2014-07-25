@@ -42,10 +42,10 @@ Window::Window(int windowSize, int windowStep, int max_insert, uint16_t minimum_
 	this->outputFileHeader   = outputFileHeader;
 	string inter_chr_events = outputFileHeader + "_inter_chr_events.tab";
 	this->interChrVariations.open(inter_chr_events.c_str());
-	this->interChrVariations << "chrA\tstartOnA\tendOnA\tchrB\tstartOnB\tendOnB\tLinksFromWindow\tLinksToChrB\tLinksInCurrentEvent\tCoverageOnChrA\tExpectedLinks\tRatioEL_LiCE\tEstDist\n";
+	this->interChrVariations << "chrA\tstartOnA\tendOnA\tchrB\tstartOnB\tendOnB\tLinksFromWindow\tLinksToChrB\tLinksToEvent\tCoverageOnChrA\tOrientationA\tOrientationB\n";
 	string intra_chr_events = outputFileHeader + "_intra_chr_events.tab";
 	this->intraChrVariations.open(intra_chr_events.c_str());
-	this->intraChrVariations << "chrA\tstartOnA\tendOnA\tchrB\tstartOnB\tendOnB\tLinksFromWindow\tLinksToChrB\tLinksInCurrentEvent\tCoverageOnChrA\tExpectedLinks\tRatioEL_LiCE\tEstDist\n";
+	this->intraChrVariations << "chrA\tstartOnA\tendOnA\tchrB\tstartOnB\tendOnB\tLinksFromWindow\tLinksToChrB\tLinksToEvent\tCoverageOnChrA\tOrientationA\tOrientationB\n";
 
 	this->coverage          	= 0;
 	this->currentWindowStart	= 0;
@@ -138,13 +138,15 @@ bool Window::computeVariations() {
 	for(list<BamAlignment>::iterator alignment = TranslocationEvents.begin(); alignment != TranslocationEvents.end(); ++alignment) {
 		uint32_t startRead_1 			= alignment->Position;
 		uint32_t chromosomeRead_1		= alignment->RefID;
+		bool     onReversedStrain_1		= alignment->IsReverseStrand();
 		uint16_t qualityAligRead_1		= alignment->MapQuality;
 		uint32_t startRead_2 			= alignment->MatePosition;
 		uint32_t chromosomeRead_2		= alignment->MateRefID;
+		bool     onReversedStrain_2		= alignment->IsMateReverseStrand();
 		//un-fortunatly I do not have mapping quality of read_2
 		if(qualityAligRead_1 >= minimum_mapping_quality) {
 			linksFromWindow ++;
-			Trans->insertConnection(startRead_1, chromosomeRead_2,startRead_2);
+			Trans->insertConnection(startRead_1, chromosomeRead_2,startRead_2, onReversedStrain_1, onReversedStrain_2);
 		}
 	}
 
@@ -177,7 +179,7 @@ bool Window::computeVariations() {
 			//ExpectedLinks(uint32_t sizeA, uint32_t sizeB, uint32_t gap, float insert_mean, float insert_stddev, float coverage, uint32_t readLength)
 
 			//INTORDUCE A LIMIT TO WINDOWSIZE 1000
-			if(firstWindowLength > 1000 and secondWindowLength > 1000 and
+			if(firstWindowLength > 200 and secondWindowLength > 200 and
 					pairsFormingLink >= minimumPairs  and coverageRealFirstWindow < 5*this->meanCoverage) { //ration between coverage
 
 				//TODO: compute expected distance between the two windows
@@ -195,23 +197,60 @@ bool Window::computeVariations() {
 
 				float expectedLinksInWindow = ExpectedLinks(firstWindowLength, secondWindowLength, estimatedDistance, mean_insert, std_insert, coverageRealFirstWindow, 100);
 
-				found = true;
-				currentPair = nextPair + 1;
+				string read1_orientation = "";
+				string read2_orientation = "";
+				uint32_t read_1_fw = 0;
+				uint32_t read_1_rv = 0;
+				uint32_t read_2_fw = 0;
+				uint32_t read_2_rv = 0;
+				for(int it = currentPair; it < nextPair; it ++) {
+					if(LinksToChr2[it].ischr1_rev) {
+						read_1_rv ++;
+					} else {
+						read_1_fw ++;
+					}
+					if(LinksToChr2[it].ischr2_rev) {
+						read_2_rv ++;
+					} else {
+						read_2_fw ++;
+					}
+				}
+				if(read_1_rv < read_1_fw) {
+					ostringstream convert;
+					convert << int((read_1_fw/float(read_1_fw+read_1_rv))*100);
+					read1_orientation = "+ (" +  convert.str() + "%)";
+				} else {
+					ostringstream convert;
+					convert << int((read_1_rv/float(read_1_fw+read_1_rv))*100);
+					read1_orientation = "- (" +  convert.str() + "%)";
+				}
+
+				if(read_2_rv < read_2_fw) {
+					ostringstream convert;
+					convert << int((read_2_fw/float(read_2_fw+read_2_rv))*100);
+					read2_orientation = "+ (" +  convert.str() + "%)";
+				} else {
+					ostringstream convert;
+					convert << int((read_2_rv/float(read_2_fw+read_2_rv))*100);
+					read2_orientation = "- (" +  convert.str() + "%)";
+				}
+
 				if(this->chr == chr2) {
 					intraChrVariations << position2contig[this->chr]  << "\t" <<     realFirstWindowStart   << "\t" <<       realFirstWindowEnd               << "\t"  ;
 					intraChrVariations << position2contig[chr2]       << "\t" <<         startSecondWindow  << "\t" <<        stopSecondWindow                << "\t"  ;
 					intraChrVariations <<      linksFromWindow        << "\t" <<        numLinksToChr2      << "\t" <<          pairsFormingLink              << "\t";
-					intraChrVariations <<     coverageRealFirstWindow << "\n" ;
+					intraChrVariations <<     coverageRealFirstWindow << "\t" <<       read1_orientation    << "\t" <<         read2_orientation              << "\n" ;
 					//expectedLinksInWindow << "\t" << pairsFormingLink/expectedLinksInWindow << "\t" << estimatedDistance << "\n";
 
 				} else {
 					interChrVariations << position2contig[this->chr]  << "\t" <<     realFirstWindowStart   << "\t" <<       realFirstWindowEnd               << "\t"  ;
 					interChrVariations << position2contig[chr2]       << "\t" <<         startSecondWindow  << "\t" <<         stopSecondWindow               << "\t"  ;
 					interChrVariations <<     linksFromWindow        << "\t" <<        numLinksToChr2      << "\t" <<          pairsFormingLink              << "\t";
-					interChrVariations <<     coverageRealFirstWindow << "\n" ;
+					interChrVariations <<     coverageRealFirstWindow << "\t" <<       read1_orientation    << "\t" <<         read2_orientation              << "\n" ;
 					//expectedLinksInWindow << "\t" << pairsFormingLink/expectedLinksInWindow << "\t" << estimatedDistance << "\n";
 				}
-
+				found = true;
+				currentPair = nextPair + 1;
 			} else {
 				currentPair ++;
 			}
@@ -295,12 +334,14 @@ void Translocations::insertConnection(uint32_t chr2, uint32_t pos2) {
 }
 
 
-void Translocations::insertConnection(uint32_t pos1, uint32_t chr2, uint32_t pos2) {
+void Translocations::insertConnection(uint32_t pos1, uint32_t chr2, uint32_t pos2, bool reversed1, bool reversed2) {
 	Link connection;
 	connection.chr1_start = pos1;
 	connection.chr2_start = pos2;
 	connection.chr2_end = pos2 + 100;
 	connection.supportingPairs = 1;
+	connection.ischr1_rev = reversed1;
+	connection.ischr2_rev = reversed2;
 	Connections[chr2].push_back(connection);
 }
 
