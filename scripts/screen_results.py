@@ -3,22 +3,21 @@ import argparse
 from operator import itemgetter
 
 def main(args):
-
-    print "memorizing masked reagions"
+    #print "memorizing masked reagions"
     toBeMaskedElements = {};
     for bed_file in [item for sublist in args.bed_files for item in sublist] :
-        sys.stdout.write("memorizing {} ...".format(bed_file))
+        #sys.stdout.write("memorizing {} ...".format(bed_file))
         with open(bed_file) as fin:
-            rows = ( line.rstrip().split('\t') for line in fin )
+            rows = ( line.rstrip().split('\t') for line in fin if not line.startswith("chrA") )
             for row in rows:
                 if not row[0].startswith("#"):
                     try:
                         toBeMaskedElements[row[0]].append([row[1], row[2], row[3]])
                     except :
                         toBeMaskedElements[row[0]] = [[row[1], row[2], row[3]]]
-            sys.stdout.write("done\n")
+            #sys.stdout.write("done\n")
 
-    print "sorting masked regions"
+    #print "sorting masked regions"
     for chr in toBeMaskedElements:
         sorted(toBeMaskedElements[chr], key=itemgetter(1))
 
@@ -29,12 +28,11 @@ def main(args):
     #CompressedVariations = []
     #currentVariation     = UncompressedVariations[0]
 
-    print "categorizing hits"
     with open(args.variations) as fin:
-        # 1        2          3      4          5        6         7              8              9                  10              11             12             13
-        #chrA	startOnA	endOnA	chrB	startOnB	endOnB	LinksFromWindow	LinksToChrB	LinksInCurrentEvent	CoverageOnChrA	ExpectedLinks	RatioEL_LiCE	EstDist
-        sys.stdout.write("chrA\tstartOnA\tendOnA\tchrB\tstartOnB\tendOnB\tLinksFromWindow\tLinksToChrB\tLinksInCurrentEvent\tCoverageOnChrA\tExpectedLinks\tRatioEL_LiCE\tEstDist\tHitOnchrA\tHitOnChrB\n")
-        UncompressedVariations = ( line.rstrip().split('\t') for line in fin if not line.startswith("#"))
+        # 1        2          3      4       5        6            7              8              9              10              11             12
+        #chrA    startOnA  endOnA   chrB  startOnB  endOnB  LinksFromWindow   LinksToChrB   LinksToEvent    CoverageOnChrA  OrientationA    OrientationB
+        sys.stdout.write("chrA\tstartOnA\tendOnA\tchrB\tstartOnB\tendOnB\tLinksFromWindow\tLinksToChrB\LinksToEvent\tCoverageOnChrA\tOrientationA\tOrientationB\n")
+        UncompressedVariations = ( line.rstrip().split('\t') for line in fin if not line.startswith("chrA"))
         
         for row in UncompressedVariations:
             chr_1       = row[0]
@@ -49,21 +47,19 @@ def main(args):
             LinksToChrB         = row[7]
             LinksInCurrentEvent = row[8]
             Coverage            = row[9]
-            ExpectedLinks       = row[10]
-            RatioEL_LiCE        = row[11]
-            EstDist             = row[12]
-
-
-
-            sys.stdout.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(chr_1,chr_1_start,
-                 chr_1_end, chr_2,  chr_2_start, chr_2_end, LinksFromWindow,  LinksToChrB, LinksInCurrentEvent , Coverage ,  ExpectedLinks, RatioEL_LiCE, EstDist ))
+            OrientationA        = row[10]
+            OrientationB        = row[11]
+           
+            sys.stdout.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(chr_1,chr_1_start,
+                 chr_1_end, chr_2,  chr_2_start, chr_2_end, LinksFromWindow,  LinksToChrB, LinksInCurrentEvent,
+                 Coverage , OrientationA , OrientationB))
             
             ## Chategorise the two breackpoints
             for j in range(2):
                 if j == 0:
                     variation_chr   = chr_1
                     variation_start = chr_1_start
-                    variation_end  = chr_1_end
+                    variation_end   = chr_1_end
                 else:
                     variation_chr   = chr_2
                     variation_start = chr_2_start
@@ -120,9 +116,16 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--bed-files', type=str, required=True, action='append', nargs='+', help="bed files containing the intervals to use as markers (chr start end label)")
-    parser.add_argument('--variations', help="tab file containing variations", type=str)
+    parser = argparse.ArgumentParser("""
+    This script takes as input one or more bed files containing genomics areas with specif features (bed entry must look like [chr start end feature]
+    and a variation file produced by FindTranslocations. For each line of the variation file the script tries to match the current feature to one of the
+    entries in the bed files. It adds two columns to the variation file.
+    """)
+    parser.add_argument('--bed-files', type=str, required=True, action='append', nargs='+', help="bed files containing the features of interest [chr start end feature]")
+    parser.add_argument('--variations', help="tabular file produced by FindTransloactions containing variations (either inter of intra chromosomal)", type=str)
     args = parser.parse_args()
 
     main(args)
+
+
+
