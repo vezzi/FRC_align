@@ -126,10 +126,10 @@ void Window::insertRead(BamAlignment alignment) {
 
 bool Window::computeVariations() {
 	//by construction I have only forward links, i.e., from chr_i to chr_j with i<j
-	//this->computeCoverage();
-	//if( this->coverage > 5*this->meanCoverage ) {
-	//	return false;
-	//}
+	this->computeCoverage();
+	if( this->coverage > 10*this->meanCoverage ) {
+		return false;
+	}
 
 	bool found = false;
 	Translocations *Trans;
