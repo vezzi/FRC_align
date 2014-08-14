@@ -72,9 +72,9 @@ void Window::initTrans(SamHeader head) {
 void Window::insertRead(BamAlignment alignment) {
 
 	readStatus alignmentStatus = computeReadType(alignment, this->max_insert, this->outtie);
-	//if(alignmentStatus == unmapped or alignmentStatus == lowQualty ) {
-	//	return; // in case the alignment is of no use discard it
-	//}
+	if(alignmentStatus == unmapped or alignmentStatus == lowQualty ) {
+		return; // in case the alignment is of no use discard it
+	}
 	//TODO: maybe do not count singletons
 
 	if(this->chr == -1) { // first read being inserted I need to initialize the window object
