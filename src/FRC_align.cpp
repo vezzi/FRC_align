@@ -43,6 +43,7 @@ void printFRCurve(string outputFile, int totalFeatNum, FeatureTypes type, uint64
 
 int main(int argc, char *argv[]) {
 	//MAIN VARIABLE
+
 	string PEalignmentFile = "";
 	string MPalignmentFile = "";
 	uint32_t max_pe_insert = 5000;

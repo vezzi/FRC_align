@@ -35,7 +35,7 @@ using namespace std;
 static inline std::string package_description() {
 	std::string line("FRC");
 	line.append(" version ");
-	line.append("1.2.0");
+	line.append("1.3.0");
 	return line;
 }
 

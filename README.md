@@ -13,13 +13,10 @@ with the local installation of boost.
 
 DESCRIPTION
 ==============
- FRCcurve is a package containing tools to process bam files in order to evaluate and analyze de novo assembly/assemblers and identify Structural Variations 
- suspicious genomics regions. The tools have been already successfully applied in several de novo and resequencing projects.
+ FRCbam is a tool able to evaluate and analyze de novo assembly/assemblers. The tool has been already successfully 
+applied in several de novo .
  
- This package contains two tools:
- 
-1. FRCbam: tool to compute Feature Response Curves in order to validate and rank assemblies and assemblers
-2. FindTranslocations: tool to identify  chromosomal rearrangements using Mate Pairs
+ FRCbam: tool to compute Feature Response Curves in order to validate and rank assemblies and assemblers
 
 
 FRCbam
@@ -82,9 +79,6 @@ on each assembly. These values must be plotted as suggested in page 3 of Supplem
 * ```--CEstats-MP-min CE_MP_MIN```: all position with CE values computed with MP library lower than this are considered compressions
 * ```--CEstats-MP-max CE_MP_MAX```: all position with CE values computed with MP library higher than this are considered expansions
  
-FindTranslocations
---------------
-The tool is under constant development. THere will be soon a detailed user guide, for now run the tool with ```--help``` to discover the options.
 
 
 
