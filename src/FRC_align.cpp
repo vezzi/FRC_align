@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 	float CEstats_PE_max = +5;
 	float CEstats_MP_min = -7;
 	float CEstats_MP_max = +7;
-	string outputFile = "FRC.txt";
+	string outputFile =  "FRC.txt";
 	string featureFile = "Features.txt";
 
 	// PROCESS PARAMETERS
@@ -100,11 +100,6 @@ int main(int argc, char *argv[]) {
 	if (vm.count("CEstats-MP-max")) {
 		CEstats_MP_max = vm["CEstats-MP-max"].as<float>();
 	}
-
-	cout << "CEstats-PE-min " << CEstats_PE_min << "\n";
-	cout << "CEstats-PE-max " << CEstats_PE_max << "\n";
-	cout << "CEstats-MP-min " << CEstats_MP_min << "\n";
-	cout << "CEstats-MP-max " << CEstats_MP_max << "\n";
 
 	// PARSE PE
 	if (!vm.count("pe-sam") && !vm.count("mp-sam")) {
@@ -176,9 +171,10 @@ int main(int argc, char *argv[]) {
 	if (estimatedGenomeSize == 0) {
 		estimatedGenomeSize =  genomeLength;
 	}
-	cout << "total number of contigs " 	<< contigsNumber << endl;
-	cout << "assembly length " 			<< genomeLength << "\n";
-	cout << "estimated length " 		<< estimatedGenomeSize << "\n";
+
+	cout << "#contigs: " 	<< contigsNumber << endl;
+	cout << "assembly length: " 			<< genomeLength << "\n";
+	cout << "estimated length: "    		<< estimatedGenomeSize << "\n";
 
 	LibraryStatistics libraryPE;
 	LibraryStatistics libraryMP;
@@ -201,8 +197,23 @@ int main(int argc, char *argv[]) {
 			libraryMP = computeLibraryStats(MPalignmentFile, estimatedGenomeSize, max_mp_insert, true);
 		}
 	}
-// Libraries have been parsed, now I need to compute new maximum and minimum for pe and mp and compute features
-//TODO: I need to recompute max and min...
+
+	//Store library stats in tabular format
+	ofstream AssemblyMetricsFile; // This file descriptor will contain statistics for the all assembly
+	string   AssemblyMetricsFileName = header + "_assemblyTable.csv";
+	AssemblyMetricsFile.open(AssemblyMetricsFileName.c_str());
+	//BAM,LIB_TYPE,InsertSizeMean,InsertSizeStd,#READS,#MAPPED,#UNMAPPED,#PROPER,#WRONG_DIST,#ZERO_QUAL,#WRONG_ORIENTATION,#WRONG_CONTIG,
+	//#SINGLETON,MEAN_COVERAGE,SPANNING_COVERAGE,PROPER_PAIRS_COVERAGE,WRONG_MATE_COVERAGE,SINGLETON_MATE_COV,DIFFERENT_CONTIG_COV
+	if(vm.count("pe-sam")) {
+		print_AssemblyMetrics(libraryPE, "PE", AssemblyMetricsFile);
+	}
+
+	if(vm.count("mp-sam")) {
+		print_AssemblyMetrics(libraryMP, "MP", AssemblyMetricsFile);
+	}
+
+
+	// Libraries have been parsed, now I need to compute new maximum and minimum for pe and mp and compute features
 
 	//parse BAM file again to compute FRC curve
 	FRC frc = FRC(contigsNumber); // FRC object, will memorize all information on features and contigs
@@ -219,7 +230,7 @@ int main(int argc, char *argv[]) {
 	int featuresTotalMP = 0;
 
 	if(vm.count("pe-sam")) { // in this case file is already OPEN
-		cout << "computing FRC for PE library\n";
+		cout << "computing Features for PE library\n";
 		computeFRC(frc, PEalignmentFile, libraryPE, max_pe_insert, false, CEstats_PE_min , CEstats_PE_max);
 		string PE_CEstats = header + "_CEstats_PE.txt";
 		ofstream CEstats;
@@ -245,11 +256,10 @@ int main(int argc, char *argv[]) {
 			featuresTotal   += frc.getTotal(i);
 			featuresTotalPE += frc.getTotal(i);
 		}
-		cout << "TOTAL number of PE features " << featuresTotalPE << "\n";
 	}
 	//NOW MP
 	if(vm.count("mp-sam")) {
-		cout << "computing FRC for MP library\n";
+		cout << "computing Features for MP library\n";
 		computeFRC(frc, MPalignmentFile, libraryMP, max_mp_insert, true, CEstats_MP_min , CEstats_MP_max);
 		string MP_CEstats = header + "_CEstats_MP.txt";
 		ofstream CEstats;
@@ -276,13 +286,10 @@ int main(int argc, char *argv[]) {
 			featuresTotal   += frc.getTotal(i);
 			featuresTotalMP += frc.getTotal(i);
 		}
-		cout << "TOTAL number of MP features " << featuresTotalMP << "\n";
 	}
 	//all features have now been computed
-	 cout << "TOTAL number of features " << featuresTotal << "\n\n";
 
-	cout << "\n----------\nNow computing FRC \n------\n";
-//print all features
+	//print all features
 	ofstream featureOutFile;
 	featureOutFile.open (featureFile.c_str());
 	ofstream GFF3_features;
@@ -332,7 +339,6 @@ int main(int argc, char *argv[]) {
     	STRECH_MP_features += frc.getSTRECH_MP(i);
     }
 
-    cout << "Total amount of features after merging " << featuresTotal << "\n";
     printFRCurve(outputFile, featuresTotal, FRC_TOTAL, estimatedGenomeSize, frc);
     //now all the others
     outputFile = header + "LOW_COV_PE_FRC.txt";
@@ -472,7 +478,7 @@ void printFRCurve(string outputFile, int totalFeatNum, FeatureTypes type, uint64
 		float coveragePartial =  100*(edgeCoverage/(float)estimatedGenomeSize);
 		myfile << partial << " " << coveragePartial << "\n";
 		partial += step;
-		cout << ".";
+
 
 		if(partial >= totalFeatNum) {
 			partial = totalFeatNum + 1;

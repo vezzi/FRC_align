@@ -14,6 +14,8 @@
 #include "api/BamReader.h"
 #include "api/BamAlignment.h"
 
+#include <boost/filesystem.hpp>
+
 
 #ifdef INLINE_DISABLED
 #define INLINE
@@ -125,6 +127,16 @@ static int StringToNumber ( string Text ) {
 
 
 struct LibraryStatistics{
+	uint32_t reads;
+	uint32_t mappedReads;
+	uint32_t unmappedReads;
+	uint32_t matedReads;
+	uint32_t wrongDistanceReads;
+	uint32_t lowQualityReads;
+	uint32_t wronglyOrientedReads;
+	uint32_t matedDifferentContig;
+	uint32_t singletonReads;
+
 	float C_A;
 	float S_A;
 	float C_D;
@@ -133,6 +145,7 @@ struct LibraryStatistics{
 	float C_W;
 	float insertMean;
 	float insertStd;
+	string library_name;
 };
 
 
@@ -199,6 +212,8 @@ static LibraryStatistics computeLibraryStats(string bamFileName, uint64_t genome
 	BamReader bamFile;
 	bamFile.Open(bamFileName);
 	LibraryStatistics library;
+	string library_name = boost::filesystem::path(bamFileName).stem().string();
+	library.library_name = library_name;
 
 	//All var declarations
 	uint32_t reads 		 	  = 0;
@@ -276,7 +291,7 @@ static LibraryStatistics computeLibraryStats(string bamFileName, uint64_t genome
 		  case singleton:
 			  singletonReads ++;
 			  singletonReadsLength += al.Length ;
-			  break;;
+			  break;
 		  case pair_wrongChrs:
 			  matedDifferentContig ++;
 			  matedDifferentContigLength += al.Length ;
@@ -300,22 +315,17 @@ static LibraryStatistics computeLibraryStats(string bamFileName, uint64_t genome
 
 	}
 
-
-
-	cout << "LIBRARY STATISTICS\n";
-	cout << "\t total reads number "	<< reads << "\n";
-	cout << "\t total mapped reads " 	<< mappedReads << "\n";
-	cout << "\t total unmapped reads " 	<< unmappedReads << "\n";
-	cout << "\t proper pairs " 			<< matedReads << "\n";
-	cout << "\t wrong distance "		<< wrongDistanceReads << "\n";
-	cout << "\t zero quality reads " 	<< lowQualityReads << "\n";
-	cout << "\t wrongly oriented "		<< wronglyOrientedReads << "\n";
-	cout << "\t wrongly contig "		<< matedDifferentContig << "\n";
-	cout << "\t singletons " 			<< singletonReads << "\n";
+	library.reads                 =  reads;
+	library.mappedReads           =  mappedReads;
+	library.unmappedReads         = unmappedReads;
+	library.matedReads            = matedReads ;
+	library.wrongDistanceReads    = wrongDistanceReads;
+	library.lowQualityReads       = lowQualityReads ;
+	library.wronglyOrientedReads  = wronglyOrientedReads ;
+	library.matedDifferentContig  = matedDifferentContig ;
+	library.singletonReads        =  singletonReads ;
 
 	uint32_t total = matedReads + wrongDistanceReads +  wronglyOrientedReads +  matedDifferentContig + singletonReads  ;
-	cout << "\ttotal " << total << "\n";
-	cout << "\tCoverage statistics\n";
 
 	library.C_A = C_A = mappedReadsLength/(float)genomeLength;
 	library.S_A = S_A = insertsLength/(float)genomeLength;
@@ -327,20 +337,42 @@ static LibraryStatistics computeLibraryStats(string bamFileName, uint64_t genome
 	Qk = sqrt(Qk/counterK);
 	library.insertStd = insertStd = Qk;
 
-	cout << "\tC_A = " << C_A << endl;
-	cout << "\tS_A = " << S_A << endl;
-	cout << "\tC_M = " << C_M << endl;
-	cout << "\tC_W = " << C_W << endl;
-	cout << "\tC_S = " << C_S << endl;
-	cout << "\tC_D = " << C_D << endl;
-	cout << "\tMean Insert length = " << Mk << endl;
-	cout << "\tStd Insert length = " << Qk << endl;
-	cout << "----------\n";
-
 	bamFile.Close();
 	return library;
 }
 
+
+static void print_AssemblyMetrics(LibraryStatistics library, string type , ofstream &AssemblyMetricsFile) {
+	AssemblyMetricsFile << "###LIBRARY STATISTICS\n";
+	AssemblyMetricsFile << "BAM,LIB_TYPE,InsertSizeMean,InsertSizeStd,READS,MAPPED,UNMAPPED,PROPER,WRONG_DIST,ZERO_QUAL,WRONG_ORIENTATION,WRONG_CONTIG,";
+	AssemblyMetricsFile << "SINGLETON,MEAN_COVERAGE,SPANNING_COVERAGE,PROPER_PAIRS_COVERAGE,WRONG_MATE_COVERAGE,SINGLETON_MATE_COV,DIFFERENT_CONTIG_COV\n";
+
+	AssemblyMetricsFile <<  library.library_name <<  ",";
+	AssemblyMetricsFile <<  type                 <<  ",";
+	AssemblyMetricsFile <<  library.insertMean   <<  ",";
+	AssemblyMetricsFile <<  library.insertStd    <<  ",";
+
+
+	AssemblyMetricsFile << library.reads  				<<  ",";
+	AssemblyMetricsFile << library.mappedReads 			<<  ",";
+	AssemblyMetricsFile << library.unmappedReads		<<  ",";
+	AssemblyMetricsFile << library.matedReads			<<  ",";
+	AssemblyMetricsFile << 	library.wrongDistanceReads 	<<  ",";
+	AssemblyMetricsFile << library.lowQualityReads 		<<  ",";
+	AssemblyMetricsFile << library.wronglyOrientedReads <<  ",";
+	AssemblyMetricsFile << library.matedDifferentContig	<<  ",";
+	AssemblyMetricsFile << library.singletonReads		<<  ",";
+	AssemblyMetricsFile << library.C_A 					<<  ",";
+	AssemblyMetricsFile << library.S_A 					<<  ",";
+	AssemblyMetricsFile << library.C_M 					<<  ",";
+	AssemblyMetricsFile << library.C_W 					<<  ",";
+	AssemblyMetricsFile << library.C_S 					<<  ",";
+	AssemblyMetricsFile << library.C_D 					<<  "";
+
+	AssemblyMetricsFile 								<<  "\n";
+
+
+}
 
 
 
