@@ -342,6 +342,18 @@ static LibraryStatistics computeLibraryStats(string bamFileName, uint64_t genome
 }
 
 
+static void print_contigMetricsFileHeader(ofstream &ContigMetricsFile) {
+	ContigMetricsFile << "contigID" << ","; //contigID
+	ContigMetricsFile << "READ_COVERAGE" << ",";//read coverage
+	ContigMetricsFile << "SPAN_COVERAGE" << ",";// span coverage
+	ContigMetricsFile << "MEAN_INSERT_SIZE" << ",";//mean insert size
+	ContigMetricsFile << "CORRECTLY_MATED_COV" << ",";//correctly mated coverage
+	ContigMetricsFile << "WRONGLY_ORIENTED_COV" << ",";//wrongly oriented coverage
+	ContigMetricsFile << "SINGLETON_COV" << ",";//singleton coverage
+	ContigMetricsFile << "MATED_DIFFERENT_CTG_COV" << "\n";//Mated Different Contigs coverage
+
+}
+
 static void print_AssemblyMetrics(LibraryStatistics library, string type , ofstream &AssemblyMetricsFile) {
 	AssemblyMetricsFile << "###LIBRARY STATISTICS\n";
 	AssemblyMetricsFile << "BAM,LIB_TYPE,InsertSizeMean,InsertSizeStd,READS,MAPPED,UNMAPPED,PROPER,WRONG_DIST,ZERO_QUAL,WRONG_ORIENTATION,WRONG_CONTIG,";

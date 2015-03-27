@@ -70,6 +70,7 @@ class Contig{
 
 
 	float MINUM_COV;
+	string contigID;
 
 	void updateCov(unsigned int strat, unsigned int end, data type);
 
@@ -78,6 +79,7 @@ public:
 
 	Contig();
 	Contig(unsigned int contigLength);
+	Contig(string contigID, unsigned int contigLength);
 	~Contig();
 
 	void updateContig(BamAlignment b, int max_insert,  bool is_mp); // given an alignment it updates the contig situation
@@ -97,6 +99,7 @@ public:
 	unsigned int getExpansionAreas(float insertionMean, float insertionStd, float Zscore, unsigned int windowSize, unsigned int windowStep);
 
 	void print();
+	void printContigMetrics(ofstream &ContigsMetricsFile);
 
 
 

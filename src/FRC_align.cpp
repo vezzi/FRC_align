@@ -154,11 +154,9 @@ int main(int argc, char *argv[]) {
 	}
 
 
-
 	SamHeader head = bamFile.GetHeader();
 	map<string,unsigned int> contig2position;
 	map<unsigned int,string> position2contig;
-
 	SamSequenceDictionary sequences  = head.Sequences;
 	for(SamSequenceIterator sequence = sequences.Begin() ; sequence != sequences.End(); ++sequence) {
 		genomeLength += StringToNumber(sequence->Length);
@@ -202,8 +200,6 @@ int main(int argc, char *argv[]) {
 	ofstream AssemblyMetricsFile; // This file descriptor will contain statistics for the all assembly
 	string   AssemblyMetricsFileName = header + "_assemblyTable.csv";
 	AssemblyMetricsFile.open(AssemblyMetricsFileName.c_str());
-	//BAM,LIB_TYPE,InsertSizeMean,InsertSizeStd,#READS,#MAPPED,#UNMAPPED,#PROPER,#WRONG_DIST,#ZERO_QUAL,#WRONG_ORIENTATION,#WRONG_CONTIG,
-	//#SINGLETON,MEAN_COVERAGE,SPANNING_COVERAGE,PROPER_PAIRS_COVERAGE,WRONG_MATE_COVERAGE,SINGLETON_MATE_COV,DIFFERENT_CONTIG_COV
 	if(vm.count("pe-sam")) {
 		print_AssemblyMetrics(libraryPE, "PE", AssemblyMetricsFile);
 	}
@@ -231,6 +227,8 @@ int main(int argc, char *argv[]) {
 
 	if(vm.count("pe-sam")) { // in this case file is already OPEN
 		cout << "computing Features for PE library\n";
+		// here add a new file descriptor for contig stats
+
 		computeFRC(frc, PEalignmentFile, libraryPE, max_pe_insert, false, CEstats_PE_min , CEstats_PE_max);
 		string PE_CEstats = header + "_CEstats_PE.txt";
 		ofstream CEstats;
@@ -257,6 +255,8 @@ int main(int argc, char *argv[]) {
 			featuresTotalPE += frc.getTotal(i);
 		}
 	}
+
+
 	//NOW MP
 	if(vm.count("mp-sam")) {
 		cout << "computing Features for MP library\n";
@@ -511,10 +511,29 @@ void computeFRC(FRC & frc, string bamFileName, LibraryStatistics library,int max
 	BamReader bamFile;
 	bamFile.Open(bamFileName);
 	SamHeader head = bamFile.GetHeader(); // get the sam header
+	SamSequenceDictionary sequences  = head.Sequences;
+
+	uint32_t contigsNumber = 0;
+	map<string,unsigned int> contig2position;
+	map<unsigned int,string> position2contig;
+	for(SamSequenceIterator sequence = sequences.Begin() ; sequence != sequences.End(); ++sequence) {
+		contig2position[sequence->Name] = contigsNumber; // keep track of contig name and position in order to avoid problems when processing two libraries
+		position2contig[contigsNumber] = sequence->Name;
+		contigsNumber++;
+
+	}
+
 	BamAlignment al;
 	int currentContig 	= -1;
 	uint32_t contigSize = 0;
 	Contig *contig;
+
+	// open file descriptor to store contig stats
+	ofstream ContigMetricsFile; // This file descriptor will contain statistics for the all assembly
+	string   ContigMetricsFileName = library.library_name + "_contigsTable.csv";
+	ContigMetricsFile.open(ContigMetricsFileName.c_str());
+	print_contigMetricsFileHeader(ContigMetricsFile);
+
 	while ( bamFile.GetNextAlignmentCore(al) ) {
 		if (al.IsMapped()) {
 			if (al.RefID != currentContig) { // another contig or simply the first one
@@ -522,9 +541,11 @@ void computeFRC(FRC & frc, string bamFileName, LibraryStatistics library,int max
 				if(currentContig == -1) { // first read that I`m processing
 					contigSize 		= frc.getContigLength(al.RefID) ;
 					currentContig 	= al.RefID;
-					contig =  new Contig(contigSize);
+					contig =  new Contig(position2contig[currentContig], contigSize);
 				} else {
 					float coverage = frc.obtainCoverage(currentContig, contig);
+					contig->printContigMetrics(ContigMetricsFile);
+
 					frc.computeCEstats(contig, library.insertMean, windowStepCE, library.insertMean, library.insertStd);
 					//frc.computeCEstats(contig, 1000, 200, library.insertMean, library.insertStd);
 					if(is_mp) {
@@ -555,7 +576,7 @@ void computeFRC(FRC & frc, string bamFileName, LibraryStatistics library,int max
 						fprintf(stderr,"%d has size %d, which can't be right!\nCheck bam header!",al.RefID,contigSize);
 					}
 					currentContig 	= al.RefID; // update current identifier
-					contig 			= new Contig(contigSize);
+					contig 			= new Contig(position2contig[currentContig], contigSize);
 				}
 				contig->updateContig(al, max_insert, is_mp); // update contig with alignment
 			} else {
@@ -566,6 +587,7 @@ void computeFRC(FRC & frc, string bamFileName, LibraryStatistics library,int max
 	}
 	//Last contig needs to be processed (I finished o read the file without parsing it)
 	float coverage = frc.obtainCoverage(currentContig, contig);
+	contig->printContigMetrics(ContigMetricsFile);
 	frc.computeCEstats(contig, library.insertMean, windowStepCE, library.insertMean, library.insertStd);
 	if(is_mp) {
 		//frc.computeLowCoverageArea("MP", currentContig, contig, 1000, 200);

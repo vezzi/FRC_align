@@ -62,9 +62,25 @@ Contig::Contig(unsigned int contigLength) {
 	highSingleFeat = 0.41;
 	highSpanningFeat = 0.41;
 	highOutieFeat = 0.41;
-
-
 }
+
+
+Contig::Contig(string contigID, unsigned int contigLength) {
+	this->contigLength = contigLength;
+	this->CONTIG       =  new Position[contigLength];
+	this->contigID     = contigID;
+	MINUM_COV = 2;
+
+	lowCoverageFeat = 1/(float)2;
+	highCoverageFeat = 2;
+	lowNormalFeat = 1/(float)2;
+	highNormalFeat = 2;
+	highSingleFeat = 0.41;
+	highSpanningFeat = 0.41;
+	highOutieFeat = 0.41;
+}
+
+
 
 Contig::~Contig() {
 	if(CONTIG != NULL) {
@@ -169,6 +185,75 @@ void Contig::print() {
 				<< "," << this->CONTIG[i].StratingInserts << ") " ;
 	}
 	cout << "\n\n";
+}
+
+
+void Contig::printContigMetrics(ofstream &ContigsMetricsFile) {
+	ContigsMetricsFile << this->contigID << ",";
+	//compute read coverage
+	unsigned int totalCoverage = 0;
+	for(unsigned int i=0; i < this->contigLength ; i++ ) {
+		totalCoverage += CONTIG[i].ReadCoverage;
+	}
+	float readCoverage = totalCoverage/(float)this->contigLength;
+	ContigsMetricsFile << readCoverage << ",";
+
+
+	//compute span coverage
+	unsigned int totalInsertCoverage = 0;
+	for(unsigned int i=0; i < this->contigLength ; i++ ) {
+		totalInsertCoverage += CONTIG[i].InsertCoverage;
+	}
+	float insertCoverage = totalInsertCoverage/(float)this->contigLength;
+	ContigsMetricsFile << insertCoverage << ",";
+
+
+	//compute mean insert size
+	unsigned long int totalInsertSize = 0;
+	unsigned int      numberOfInserts = 0;
+	for(unsigned int i=0; i < this->contigLength ; i++ ) {
+		totalInsertSize += CONTIG[i].insertsLength * CONTIG[i].StratingInserts;
+		numberOfInserts += CONTIG[i].StratingInserts;
+	}
+	float insertMean = totalInsertSize/(float)numberOfInserts;
+	ContigsMetricsFile << insertMean << ",";
+
+
+	//compute correctly mated coverage
+	unsigned int totalCorrentlyMatedCoverage = 0;
+	for(unsigned int i=0; i < this->contigLength ; i++ ) {
+		totalCorrentlyMatedCoverage += CONTIG[i].CorrectlyMated;
+	}
+	float correntlyMatedCoverage = totalCorrentlyMatedCoverage/(float)this->contigLength;
+	ContigsMetricsFile << correntlyMatedCoverage << ",";
+
+	//compute wrongly oriented coverage
+	unsigned int totalWronglyOrientedCoverage = 0;
+	for(unsigned int i=0; i < this->contigLength ; i++ ) {
+		totalWronglyOrientedCoverage += CONTIG[i].WronglyOriented;
+	}
+	float wronglyOrientedCoverage = totalWronglyOrientedCoverage/(float)this->contigLength;
+	ContigsMetricsFile << wronglyOrientedCoverage << ",";
+
+	//computed singleton coverage
+	unsigned int totalSingletonCoverage = 0;
+	for(unsigned int i=0; i < this->contigLength ; i++ ) {
+		totalSingletonCoverage += CONTIG[i].Singleton;
+	}
+	float singletonCoverage = totalSingletonCoverage/(float)this->contigLength;
+	ContigsMetricsFile << singletonCoverage << ",";
+
+	//compute Mated Different Contigs
+	unsigned int totalMatedDifferentCoverage = 0;
+	for(unsigned int i=0; i < this->contigLength ; i++ ) {
+		totalMatedDifferentCoverage += CONTIG[i].MatedDifferentContig;
+	}
+	float matedDifferentCoverage = totalMatedDifferentCoverage/(float)this->contigLength;
+	ContigsMetricsFile << matedDifferentCoverage ;
+
+
+	ContigsMetricsFile << "\n";
+
 }
 
 
