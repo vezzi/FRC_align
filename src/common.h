@@ -1,11 +1,16 @@
+
+
 #ifndef TYPES_H_
 #define TYPES_H_
+
 
 #include <string>
 #include <algorithm>    // std::sort
 #include <vector>       // std::vector
 #include <cstring>
-#include <cmath>
+#include <queue>
+
+
 #include <climits>
 #include <cstdlib>
 #include <sstream>
@@ -14,8 +19,10 @@
 #include "api/BamReader.h"
 #include "api/BamAlignment.h"
 
-#include <boost/filesystem.hpp>
+#define _USE_MATH_DEFINES
+#include <cmath>
 
+#define M_PI 3.141592654
 
 #ifdef INLINE_DISABLED
 #define INLINE
@@ -37,7 +44,7 @@ using namespace std;
 static inline std::string package_description() {
 	std::string line("FRC");
 	line.append(" version ");
-	line.append("1.3.0");
+	line.append("1.2.0");
 	return line;
 }
 
@@ -127,16 +134,6 @@ static int StringToNumber ( string Text ) {
 
 
 struct LibraryStatistics{
-	uint32_t reads;
-	uint32_t mappedReads;
-	uint32_t unmappedReads;
-	uint32_t matedReads;
-	uint32_t wrongDistanceReads;
-	uint32_t lowQualityReads;
-	uint32_t wronglyOrientedReads;
-	uint32_t matedDifferentContig;
-	uint32_t singletonReads;
-
 	float C_A;
 	float S_A;
 	float C_D;
@@ -145,7 +142,6 @@ struct LibraryStatistics{
 	float C_W;
 	float insertMean;
 	float insertStd;
-	string library_name;
 };
 
 
@@ -208,12 +204,49 @@ static readStatus computeReadType(BamAlignment al, uint32_t max_insert, bool is_
 
 
 
+
+static float normcdf(float x,float mu,float sigma) {
+	float t = x - mu;
+	float y = 0.5 * erfc(float(-t / (sigma * sqrt(2.0))));
+	if (y > 1.0) {
+		y = 1.0;
+	}
+	return y;
+}
+
+static float normpdf(float x,float mu,float sigma) {
+    float u = (x - mu) / abs(sigma);
+    float y = (1 /(sqrt(2 * M_PI) * abs(sigma))) * exp((-u * u)/2) ;
+    return y;
+}
+
+
+static float Part(float a, float b,  uint32_t sizeA, uint32_t sizeB, uint32_t gap, float insert_mean, float insert_stddev, float coverage, uint32_t readLength ) {
+	float readfrequency = 2 * readLength / coverage;
+	float expr1 = (min(sizeA, sizeB) - (readLength - 0)) / readfrequency * normcdf(a, 0, 1);
+	float expr2 = -(- 0 ) / readfrequency * normcdf(b, 0, 1);
+	float expr3 = (b * insert_stddev) / readfrequency * (normcdf(b, 0, 1) - normcdf(a, 0, 1));
+	float expr4 = (insert_stddev / readfrequency) * (normpdf(b, 0, 1) - normpdf(a, 0, 1));
+	float value = expr1 + expr2 + expr3 + expr4;
+	return value;
+}
+
+
+static float ExpectedLinks(uint32_t sizeA, uint32_t sizeB, uint32_t gap, float insert_mean, float insert_stddev, float coverage, uint32_t readLength) {
+	float b1 = (sizeA + sizeB + gap - insert_mean) / insert_stddev;
+	float a1 = (max(sizeA, sizeB) + gap + readLength  - insert_mean) / insert_stddev;
+	float b2 = (min(sizeA, sizeB) + gap + readLength  - insert_mean) / insert_stddev;
+	float a2 = (gap + 2 * readLength - insert_mean) / insert_stddev;
+
+	float E_links = Part(a1, b1, sizeA, sizeB, gap, insert_mean, insert_stddev, coverage, readLength ) - Part(a2, b2, sizeA, sizeB, gap, insert_mean, insert_stddev, coverage, readLength);
+	return E_links;
+}
+
+
 static LibraryStatistics computeLibraryStats(string bamFileName, uint64_t genomeLength, uint32_t max_insert, bool is_mp) {
 	BamReader bamFile;
 	bamFile.Open(bamFileName);
 	LibraryStatistics library;
-	string library_name = boost::filesystem::path(bamFileName).stem().string();
-	library.library_name = library_name;
 
 	//All var declarations
 	uint32_t reads 		 	  = 0;
@@ -291,7 +324,7 @@ static LibraryStatistics computeLibraryStats(string bamFileName, uint64_t genome
 		  case singleton:
 			  singletonReads ++;
 			  singletonReadsLength += al.Length ;
-			  break;
+			  break;;
 		  case pair_wrongChrs:
 			  matedDifferentContig ++;
 			  matedDifferentContigLength += al.Length ;
@@ -315,17 +348,22 @@ static LibraryStatistics computeLibraryStats(string bamFileName, uint64_t genome
 
 	}
 
-	library.reads                 =  reads;
-	library.mappedReads           =  mappedReads;
-	library.unmappedReads         = unmappedReads;
-	library.matedReads            = matedReads ;
-	library.wrongDistanceReads    = wrongDistanceReads;
-	library.lowQualityReads       = lowQualityReads ;
-	library.wronglyOrientedReads  = wronglyOrientedReads ;
-	library.matedDifferentContig  = matedDifferentContig ;
-	library.singletonReads        =  singletonReads ;
+
+
+	cout << "LIBRARY STATISTICS\n";
+	cout << "\t total reads number "	<< reads << "\n";
+	cout << "\t total mapped reads " 	<< mappedReads << "\n";
+	cout << "\t total unmapped reads " 	<< unmappedReads << "\n";
+	cout << "\t proper pairs " 			<< matedReads << "\n";
+	cout << "\t wrong distance "		<< wrongDistanceReads << "\n";
+	cout << "\t zero quality reads " 	<< lowQualityReads << "\n";
+	cout << "\t wrongly oriented "		<< wronglyOrientedReads << "\n";
+	cout << "\t wrongly contig "		<< matedDifferentContig << "\n";
+	cout << "\t singletons " 			<< singletonReads << "\n";
 
 	uint32_t total = matedReads + wrongDistanceReads +  wronglyOrientedReads +  matedDifferentContig + singletonReads  ;
+	cout << "\ttotal " << total << "\n";
+	cout << "\tCoverage statistics\n";
 
 	library.C_A = C_A = mappedReadsLength/(float)genomeLength;
 	library.S_A = S_A = insertsLength/(float)genomeLength;
@@ -337,54 +375,20 @@ static LibraryStatistics computeLibraryStats(string bamFileName, uint64_t genome
 	Qk = sqrt(Qk/counterK);
 	library.insertStd = insertStd = Qk;
 
+	cout << "\tC_A = " << C_A << endl;
+	cout << "\tS_A = " << S_A << endl;
+	cout << "\tC_M = " << C_M << endl;
+	cout << "\tC_W = " << C_W << endl;
+	cout << "\tC_S = " << C_S << endl;
+	cout << "\tC_D = " << C_D << endl;
+	cout << "\tMean Insert length = " << Mk << endl;
+	cout << "\tStd Insert length = " << Qk << endl;
+	cout << "----------\n";
+
 	bamFile.Close();
 	return library;
 }
 
-
-static void print_contigMetricsFileHeader(ofstream &ContigMetricsFile) {
-	ContigMetricsFile << "contigID" << ","; //contigID
-	ContigMetricsFile << "READ_COVERAGE" << ",";//read coverage
-	ContigMetricsFile << "SPAN_COVERAGE" << ",";// span coverage
-	ContigMetricsFile << "MEAN_INSERT_SIZE" << ",";//mean insert size
-	ContigMetricsFile << "CORRECTLY_MATED_COV" << ",";//correctly mated coverage
-	ContigMetricsFile << "WRONGLY_ORIENTED_COV" << ",";//wrongly oriented coverage
-	ContigMetricsFile << "SINGLETON_COV" << ",";//singleton coverage
-	ContigMetricsFile << "MATED_DIFFERENT_CTG_COV" << "\n";//Mated Different Contigs coverage
-
-}
-
-static void print_AssemblyMetrics(LibraryStatistics library, string type , ofstream &AssemblyMetricsFile) {
-	AssemblyMetricsFile << "###LIBRARY STATISTICS\n";
-	AssemblyMetricsFile << "BAM,LIB_TYPE,InsertSizeMean,InsertSizeStd,READS,MAPPED,UNMAPPED,PROPER,WRONG_DIST,ZERO_QUAL,WRONG_ORIENTATION,WRONG_CONTIG,";
-	AssemblyMetricsFile << "SINGLETON,MEAN_COVERAGE,SPANNING_COVERAGE,PROPER_PAIRS_COVERAGE,WRONG_MATE_COVERAGE,SINGLETON_MATE_COV,DIFFERENT_CONTIG_COV\n";
-
-	AssemblyMetricsFile <<  library.library_name <<  ",";
-	AssemblyMetricsFile <<  type                 <<  ",";
-	AssemblyMetricsFile <<  library.insertMean   <<  ",";
-	AssemblyMetricsFile <<  library.insertStd    <<  ",";
-
-
-	AssemblyMetricsFile << library.reads  				<<  ",";
-	AssemblyMetricsFile << library.mappedReads 			<<  ",";
-	AssemblyMetricsFile << library.unmappedReads		<<  ",";
-	AssemblyMetricsFile << library.matedReads			<<  ",";
-	AssemblyMetricsFile << 	library.wrongDistanceReads 	<<  ",";
-	AssemblyMetricsFile << library.lowQualityReads 		<<  ",";
-	AssemblyMetricsFile << library.wronglyOrientedReads <<  ",";
-	AssemblyMetricsFile << library.matedDifferentContig	<<  ",";
-	AssemblyMetricsFile << library.singletonReads		<<  ",";
-	AssemblyMetricsFile << library.C_A 					<<  ",";
-	AssemblyMetricsFile << library.S_A 					<<  ",";
-	AssemblyMetricsFile << library.C_M 					<<  ",";
-	AssemblyMetricsFile << library.C_W 					<<  ",";
-	AssemblyMetricsFile << library.C_S 					<<  ",";
-	AssemblyMetricsFile << library.C_D 					<<  "";
-
-	AssemblyMetricsFile 								<<  "\n";
-
-
-}
 
 
 
