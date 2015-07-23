@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
 	desc.add_options() ("help", "produce help message")
 	("pe-sam"       , po::value<string>(), "paired end alignment file (in sam or bam format). Orientation must be -> <-")
 	("pe-max-insert", po::value<int>()   , "maximum allowed insert size for PE (to filter out outleyers)")
-	("mp-sam"       , po::value<string>(), "mate pairs alignment file. (in sam or bam format). Orientation must be -> <-")
+	("mp-sam"       , po::value<string>(), "mate pairs alignment file. (in sam or bam format). Orientation must be <- ->")
 	("mp-max-insert", po::value<int>()   , "maximum allowed insert size for MP (to filter out outleyers)")
 	("genome-size"  , po::value<unsigned long int>(), "estimated genome size (if not supplied genome size is believed to be assembly length")
 	("output"       ,  po::value<string>(), "Header output file names (default FRC.txt and Features.txt)")
