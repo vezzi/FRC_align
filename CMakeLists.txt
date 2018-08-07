@@ -35,7 +35,16 @@ add_subdirectory(lib)
 # FRC executable
 add_executable(FRC ${FRC_FILES})
 target_link_libraries(FRC ${ZLIB_LIBRARIES})
-target_link_libraries(FRC  BamTools)
+
+if(TARGET BamTools-static)
+  target_link_libraries(FRC BamTools-static)
+else()
+  target_link_libraries(FRC BamTools)
+endif()
+
 target_link_libraries(FRC ${Boost_LIBRARIES})
 
-
+install(
+  TARGETS FRC
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib)
