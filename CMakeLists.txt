@@ -7,6 +7,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 add_definitions( -Wno-deprecated )
 
+#to link against static boost libraries if available
+set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost COMPONENTS  program_options system filesystem REQUIRED)
 
 # set our library and executable destination dirs
