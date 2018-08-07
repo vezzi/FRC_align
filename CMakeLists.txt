@@ -7,6 +7,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 add_definitions( -Wno-deprecated )
 
+#to link against static boost libraries if available
+set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost COMPONENTS  program_options system filesystem REQUIRED)
 
 # set our library and executable destination dirs
@@ -35,7 +37,16 @@ add_subdirectory(lib)
 # FRC executable
 add_executable(FRC ${FRC_FILES})
 target_link_libraries(FRC ${ZLIB_LIBRARIES})
-target_link_libraries(FRC  BamTools)
+
+if(TARGET BamTools-static)
+  target_link_libraries(FRC BamTools-static)
+else()
+  target_link_libraries(FRC BamTools)
+endif()
+
 target_link_libraries(FRC ${Boost_LIBRARIES})
 
-
+install(
+  TARGETS FRC
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib)
